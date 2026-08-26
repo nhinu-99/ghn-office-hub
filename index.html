@@ -3621,8 +3621,7 @@ function renderWeblockUI(){
 }
 
 function toggleWebLock(){
-  const currentUser = window.__currentSession;
-  if(!currentUser || currentUser.role !== 'admin'){
+  if(!isAdmin()){
     toast('Chỉ Admin mới có thể khoá/mở khoá web!','⚠️'); return;
   }
   const willLock = !WEB_LOCKED;
@@ -3640,12 +3639,12 @@ function toggleWebLock(){
 const __origRefreshAll = refreshAllViews;
 const __prevApply = applyCloudInitial;
 function _checkAndKickIfLocked(){
-  const session = window.__currentSession;
-  if(WEB_LOCKED && session && session.role === 'staff'){
+  if(WEB_LOCKED && SESSION && SESSION.role === 'staff'){
     toast('🔒 Web đã bị Admin khoá. Bạn sẽ bị đăng xuất tự động.', '🔒');
     setTimeout(() => {
-      if(typeof doLogout === 'function') doLogout();
-      else { window.__currentSession = null; location.reload(); }
+      SESSION = null;
+      lsSet(LS_KEY.session, null);
+      applySession();
     }, 2500);
   }
   renderWeblockUI();
