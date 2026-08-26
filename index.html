@@ -412,6 +412,11 @@ footer.site-footer{text-align:center;color:var(--muted);font-size:12.5px;padding
 .login-error{color:var(--do);font-size:12.5px;font-weight:700;min-height:16px;margin:0;}
 .login-form .btn{justify-content:center;margin-top:4px;width:100%;}
 .login-hint{color:var(--muted);font-size:11.5px;margin-top:18px;line-height:1.6;}
+.login-admin-toggle{margin-top:18px;text-align:center;}
+.login-admin-toggle button{background:none;border:1.5px solid #e8e8e8;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;padding:7px 18px;border-radius:20px;transition:all .2s;letter-spacing:.01em;}
+.login-admin-toggle button:hover{border-color:var(--cam);color:var(--cam);background:#fff5f0;}
+.login-admin-toggle button.admin-active{border-color:var(--xanh);color:var(--xanh);background:#f0f4ff;}
+.login-box.admin-mode .login-logo::after{content:' 🔐';font-size:18px;vertical-align:middle;}
 
 .user-area{display:none;align-items:center;gap:10px;background:rgba(255,255,255,.18);padding:6px 8px 6px 14px;border-radius:999px;}
 .user-area .user-email{color:#fff;font-weight:700;font-size:12.5px;white-space:nowrap;}
@@ -919,23 +924,26 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
 
 <!-- Login overlay -->
 <div class="login-overlay" id="loginOverlay">
-  <div class="login-box">
+  <div class="login-box" id="loginBox">
     <div class="login-logo">🏢</div>
     <h2>GHN Office Hub</h2>
-    <p>Đăng nhập bằng email công ty để tiếp tục</p>
+    <p id="loginSubtitle">Nhập email công ty để đặt hàng văn phòng phẩm</p>
     <div class="login-form">
       <div>
         <label>EMAIL</label>
         <input type="email" id="loginEmail" placeholder="ten@ghn.vn" autocomplete="username">
       </div>
-      <div>
-        <label>MẬT KHẨU</label>
-        <input type="password" id="loginPassword" placeholder="Nhập mật khẩu..." autocomplete="current-password">
+      <div id="loginPasswordRow" style="display:none;">
+        <label>MẬT KHẨU ADMIN</label>
+        <input type="password" id="loginPassword" placeholder="Nhập mật khẩu quản trị..." autocomplete="current-password">
       </div>
       <p class="login-error" id="loginError"></p>
       <button class="btn btn-cam" id="loginBtn">🔓 Đăng nhập</button>
     </div>
-    <p class="login-hint">👤 Đăng nhập bằng email và mật khẩu thật trên Firebase Auth.<br>🔐 Nếu chưa có tài khoản, hãy liên hệ Admin để được tạo.</p>
+    <div class="login-admin-toggle">
+      <button id="toggleAdminBtn" onclick="toggleAdminLoginMode()">🔐 Đăng nhập Admin</button>
+    </div>
+    <p class="login-hint" id="loginHint">👤 Nhân viên chỉ cần nhập email @ghn.vn là vào được ngay.<br>Nếu cần quyền Admin, hãy bấm nút bên dưới.</p>
   </div>
 </div>
 
@@ -2448,58 +2456,99 @@ const loginBtn = document.getElementById('loginBtn');
 
 function showLoginError(msg){ loginErrorEl.textContent = msg || ''; }
 
+// ----- ADMIN MODE TOGGLE -----
+let _loginMode = 'staff'; // 'staff' | 'admin'
+
+function toggleAdminLoginMode(){
+  const passwordRow = document.getElementById('loginPasswordRow');
+  const toggleBtn = document.getElementById('toggleAdminBtn');
+  const subtitle = document.getElementById('loginSubtitle');
+  const hint = document.getElementById('loginHint');
+  const loginBox = document.getElementById('loginBox');
+  if(_loginMode === 'staff'){
+    _loginMode = 'admin';
+    passwordRow.style.display = '';
+    toggleBtn.textContent = '👤 Quay lại đăng nhập Nhân viên';
+    toggleBtn.classList.add('admin-active');
+    loginBox.classList.add('admin-mode');
+    subtitle.textContent = 'Đăng nhập tài khoản Quản trị viên';
+    hint.innerHTML = '🔐 Chỉ dành cho Admin. Nhập email và mật khẩu quản trị để tiếp tục.';
+    loginBtn.textContent = '🔐 Đăng nhập Admin';
+    loginPasswordInput.focus();
+  } else {
+    _loginMode = 'staff';
+    passwordRow.style.display = 'none';
+    loginPasswordInput.value = '';
+    toggleBtn.textContent = '🔐 Đăng nhập Admin';
+    toggleBtn.classList.remove('admin-active');
+    loginBox.classList.remove('admin-mode');
+    subtitle.textContent = 'Nhập email công ty để đặt hàng văn phòng phẩm';
+    hint.innerHTML = '👤 Nhân viên chỉ cần nhập email @ghn.vn là vào được ngay.<br>Nếu cần quyền Admin, hãy bấm nút bên dưới.';
+    loginBtn.textContent = '🔓 Đăng nhập';
+    loginEmailInput.focus();
+  }
+  showLoginError('');
+}
+
 function attemptLogin(){
   const email = normalizeEmail(loginEmailInput.value);
   const password = loginPasswordInput.value;
   showLoginError('');
   if(!email || !email.includes('@')){ showLoginError('Vui lòng nhập email hợp lệ.'); return; }
 
-  const adminAccount = findAdminAccount(email);
-  const isStaffEmail = !!(STAFF_DIRECTORY && STAFF_DIRECTORY[email] && !adminAccount);
-  if(!password && !isStaffEmail){ showLoginError('Vui lòng nhập mật khẩu cho tài khoản Admin.'); return; }
+  // ---- CHẾ ĐỘ ADMIN ----
+  if(_loginMode === 'admin'){
+    if(!password){ showLoginError('Vui lòng nhập mật khẩu Admin.'); return; }
+    loginBtn.disabled = true;
+    loginBtn.textContent = '⏳ Đang đăng nhập...';
+    const adminAccount = findAdminAccount(email);
+    const localAdminPassword = LOCAL_ADMIN_BOOTSTRAP_PASSWORDS[email] || (adminAccount && adminAccount.password);
+    if(localAdminPassword && password === localAdminPassword){
+      doLogin({email, role:'admin', dept: (adminAccount && adminAccount.dept) || 'Office Admin General', uid:'admin-' + email});
+      loginBtn.disabled = false;
+      loginBtn.textContent = '🔐 Đăng nhập Admin';
+      return;
+    }
+    if(window.firebase && firebase.auth && firebase.apps && firebase.apps.length){
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential)=>{
+          const user = userCredential.user;
+          return user.getIdTokenResult().then((tokenResult)=>{
+            const claims = tokenResult && tokenResult.claims ? tokenResult.claims : {};
+            const role = claims.role || (adminAccount ? 'admin' : 'staff');
+            const dept = claims.dept || (adminAccount ? adminAccount.dept : (STAFF_DIRECTORY[email] || 'Khác'));
+            doLogin({email: user.email, role, dept, uid: user.uid});
+          });
+        })
+        .catch(err=>{
+          console.error(err);
+          showLoginError('Mật khẩu không chính xác hoặc tài khoản Admin chưa được tạo.');
+        })
+        .finally(()=>{
+          loginBtn.disabled = false;
+          loginBtn.textContent = '🔐 Đăng nhập Admin';
+        });
+    } else {
+      showLoginError('Mật khẩu Admin không chính xác.');
+      loginBtn.disabled = false;
+      loginBtn.textContent = '🔐 Đăng nhập Admin';
+    }
+    return;
+  }
 
+  // ---- CHẾ ĐỘ NHÂN VIÊN (email only) ----
   loginBtn.disabled = true;
   loginBtn.textContent = '⏳ Đang đăng nhập...';
-
-  const localAdminPassword = LOCAL_ADMIN_BOOTSTRAP_PASSWORDS[email] || (adminAccount && adminAccount.password);
-  if(localAdminPassword && password === localAdminPassword){
-    doLogin({email, role:'admin', dept: (adminAccount && adminAccount.dept) || 'Office Admin General', uid:'admin-' + email});
+  const adminAccount = findAdminAccount(email);
+  if(adminAccount){
+    showLoginError('Tài khoản này là Admin. Vui lòng bấm "🔐 Đăng nhập Admin" bên dưới.');
     loginBtn.disabled = false;
     loginBtn.textContent = '🔓 Đăng nhập';
     return;
   }
-
-  if(isStaffEmail && !password){
-    doLogin({email, role:'staff', dept: STAFF_DIRECTORY[email] || 'Khác', uid:'staff-' + email});
-    loginBtn.disabled = false;
-    loginBtn.textContent = '🔓 Đăng nhập';
-    return;
-  }
-
-  if(window.firebase && firebase.auth && firebase.apps && firebase.apps.length){
-    firebase.auth().signInWithEmailAndPassword(email, password)
-      .then((userCredential)=>{
-        const user = userCredential.user;
-        return user.getIdTokenResult().then((tokenResult)=>{
-          const claims = tokenResult && tokenResult.claims ? tokenResult.claims : {};
-          const role = claims.role || (adminAccount ? 'admin' : 'staff');
-          const dept = claims.dept || (adminAccount ? adminAccount.dept : (STAFF_DIRECTORY[email] || 'Khác'));
-          doLogin({email: user.email, role, dept, uid: user.uid});
-        });
-      })
-      .catch(err=>{
-        console.error(err);
-        showLoginError('Mật khẩu không chính xác hoặc tài khoản chưa được tạo.');
-      })
-      .finally(()=>{
-        loginBtn.disabled = false;
-        loginBtn.textContent = '🔓 Đăng nhập';
-      });
-  } else {
-    loginBtn.disabled = false;
-    loginBtn.textContent = '🔓 Đăng nhập';
-    showLoginError('Mật khẩu không chính xác.');
-  }
+  doLogin({email, role:'staff', dept: (STAFF_DIRECTORY && STAFF_DIRECTORY[email]) || 'Khác', uid:'staff-' + email});
+  loginBtn.disabled = false;
+  loginBtn.textContent = '🔓 Đăng nhập';
 }
 loginBtn.addEventListener('click', attemptLogin);
 [loginEmailInput, loginPasswordInput].forEach(inp=>{
