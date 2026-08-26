@@ -585,6 +585,24 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
     <h2 class="section-title">🔐 Quản trị tài khoản đăng nhập</h2>
     <p class="section-sub">Quản lý email đăng nhập theo phòng ban và tài khoản Admin của hệ thống.</p>
 
+    <!-- ===== CARD: KHOÁ WEB ===== -->
+    <div class="card" style="margin-bottom:16px;border:2px solid #fee2e2;">
+      <button type="button" class="collapsible-toggle" data-collapse-target="cc-weblock">
+        <span class="collapsible-title-wrap">
+          <span class="collapsible-title">🔒 Khoá / Mở khoá web</span>
+          <span class="collapsible-sub" id="weblockStatusSub">Kiểm soát quyền truy cập của nhân viên vào hệ thống</span>
+        </span>
+        <span class="collapsible-chevron">▾</span>
+      </button>
+      <div class="collapsible-body" id="cc-weblock">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:4px 0 8px;">
+          <div id="weblockStatusBadge" style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;"></div>
+          <button class="btn btn-sm" id="toggleWeblockBtn" onclick="toggleWebLock()">...</button>
+        </div>
+        <p style="color:var(--muted);font-size:12px;margin:0;">⚠️ Khi web đang <strong>bị khoá</strong>, chỉ tài khoản Admin mới có thể đăng nhập. Nhân viên đang đăng nhập sẽ bị tự động đăng xuất ngay khi web bị khoá.</p>
+      </div>
+    </div>
+
     <div class="card" style="margin-bottom:16px;">
       <button type="button" class="collapsible-toggle" data-collapse-target="cc-staffdir">
         <span class="collapsible-title-wrap">
@@ -1308,6 +1326,7 @@ function applyCloudInitial(raw, options){
 
   INSPECTIONS = raw.inspections || {};
   ORDERS = raw.orders || [];
+  WEB_LOCKED = raw.webLocked === true;
 }
 
 function normalizeProduct(p){
@@ -2546,6 +2565,13 @@ function attemptLogin(){
     loginBtn.textContent = '🔓 Đăng nhập';
     return;
   }
+  // Kiểm tra web có đang bị khoá không
+  if(WEB_LOCKED){
+    showLoginError('🔒 Web hiện đang bị khoá bởi Admin. Vui lòng thử lại sau.');
+    loginBtn.disabled = false;
+    loginBtn.textContent = '🔓 Đăng nhập';
+    return;
+  }
   doLogin({email, role:'staff', dept: (STAFF_DIRECTORY && STAFF_DIRECTORY[email]) || 'Khác', uid:'staff-' + email});
   loginBtn.disabled = false;
   loginBtn.textContent = '🔓 Đăng nhập';
@@ -3571,6 +3597,66 @@ function startPostgresSync(){
   window.addEventListener('online', () => setSyncBadge('online'));
   window.addEventListener('offline', () => setSyncBadge('offline'));
 }
+
+// -------- TÍNH NĂNG KHOÁ WEB --------
+let WEB_LOCKED = false;
+
+function renderWeblockUI(){
+  const badge = document.getElementById('weblockStatusBadge');
+  const btn = document.getElementById('toggleWeblockBtn');
+  const sub = document.getElementById('weblockStatusSub');
+  if(!badge || !btn) return;
+  if(WEB_LOCKED){
+    badge.innerHTML = '<span style="font-size:20px;">🔒</span> <span style="color:#dc2626;">Web đang bị KHOÁ</span>';
+    btn.className = 'btn btn-cam btn-sm';
+    btn.textContent = '🔓 Mở khoá web ngay';
+    if(sub) sub.textContent = 'Web hiện đang bị khoá — chỉ Admin mới đăng nhập được';
+  } else {
+    badge.innerHTML = '<span style="font-size:20px;">🟢</span> <span style="color:#16a34a;">Web đang mở bình thường</span>';
+    btn.className = 'btn btn-sm';
+    btn.style.cssText = 'background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;font-weight:700;';
+    btn.textContent = '🔒 Khoá web lại';
+    if(sub) sub.textContent = 'Kiểm soát quyền truy cập của nhân viên vào hệ thống';
+  }
+}
+
+function toggleWebLock(){
+  const currentUser = window.__currentSession;
+  if(!currentUser || currentUser.role !== 'admin'){
+    toast('Chỉ Admin mới có thể khoá/mở khoá web!','⚠️'); return;
+  }
+  const willLock = !WEB_LOCKED;
+  const msg = willLock
+    ? '🔒 Xác nhận KHOÁ WEB? Toàn bộ nhân viên sẽ bị đăng xuất và không thể đăng nhập cho đến khi mở khoá.'
+    : '🔓 Xác nhận MỞ KHOÁ WEB? Nhân viên sẽ có thể đăng nhập trở lại bình thường.';
+  if(!confirm(msg)) return;
+  WEB_LOCKED = willLock;
+  cloudSet('webLocked', WEB_LOCKED);
+  renderWeblockUI();
+  toast(willLock ? '🔒 Đã khoá web thành công! Nhân viên không thể đăng nhập.' : '🔓 Đã mở khoá web! Nhân viên có thể đăng nhập trở lại.', willLock ? '🔒' : '✅');
+}
+
+// Tự động kiểm tra trạng thái khoá web sau mỗi lần poll và kick staff ra nếu web bị khoá
+const __origRefreshAll = refreshAllViews;
+const __prevApply = applyCloudInitial;
+function _checkAndKickIfLocked(){
+  const session = window.__currentSession;
+  if(WEB_LOCKED && session && session.role === 'staff'){
+    toast('🔒 Web đã bị Admin khoá. Bạn sẽ bị đăng xuất tự động.', '🔒');
+    setTimeout(() => {
+      if(typeof doLogout === 'function') doLogout();
+      else { window.__currentSession = null; location.reload(); }
+    }, 2500);
+  }
+  renderWeblockUI();
+}
+
+// Hook vào polling để tự động kick staff khi web bị khoá
+const __origRefreshAllViews = refreshAllViews;
+window.refreshAllViews = function(){
+  __origRefreshAllViews();
+  _checkAndKickIfLocked();
+};
 
 startPostgresSync();
 </script>
