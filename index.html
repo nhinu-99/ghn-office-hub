@@ -451,7 +451,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
       <button data-page="home" class="active">🏠 Trang chủ</button>
       <button data-page="hygiene">🧹 Vệ sinh văn phòng</button>
       <button data-page="order">📦 Order VPP</button>
-      <button data-page="idcard">🪪 Tạo Thẻ Nhân Viên</button>
+      <button data-page="idcard" id="navIdCardBtn" style="display:none;">🪪 Tạo Thẻ Nhân Viên</button>
       <button data-page="accounts" id="navAccountsBtn" style="display:none;">🔐 Tài khoản</button>
     </nav>
     <div class="user-area" id="userArea">
@@ -1643,7 +1643,7 @@ function confettiBurst(){
    ĐIỀU HƯỚNG
    ============================================================ */
 function gotoPage(pageId){
-  if(pageId==='accounts' && !isAdmin()){ toast('Chỉ Admin mới có quyền truy cập trang này','🔒'); return; }
+  if((pageId==='accounts' || pageId==='idcard') && !isAdmin()){ toast('Chỉ Admin mới có quyền truy cập trang này','🔒'); return; }
   if((pageId==='home' || pageId==='hygiene') && SESSION && !canFullAccess()){
     toast('Tài khoản của bạn chỉ có quyền truy cập Order VPP','🔒');
     pageId = 'order';
@@ -2760,6 +2760,8 @@ function applySession(){
     document.getElementById('userEmailLabel').textContent = SESSION.email;
     document.getElementById('userDeptPill').textContent = (SESSION.role==='admin' ? '👑 Admin · ' : '👤 ') + SESSION.dept;
     document.getElementById('navAccountsBtn').style.display = isAdmin() ? 'flex' : 'none';
+    const navIdCardBtn = document.getElementById('navIdCardBtn');
+    if(navIdCardBtn) navIdCardBtn.style.display = isAdmin() ? 'flex' : 'none';
     const full = canFullAccess();
     const homeBtn = document.querySelector('#mainNav button[data-page="home"]');
     const hygieneBtn = document.querySelector('#mainNav button[data-page="hygiene"]');
