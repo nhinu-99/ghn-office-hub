@@ -177,7 +177,13 @@ p.section-sub{color:var(--muted);margin:0 0 20px;font-size:14.5px;}
 .zone-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:start;}
 @media(max-width:1300px){.zone-grid{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:900px){.zone-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:560px){.zone-grid{grid-template-columns:repeat(1,1fr);}}
+@media(max-width:640px){
+  .zone-grid{grid-template-columns:repeat(1,1fr);gap:14px;}
+  .zone-card{padding:14px;}
+  .crit-row input[type=checkbox]{width:24px;height:24px;}
+  .crit-row label{font-size:14.5px;padding-top:4px;}
+  .zone-photo-btn{padding:8px 14px;font-size:13.5px;}
+}
 .staff-group{margin-bottom:34px;}
 .staff-group-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;padding-bottom:10px;border-bottom:2.5px dashed #f0c8a0;}
 .staff-group-head h3{margin:0;font-size:17px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -429,6 +435,20 @@ footer.site-footer{text-align:center;color:var(--muted);font-size:12.5px;padding
 input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important;color:var(--muted) !important;cursor:not-allowed;}
 .locked-note{font-size:11.5px;color:var(--muted);font-style:italic;margin-top:-6px;}
 
+.zone-photo-sec{display:flex;align-items:center;gap:10px;margin-top:12px;}
+.zone-photo-btn{background:#f0f0f0;color:var(--text);padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.zone-photo-btn:hover{background:#e4e4e4;}
+.zone-photo-thumb{width:48px;height:48px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid #eee;background:#fff;}
+.zone-photo-thumb:hover{border-color:var(--cam);}
+
+.trend-chart{display:flex;align-items:flex-end;gap:6px;height:80px;margin-top:20px;padding-top:20px;border-bottom:1px solid #eee;}
+.trend-bar-wrap{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;}
+.trend-bar{width:100%;background:var(--xanh-light);border-radius:4px 4px 0 0;position:relative;min-width:12px;transition:0.3s;}
+.trend-bar:hover{background:var(--xanh);}
+.trend-bar span{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;color:var(--text);margin-bottom:4px;opacity:0;transition:0.2s;}
+.trend-bar:hover span{opacity:1;}
+.trend-label{font-size:10px;color:var(--muted);text-align:center;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
+
 @media(max-width:640px){
   .brand-text h1{font-size:16px;}
   .nav-tabs button{padding:8px 12px;font-size:13px;}
@@ -533,6 +553,10 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
           <h4 style="margin:0 0 14px;">Điểm trung bình theo khu vực</h4>
           <div id="catBars"></div>
         </div>
+      </div>
+      <div class="card" style="margin-bottom:22px;">
+        <h4 style="margin:0 0 14px;">📈 Xu hướng điểm vệ sinh (8 tuần gần nhất)</h4>
+        <div class="trend-chart" id="trendChart"></div>
       </div>
       <div class="card">
         <h4 style="margin:0 0 14px;">Chi tiết từng khu vực</h4>
@@ -1787,7 +1811,12 @@ function renderZoneGrid(){
             <input type="checkbox" data-idx="${i}" ${rec.checks[i]?'checked':''} ${readOnly?'disabled':''} id="chk-${z.id}-${i}">
             <label for="chk-${z.id}-${i}">${c}</label>
           </div>`).join('')}
-        <textarea class="zone-note" ${readOnly?'disabled':''} placeholder="Ghi chú thêm (nếu có)...">${rec.note}</textarea>
+        <div class="zone-photo-sec">
+          ${rec.photo ? `<img src="${rec.photo}" class="zone-photo-thumb" onclick="window.open('${rec.photo}')" />` : ''}
+          ${!readOnly ? `<label class="zone-photo-btn">📸 Thêm ảnh<input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleZonePhoto(event, '${week}', '${z.id}')"></label>` : ''}
+          ${readOnly && !rec.photo ? '<span style="font-size:11px;color:var(--muted);">Không có ảnh</span>' : ''}
+        </div>
+        <textarea class="zone-note" ${readOnly?'disabled':''} placeholder="Ghi chú thêm (nếu có)...">${rec.note||''}</textarea>
       </div>`;
     });
     html += `</div></div>`;
@@ -1832,6 +1861,32 @@ function renderZoneGrid(){
   });
 }
 weekInput.addEventListener('change', renderZoneGrid);
+
+window.handleZonePhoto = function(e, week, zid){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if(w > 800) { h = Math.round(h * 800 / w); w = 800; }
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+      
+      const cat = ZONE_CATEGORIES.find(c=>ALL_ZONES.find(z=>z.id===zid && z.catId===c.id));
+      const rec = getInspection(week, zid, cat.criteria.length);
+      rec.photo = dataUrl;
+      saveInspections();
+      renderZoneGrid();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+};
 
 /* ============================================================
    MODULE VỆ SINH — BÁO CÁO TUẦN
@@ -1884,6 +1939,27 @@ function renderReport(){
       <td><b>${r.score===null?'—':r.score+'%'}</b></td>
       <td><span class="pill ${scorePillClass(r.score)}">${scoreLabel(r.score)}</span></td>
     </tr>`).join('');
+
+  // Tính toán biểu đồ xu hướng (8 tuần gần nhất)
+  const [cy, cw] = week.split('-W').map(Number);
+  const trendWeeks = [];
+  let ty = cy, tw = cw;
+  for(let i=0; i<8; i++){
+    trendWeeks.unshift(`${ty}-W${tw.toString().padStart(2,'0')}`);
+    tw--;
+    if(tw <= 0) { ty--; tw = 52; }
+  }
+  const trendHtml = trendWeeks.map(w => {
+    const wRows = ALL_ZONES.map(z => zoneScore(w, z.id)).filter(s => s!==null);
+    const wAvg = wRows.length ? Math.round(wRows.reduce((a,b)=>a+b,0)/wRows.length) : 0;
+    return `<div class="trend-bar-wrap">
+      <div class="trend-bar" style="height:${wAvg}%;background:${scoreColor(wAvg)}">
+        <span>${wAvg}%</span>
+      </div>
+      <div class="trend-label">W${w.split('-W')[1]}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('trendChart').innerHTML = trendHtml;
 }
 
 /* ============================================================
