@@ -484,10 +484,25 @@
   align-items: center;
 }
 #page-idcard .scommerce-o {
-  width: 0.9em;
-  height: 0.9em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.78em;
+  height: 0.78em;
+  border-radius: 50%;
+  border: 0.17em solid var(--ic-blue);
+  box-sizing: border-box;
+  vertical-align: middle;
   margin: 0 0.5px;
-  color: var(--ic-blue);
+  position: relative;
+  top: -0.04em;
+}
+#page-idcard .scommerce-o-dot {
+  display: block;
+  width: 0.25em;
+  height: 0.25em;
+  border-radius: 50%;
+  background: var(--ic-blue);
 }
 
 /* ===== EMPTY PREVIEW ===== */
