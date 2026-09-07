@@ -470,39 +470,40 @@
   font-family: 'Poppins', sans-serif;
   font-size: 8px;
   color: var(--ic-blue);
-  font-weight: 600;
-  letter-spacing: .2px;
+  font-weight: 400;
+  letter-spacing: .3px;
   font-style: italic;
+  line-height: 1;
 }
 #page-idcard .card-footer-brand {
   font-family: 'Poppins', sans-serif;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: .2px;
+  letter-spacing: .3px;
   color: var(--ic-blue);
   display: flex;
   align-items: center;
+  line-height: 1;
 }
 #page-idcard .scommerce-o {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 0.78em;
-  height: 0.78em;
+  width: 0.72em;
+  height: 0.72em;
   border-radius: 50%;
-  border: 0.17em solid var(--ic-blue);
+  border: 0.16em solid var(--ic-blue);
   box-sizing: border-box;
-  vertical-align: middle;
   margin: 0 0.5px;
-  position: relative;
-  top: -0.04em;
+  flex-shrink: 0;
 }
 #page-idcard .scommerce-o-dot {
   display: block;
-  width: 0.25em;
-  height: 0.25em;
+  width: 0.22em;
+  height: 0.22em;
   border-radius: 50%;
   background: var(--ic-blue);
+  flex-shrink: 0;
 }
 
 /* ===== EMPTY PREVIEW ===== */
