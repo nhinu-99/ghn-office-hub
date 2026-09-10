@@ -3054,21 +3054,33 @@ function renderAccountsPage(){
   renderStaffDirTable();
 
   const atbody = document.querySelector('#adminTable tbody');
-  atbody.innerHTML = ADMIN_ACCOUNTS.map(a=>`
-    <tr><td>${escapeHtml(a.email)}</td>
-    <td>
-      ${a.isSuper ? '👑 Quản trị cao nhất (Toàn quyền)' : `
-        <div style="font-weight:600;margin-bottom:6px;">Admin</div>
-        <div style="font-size:12px; display:flex; flex-direction:column; gap:4px;">
-          <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canLockWeb" ${a.canLockWeb?'checked':''} ${isSuperAdmin()?'':'disabled'}> Khoá Web</label>
-          <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canEditProducts" ${a.canEditProducts?'checked':''} ${isSuperAdmin()?'':'disabled'}> QL Sản phẩm</label>
-          <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canEditDepts" ${a.canEditDepts?'checked':''} ${isSuperAdmin()?'':'disabled'}> QL Phòng ban</label>
-          <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canEditStaff" ${a.canEditStaff?'checked':''} ${isSuperAdmin()?'':'disabled'}> QL Danh bạ NV</label>
-        </div>
-      `}
-    </td>
-    <td style="vertical-align:top;padding-top:14px;">${a.isSuper ? '' : `<button class="btn btn-danger btn-sm" data-rmadmin="${escapeHtml(a.email)}" ${isSuperAdmin()?'':'disabled'}>Xoá</button>`}</td></tr>
-  `).join('');
+  atbody.innerHTML = ADMIN_ACCOUNTS.map(a=>{
+    const canEdit = isSuperAdmin() || (SESSION && normalizeEmail(SESSION.email) === normalizeEmail(a.email));
+    const canDelete = isSuperAdmin() && !a.isSuper;
+    return `
+    <tr>
+      <td>
+        <div style="font-weight:600;">${escapeHtml(a.displayName||a.email)}</div>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">${escapeHtml(a.email)}</div>
+      </td>
+      <td>
+        ${a.isSuper ? '👑 Quản trị cao nhất (Toàn quyền)' : `
+          <div style="font-weight:600;margin-bottom:6px;">Admin</div>
+          <div style="font-size:12px; display:flex; flex-direction:column; gap:4px;">
+            <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canLockWeb" ${a.canLockWeb?'checked':''} ${isSuperAdmin()?'':'disabled'}> Khoá Web</label>
+            <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canEditProducts" ${a.canEditProducts?'checked':''} ${isSuperAdmin()?'':'disabled'}> QL Sản phẩm</label>
+            <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canEditDepts" ${a.canEditDepts?'checked':''} ${isSuperAdmin()?'':'disabled'}> QL Phòng ban</label>
+            <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canEditStaff" ${a.canEditStaff?'checked':''} ${isSuperAdmin()?'':'disabled'}> QL Danh bạ NV</label>
+          </div>
+        `}
+      </td>
+      <td style="vertical-align:top;padding-top:12px;white-space:nowrap;">
+        ${canEdit ? `<button class="btn btn-ghost btn-sm" data-editadmin="${escapeHtml(a.email)}" style="margin-right:4px;">✏️ Sửa</button>` : ''}
+        ${canDelete ? `<button class="btn btn-danger btn-sm" data-rmadmin="${escapeHtml(a.email)}">Xoá</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+
   
   atbody.querySelectorAll('.admin-perm-cb').forEach(cb => {
     cb.addEventListener('change', (e) => {
@@ -3087,6 +3099,12 @@ function renderAccountsPage(){
     });
   });
 
+  atbody.querySelectorAll('[data-editadmin]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      showEditAdminModal(b.dataset.editadmin);
+    });
+  });
+
   atbody.querySelectorAll('[data-rmadmin]').forEach(b=>{
     b.addEventListener('click', ()=>{
       if(!isSuperAdmin()) {
@@ -3099,6 +3117,77 @@ function renderAccountsPage(){
       renderAccountsPage();
       toast('Đã xoá tài khoản Admin','🗑️');
     });
+  });
+}
+
+function showEditAdminModal(targetEmail){
+  const admin = ADMIN_ACCOUNTS.find(a => normalizeEmail(a.email) === normalizeEmail(targetEmail));
+  if(!admin){ toast('Không tìm thấy tài khoản','⚠️'); return; }
+  const isSelf = SESSION && normalizeEmail(SESSION.email) === normalizeEmail(targetEmail);
+  const canEdit = isSuperAdmin() || isSelf;
+  if(!canEdit){ toast('Bạn không có quyền chỉnh sửa tài khoản này','🔒'); return; }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'editAdminOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:30px 28px 24px;min-width:340px;max-width:92vw;box-shadow:0 10px 50px rgba(0,0,0,.2);">
+      <h3 style="margin:0 0 6px;font-size:17px;font-weight:700;">✏️ Chỉnh sửa tài khoản Admin</h3>
+      <p style="margin:0 0 20px;font-size:12.5px;color:var(--muted);">${escapeHtml(admin.email)}</p>
+
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:4px;">Tên hiển thị</label>
+      <input id="editAdminName" type="text" value="${escapeHtml(admin.displayName||'')}" placeholder="Nhập tên hiển thị..." style="width:100%;padding:10px 14px;border-radius:10px;border:2px solid #f0f0f0;margin-bottom:16px;box-sizing:border-box;font-size:13.5px;">
+
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:4px;">Mật khẩu mới <span style="font-weight:400;color:var(--muted);">(để trống nếu không đổi)</span></label>
+      <div style="position:relative;margin-bottom:6px;">
+        <input id="editAdminPass" type="password" placeholder="Tối thiểu 6 ký tự..." style="width:100%;padding:10px 40px 10px 14px;border-radius:10px;border:2px solid #f0f0f0;box-sizing:border-box;font-size:13.5px;">
+        <span id="toggleEditPassIcon" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;user-select:none;" title="Hiện/ẩn mật khẩu">👁️</span>
+      </div>
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:4px;">Xác nhận mật khẩu mới</label>
+      <input id="editAdminPass2" type="password" placeholder="Nhập lại mật khẩu mới..." style="width:100%;padding:10px 14px;border-radius:10px;border:2px solid #f0f0f0;margin-bottom:20px;box-sizing:border-box;font-size:13.5px;">
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="editAdminCancelBtn" class="btn btn-ghost btn-sm">Huỷ</button>
+        <button id="editAdminSaveBtn" class="btn btn-xanh btn-sm">💾 Lưu thay đổi</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // toggle show/hide password
+  document.getElementById('toggleEditPassIcon').addEventListener('click', ()=>{
+    const inp = document.getElementById('editAdminPass');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  });
+
+  document.getElementById('editAdminCancelBtn').addEventListener('click', ()=>{ overlay.remove(); });
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+
+  document.getElementById('editAdminSaveBtn').addEventListener('click', ()=>{
+    const newName = document.getElementById('editAdminName').value.trim();
+    const newPass = document.getElementById('editAdminPass').value;
+    const newPass2 = document.getElementById('editAdminPass2').value;
+
+    if(newPass && newPass.length < 6){ toast('Mật khẩu tối thiểu 6 ký tự','⚠️'); return; }
+    if(newPass && newPass !== newPass2){ toast('Mật khẩu xác nhận không khớp','⚠️'); return; }
+
+    // Cập nhật displayName
+    admin.displayName = newName || '';
+
+    // Cập nhật password nếu có nhập
+    if(newPass){
+      admin.password = newPass;
+      // Đổi mật khẩu trên Firebase nếu đang đổi của chính mình
+      if(isSelf && window.firebase && firebase.auth && firebase.apps && firebase.apps.length){
+        const user = firebase.auth().currentUser;
+        if(user) user.updatePassword(newPass).catch(err=>{ toast('Firebase: ' + err.message,'⚠️'); });
+      }
+    }
+
+    cloudSet('admins', ADMIN_ACCOUNTS);
+    overlay.remove();
+    renderAccountsPage();
+    toast('Đã cập nhật thông tin tài khoản','✅');
   });
 }
 
