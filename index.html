@@ -366,10 +366,48 @@ select#sortSelect{padding:12px 14px;border-radius:14px;border:2px solid #f0f0f0;
 .order-hist-row-edit .item-note-input{width:100%;padding:6px 10px;border-radius:8px;border:1.5px solid #FFE3CC;background:#FFFBF6;font-size:12px;}
 .superadmin-edit-tag{background:var(--cam-light);color:var(--cam-dark);font-size:10px;font-weight:800;padding:2px 8px;border-radius:8px;margin-left:6px;}
 .export-dept-panel{
-  position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:14px;box-shadow:var(--shadow-lg);
-  padding:14px;width:280px;z-index:80;
+  position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:16px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.15),0 8px 10px -6px rgba(0,0,0,0.1);
+  padding:14px;width:300px;z-index:90;border:1px solid #e2e8f0;animation:fadein .15s ease;
 }
 .export-dept-panel .dept-check-list{max-height:220px;}
+
+/* order history month groups (chỉ Admin) */
+.order-month-group{
+  margin-bottom:20px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:20px;padding:12px 14px 6px;
+}
+.order-month-header{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  cursor:pointer;user-select:none;padding:6px 8px 12px;
+}
+.order-month-title{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.order-month-chevron{
+  font-size:11px;color:var(--xanh);transition:transform .2s ease;display:inline-block;width:14px;
+}
+.order-month-group.collapsed .order-month-chevron{
+  transform:rotate(-90deg);
+}
+.order-month-badge{
+  background:rgba(2,111,173,0.1);color:var(--xanh-dark);font-size:11px;font-weight:700;
+  padding:3px 9px;border-radius:12px;border:1px solid rgba(2,111,173,0.2);
+}
+.order-month-total{
+  font-size:13px;color:#475569;background:#fff;padding:5px 12px;border-radius:12px;
+  border:1px solid #e2e8f0;font-weight:600;
+}
+.order-month-total strong{
+  color:var(--cam-dark);font-weight:800;
+}
+.order-month-group.collapsed .order-month-list{
+  display:none;
+}
+.order-month-list{
+  animation:fadein .2s ease;
+}
+.order-month-list .order-hist-card:last-child{
+  margin-bottom:8px;
+}
 
 /* card thu gọn/mở rộng (trang Tài khoản) */
 .collapsible-toggle{
@@ -788,22 +826,40 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
     </div>
 
     <div class="subpage" id="or-history">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
-        <p class="section-sub" style="margin:0;">Toàn bộ đơn hàng VPP đã đặt, có thể tổng hợp và xuất ra file Excel để in.</p>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;position:relative;">
-          <input type="month" id="exportMonthFilter" title="Lọc theo tháng (để trống = tất cả)" style="padding:9px 12px;border-radius:12px;border:2px solid #f0f0f0;font-weight:700;font-size:13px;color:var(--xanh-dark);">
-          <button class="btn btn-ghost btn-sm" id="clearExportMonthBtn" title="Bỏ lọc tháng">✕ Tất cả</button>
-          <button class="btn btn-ghost btn-sm" id="exportDeptToggleBtn" title="Chọn phòng ban muốn xuất">🏢 Chọn phòng ban <span id="exportDeptCountLbl">(tất cả)</span> ▾</button>
-          <button class="btn btn-xanh" id="exportExcelBtn">📥 Xuất Excel</button>
-          <div id="exportDeptPanel" class="export-dept-panel" style="display:none;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <b style="font-size:12.5px;">Chọn phòng ban muốn xuất</b>
-              <span style="display:flex;gap:6px;">
-                <button type="button" id="exportDeptSelectAllBtn" class="btn btn-ghost btn-sm" style="padding:3px 9px;font-size:11px;">✅ Tất cả</button>
-                <button type="button" id="exportDeptClearAllBtn" class="btn btn-ghost btn-sm" style="padding:3px 9px;font-size:11px;">⬜ Bỏ chọn</button>
-              </span>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px;">
+        <p class="section-sub" style="margin:0;">Toàn bộ đơn hàng VPP đã đặt, có thể lọc theo tháng và tìm kiếm nhanh.</p>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <!-- Lọc theo tháng (áp dụng cho tất cả tài khoản) -->
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input type="month" id="exportMonthFilter" title="Lọc theo tháng (để trống = tất cả)" style="padding:8px 12px;border-radius:12px;border:2px solid #e2e8f0;font-weight:700;font-size:13px;color:var(--xanh-dark);background:#fff;">
+            <button class="btn btn-ghost btn-sm" id="clearExportMonthBtn" title="Xem tất cả các tháng" style="padding:8px 12px;">✕ Tất cả</button>
+          </div>
+
+          <!-- Tìm kiếm theo phòng ban/tên NV/email (Chỉ dành cho Admin) -->
+          <div id="orderAdminSearchWrap" style="display:none;position:relative;align-items:center;">
+            <input type="text" id="orderSearchAdminInput" placeholder="🔍 Tìm phòng ban, tên NV, email..." style="padding:8px 30px 8px 12px;border-radius:12px;border:2px solid #e2e8f0;font-size:13px;font-weight:600;width:240px;background:#fff;transition:border-color .2s;">
+            <button type="button" id="clearOrderAdminSearchBtn" title="Xoá tìm kiếm" style="position:absolute;right:8px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:13px;display:none;padding:2px 4px;">✕</button>
+          </div>
+
+          <!-- Cụm chọn phòng ban & xuất Excel (Chỉ dành cho Admin) -->
+          <div id="adminExportControlsWrap" style="display:none;align-items:center;gap:8px;position:relative;">
+            <div style="position:relative;display:inline-block;">
+              <button class="btn btn-ghost btn-sm" id="exportDeptToggleBtn" title="Chọn phòng ban muốn xuất" style="padding:8px 12px;">🏢 Chọn phòng ban <span id="exportDeptCountLbl">(tất cả)</span> ▾</button>
+              <div id="exportDeptPanel" class="export-dept-panel" style="display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <b style="font-size:12.5px;color:var(--text);">Phòng ban tải Excel</b>
+                  <span style="display:flex;gap:4px;">
+                    <button type="button" id="exportDeptSelectAllBtn" class="btn btn-ghost btn-sm" style="padding:2px 7px;font-size:11px;">✅ Tất cả</button>
+                    <button type="button" id="exportDeptClearAllBtn" class="btn btn-ghost btn-sm" style="padding:2px 7px;font-size:11px;">⬜ Bỏ chọn</button>
+                  </span>
+                </div>
+                <div style="margin-bottom:8px;">
+                  <input type="text" id="exportDeptSearchInput" placeholder="🔍 Lọc phòng ban..." style="width:100%;padding:5px 9px;border-radius:8px;border:1px solid #e2e8f0;font-size:11.5px;">
+                </div>
+                <div id="exportDeptCheckList" class="dept-check-list" style="grid-template-columns:1fr;max-height:220px;padding:6px 8px;"></div>
+              </div>
             </div>
-            <div id="exportDeptCheckList" class="dept-check-list" style="grid-template-columns:1fr;"></div>
+            <button class="btn btn-xanh" id="exportExcelBtn" style="padding:8px 14px;">📥 Xuất Excel</button>
           </div>
         </div>
       </div>
@@ -1658,6 +1714,9 @@ function escapeHtml(value){
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#39;');
 }
+function stripVN(value){
+  return String(value ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'd').trim();
+}
 
 function getISOWeekString(d){
   d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -2391,52 +2450,15 @@ document.getElementById('confirmOrderBtn').addEventListener('click', ()=>{
 });
 
 /* ---------- Lịch sử đặt hàng ---------- */
-function renderOrderHistory(){
-  const wrap = document.getElementById('orderHistoryList');
-  const scopedOrders = canViewAllOrders() ? ORDERS : ORDERS.filter(o=>o.orderedBy===(SESSION&&SESSION.email));
-  if(!scopedOrders.length){
-    wrap.innerHTML = `<div class="no-result"><span class="em">🧾</span>Chưa có đơn hàng nào được tạo.</div>`;
-    return;
-  }
-  const editMode = isSuperAdmin();
-  wrap.innerHTML = scopedOrders.map(o=>{
-    const d = new Date(o.date);
-    const dateStr = d.toLocaleDateString('vi-VN') + ' ' + d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
-    const visibleItems = editMode ? o.items : o.items.filter(i=>i.qty>0);
-    return `<div class="order-hist-card">
-      <div class="order-hist-head" data-id="${escapeHtml(o.id)}">
-        <div>
-          <h4>${escapeHtml(o.dept)} · ${escapeHtml(o.orderer)}${editMode?'<span class="superadmin-edit-tag">✏️ Có thể chỉnh sửa</span>':''}</h4>
-          <div class="meta">${dateStr} · ${visibleItems.length} sản phẩm</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-          <div class="pill cam">${formatVND(o.total)}</div>
-          <button class="btn btn-xanh btn-sm" data-restoreorder="${o.id}" title="Đặt lại đơn cũ">🔁 Đặt lại</button>
-          ${isAdmin() ? `<button class="btn btn-danger btn-sm" data-delorder="${o.id}" title="Xoá đơn hàng">🗑️</button>` : ''}
-        </div>
-      </div>
-      <div class="order-hist-body ${openOrderIds.has(o.id)?'open':''}" id="body-${o.id}">
-        ${editMode ? visibleItems.map((i,idx)=>{
-          const realIdx = o.items.indexOf(i);
-          return `<div class="order-hist-row-edit" data-order="${escapeHtml(o.id)}" data-itemidx="${realIdx}">
-            <div class="row-top">
-              <span class="item-name ${i.qty===0?'zeroed':''}">${escapeHtml(i.ten)} (${escapeHtml(i.dvt)})</span>
-              <input type="number" min="0" class="item-qty-input" value="${i.qty}" data-role="qty">
-              <span class="item-money" data-role="money">${formatVND(i.gia*i.qty)}</span>
-              <button class="item-zero-btn" data-role="zero" title="Cắt về 0">🗑️</button>
-            </div>
-            <input type="text" class="item-note-input" data-role="note" placeholder="📝 Lý do cắt giảm / ghi chú (chỉ Admin cao nhất thấy)..." value="${escapeHtml(i.cutNote || '')}">
-          </div>`;
-        }).join('') : visibleItems.map(i=>`<div class="order-hist-row"><span>${i.ten} × ${i.qty} ${i.dvt}</span><span>${formatVND(i.gia*i.qty)}</span></div>`).join('')}
-        ${o.note?`<div class="order-hist-row" style="color:var(--muted);font-style:italic;">📝 ${escapeHtml(o.note)}</div>`:''}
-        <div class="order-hist-total"><span>Tổng cộng</span><span>${formatVND(o.total)}</span></div>
-      </div>
-    </div>`;
-  }).join('');
+let collapsedMonthKeys = new Set();
+
+function attachOrderCardEventListeners(wrap, editMode){
+  const admin = isAdmin();
   wrap.querySelectorAll('.order-hist-head').forEach(h=>{
     h.addEventListener('click', (e)=>{
       if(e.target.closest('[data-restoreorder],[data-delorder]')) return;
       const body = document.getElementById('body-'+h.dataset.id);
+      if(!body) return;
       body.classList.toggle('open');
       if(body.classList.contains('open')) openOrderIds.add(h.dataset.id);
       else openOrderIds.delete(h.dataset.id);
@@ -2461,22 +2483,173 @@ function renderOrderHistory(){
       const qtyInput = row.querySelector('[data-role="qty"]');
       const noteInput = row.querySelector('[data-role="note"]');
       const zeroBtn = row.querySelector('[data-role="zero"]');
-      qtyInput.addEventListener('change', ()=>{
-        const q = Math.max(0, parseInt(qtyInput.value)||0);
-        setTimeout(()=> updateOrderItemQty(orderId, itemIdx, q), 0);
-      });
-      noteInput.addEventListener('change', ()=>{
-        const val = noteInput.value.trim();
-        setTimeout(()=> updateOrderItemNote(orderId, itemIdx, val), 0);
-      });
-      zeroBtn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        qtyInput.value = 0;
-        setTimeout(()=> updateOrderItemQty(orderId, itemIdx, 0), 0);
-      });
+      if(qtyInput){
+        qtyInput.addEventListener('change', ()=>{
+          const q = Math.max(0, parseInt(qtyInput.value)||0);
+          setTimeout(()=> updateOrderItemQty(orderId, itemIdx, q), 0);
+        });
+      }
+      if(noteInput){
+        noteInput.addEventListener('change', ()=>{
+          const val = noteInput.value.trim();
+          setTimeout(()=> updateOrderItemNote(orderId, itemIdx, val), 0);
+        });
+      }
+      if(zeroBtn){
+        zeroBtn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          if(qtyInput) qtyInput.value = 0;
+          setTimeout(()=> updateOrderItemQty(orderId, itemIdx, 0), 0);
+        });
+      }
       row.addEventListener('click', (e)=> e.stopPropagation());
     });
   }
+}
+
+function renderOrderHistory(){
+  const wrap = document.getElementById('orderHistoryList');
+  if(!wrap) return;
+
+  const admin = isAdmin();
+  const editMode = isSuperAdmin();
+  let scopedOrders = canViewAllOrders() ? ORDERS : ORDERS.filter(o=>o.orderedBy===(SESSION&&SESSION.email));
+
+  if(!scopedOrders.length){
+    wrap.innerHTML = `<div class="no-result"><span class="em">🧾</span>Chưa có đơn hàng nào được tạo.</div>`;
+    return;
+  }
+
+  // 1. Lọc theo tháng (áp dụng cho tất cả các phòng ban và các tài khoản admin)
+  const monthInput = document.getElementById('exportMonthFilter');
+  const monthFilter = monthInput ? monthInput.value : ''; // 'YYYY-MM' hoặc rỗng
+  if(monthFilter){
+    scopedOrders = scopedOrders.filter(o=>{
+      const d = new Date(o.date);
+      if(isNaN(d.getTime())) return false;
+      const ym = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+      return ym === monthFilter;
+    });
+  }
+
+  // 2. Tìm kiếm theo tên phòng ban / tên nhân viên / email nhân viên (Chỉ Admin)
+  const searchInput = document.getElementById('orderSearchAdminInput');
+  const searchQuery = (admin && searchInput) ? searchInput.value.trim() : '';
+  const clearSearchBtn = document.getElementById('clearOrderAdminSearchBtn');
+  if(clearSearchBtn){
+    clearSearchBtn.style.display = searchQuery ? 'block' : 'none';
+  }
+
+  if(admin && searchQuery){
+    const cleanQ = stripVN(searchQuery);
+    scopedOrders = scopedOrders.filter(o=>{
+      const dept = stripVN(o.dept);
+      const orderer = stripVN(o.orderer);
+      const orderedBy = stripVN(o.orderedBy);
+      const id = stripVN(o.id);
+      return dept.includes(cleanQ) || orderer.includes(cleanQ) || orderedBy.includes(cleanQ) || id.includes(cleanQ);
+    });
+  }
+
+  // 3. Nếu sau khi lọc không còn đơn nào
+  if(!scopedOrders.length){
+    wrap.innerHTML = `<div class="no-result"><span class="em">🔎</span>Không tìm thấy đơn hàng nào phù hợp với bộ lọc.</div>`;
+    return;
+  }
+
+  function renderOrderCard(o){
+    const d = new Date(o.date);
+    const dateStr = isNaN(d.getTime()) ? '—' : (d.toLocaleDateString('vi-VN') + ' ' + d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}));
+    const visibleItems = editMode ? o.items : (o.items || []).filter(i=>i.qty>0);
+    return `<div class="order-hist-card">
+      <div class="order-hist-head" data-id="${escapeHtml(o.id)}">
+        <div>
+          <h4>${escapeHtml(o.dept)} · ${escapeHtml(o.orderer)}${editMode?'<span class="superadmin-edit-tag">✏️ Có thể chỉnh sửa</span>':''}</h4>
+          <div class="meta">${dateStr} · ${visibleItems.length} sản phẩm${o.orderedBy ? ` · <span style="color:var(--text-sub);">${escapeHtml(o.orderedBy)}</span>` : ''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+          <div class="pill cam">${formatVND(o.total)}</div>
+          <button class="btn btn-xanh btn-sm" data-restoreorder="${escapeHtml(o.id)}" title="Đặt lại đơn cũ">🔁 Đặt lại</button>
+          ${admin ? `<button class="btn btn-danger btn-sm" data-delorder="${escapeHtml(o.id)}" title="Xoá đơn hàng">🗑️</button>` : ''}
+        </div>
+      </div>
+      <div class="order-hist-body ${openOrderIds.has(o.id)?'open':''}" id="body-${escapeHtml(o.id)}">
+        ${editMode ? visibleItems.map((i,idx)=>{
+          const realIdx = o.items.indexOf(i);
+          return `<div class="order-hist-row-edit" data-order="${escapeHtml(o.id)}" data-itemidx="${realIdx}">
+            <div class="row-top">
+              <span class="item-name ${i.qty===0?'zeroed':''}">${escapeHtml(i.ten)} (${escapeHtml(i.dvt)})</span>
+              <input type="number" min="0" class="item-qty-input" value="${i.qty}" data-role="qty">
+              <span class="item-money" data-role="money">${formatVND(i.gia*i.qty)}</span>
+              <button class="item-zero-btn" data-role="zero" title="Cắt về 0">🗑️</button>
+            </div>
+            <input type="text" class="item-note-input" data-role="note" placeholder="📝 Lý do cắt giảm / ghi chú (chỉ Admin cao nhất thấy)..." value="${escapeHtml(i.cutNote || '')}">
+          </div>`;
+        }).join('') : visibleItems.map(i=>`<div class="order-hist-row"><span>${escapeHtml(i.ten)} × ${i.qty} ${escapeHtml(i.dvt)}</span><span>${formatVND(i.gia*i.qty)}</span></div>`).join('')}
+        ${o.note?`<div class="order-hist-row" style="color:var(--muted);font-style:italic;">📝 ${escapeHtml(o.note)}</div>`:''}
+        <div class="order-hist-total"><span>Tổng cộng</span><span>${formatVND(o.total)}</span></div>
+      </div>
+    </div>`;
+  }
+
+  // 4. Phân nhánh hiển thị: Nhóm theo tháng (chỉ dành cho các tài khoản Admin)
+  if(admin){
+    const monthGroups = {};
+    scopedOrders.forEach(o=>{
+      const d = new Date(o.date);
+      const ym = isNaN(d.getTime()) ? 'other' : (d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
+      const label = isNaN(d.getTime()) ? 'Thời gian khác' : `Tháng ${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+      if(!monthGroups[ym]){
+        monthGroups[ym] = { key: ym, label, orders: [], totalAmount: 0 };
+      }
+      monthGroups[ym].orders.push(o);
+      monthGroups[ym].totalAmount += (o.total || 0);
+    });
+
+    const sortedGroups = Object.values(monthGroups).sort((a,b)=>{
+      if(a.key==='other') return 1;
+      if(b.key==='other') return -1;
+      return b.key.localeCompare(a.key);
+    });
+
+    wrap.innerHTML = sortedGroups.map(grp=>{
+      const isCollapsed = collapsedMonthKeys.has(grp.key);
+      return `<div class="order-month-group ${isCollapsed?'collapsed':''}" data-monthkey="${grp.key}">
+        <div class="order-month-header" data-togglemonth="${grp.key}">
+          <div class="order-month-title">
+            <span class="order-month-chevron">▼</span>
+            <span style="font-size:16px;">📅</span>
+            <span style="font-weight:800;font-size:14.5px;color:var(--xanh-dark);">${grp.label}</span>
+            <span class="order-month-badge">${grp.orders.length} đơn hàng</span>
+          </div>
+          <div class="order-month-total">
+            Tổng: <strong>${formatVND(grp.totalAmount)}</strong>
+          </div>
+        </div>
+        <div class="order-month-list">
+          ${grp.orders.map(renderOrderCard).join('')}
+        </div>
+      </div>`;
+    }).join('');
+
+    wrap.querySelectorAll('[data-togglemonth]').forEach(h=>{
+      h.addEventListener('click', ()=>{
+        const key = h.dataset.togglemonth;
+        const grpEl = wrap.querySelector(`.order-month-group[data-monthkey="${key}"]`);
+        if(grpEl){
+          grpEl.classList.toggle('collapsed');
+          if(grpEl.classList.contains('collapsed')) collapsedMonthKeys.add(key);
+          else collapsedMonthKeys.delete(key);
+        }
+      });
+    });
+
+  } else {
+    // Tài khoản nhân viên thường: Hiển thị phẳng
+    wrap.innerHTML = scopedOrders.map(renderOrderCard).join('');
+  }
+
+  attachOrderCardEventListeners(wrap, editMode);
 }
 
 function recomputeOrderTotal(order){
@@ -2569,20 +2742,23 @@ function exportSummaryExcel(){
   if(!isAdmin()){ toast('Chỉ Admin mới có quyền xuất báo cáo tổng hợp','🔒'); return; }
   if(!ORDERS.length){ toast('Chưa có đơn hàng nào để tổng hợp!','⚠️'); return; }
 
+  const selectedDepts = getSelectedExportDepts();
+  if(!selectedDepts.length){ toast('Vui lòng chọn ít nhất 1 phòng ban để xuất Excel!','⚠️'); return; }
+
   const monthFilter = (document.getElementById('exportMonthFilter')||{}).value; // 'YYYY-MM' hoặc rỗng
   let ordersInRange = ORDERS;
   if(monthFilter){
     ordersInRange = ORDERS.filter(o=>{
       const d = new Date(o.date);
+      if(isNaN(d.getTime())) return false;
       const ym = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
       return ym === monthFilter;
     });
   }
 
-  const selectedDepts = getSelectedExportDepts();
   ordersInRange = ordersInRange.filter(o=> selectedDepts.includes(o.dept));
 
-  if(!ordersInRange.length){ toast('Không có đơn hàng nào khớp với bộ lọc đã chọn!','⚠️'); return; }
+  if(!ordersInRange.length){ toast('Không có đơn hàng nào khớp với phòng ban và thời gian đã chọn!','⚠️'); return; }
 
   const allDeptsCount = getExportDeptUniverse().length;
   const deptLabel = selectedDepts.length===allDeptsCount ? 'Tất cả phòng ban' : (selectedDepts.length + ' phòng ban đã chọn');
@@ -2650,16 +2826,39 @@ function exportSummaryExcel(){
   toast('Đã xuất file Excel!','📥');
 }
 document.getElementById('exportExcelBtn').addEventListener('click', exportSummaryExcel);
+
+// Sự kiện lọc theo tháng
+const exportMonthFilterEl = document.getElementById('exportMonthFilter');
+if(exportMonthFilterEl){
+  exportMonthFilterEl.addEventListener('change', renderOrderHistory);
+}
 document.getElementById('clearExportMonthBtn').addEventListener('click', ()=>{
-  document.getElementById('exportMonthFilter').value = '';
+  if(exportMonthFilterEl) exportMonthFilterEl.value = '';
+  renderOrderHistory();
 });
+
+// Sự kiện tìm kiếm đơn hàng (Admin)
+const orderSearchAdminInputEl = document.getElementById('orderSearchAdminInput');
+if(orderSearchAdminInputEl){
+  orderSearchAdminInputEl.addEventListener('input', renderOrderHistory);
+}
+const clearOrderAdminSearchBtnEl = document.getElementById('clearOrderAdminSearchBtn');
+if(clearOrderAdminSearchBtnEl){
+  clearOrderAdminSearchBtnEl.addEventListener('click', ()=>{
+    if(orderSearchAdminInputEl){
+      orderSearchAdminInputEl.value = '';
+      orderSearchAdminInputEl.focus();
+    }
+    renderOrderHistory();
+  });
+}
 
 /* ---------- Chọn phòng ban muốn xuất Excel ---------- */
 let exportDeptSelection = null; // null = chưa khởi tạo; sau đó là Set các phòng ban đang được tích chọn
 
 function getExportDeptUniverse(){
   // Gộp danh sách phòng ban hiện có + phòng ban xuất hiện trong đơn hàng cũ (kể cả đã đổi tên/xoá khỏi danh sách chính)
-  const fromOrders = [...new Set(ORDERS.map(o=>o.dept))];
+  const fromOrders = [...new Set(ORDERS.map(o=>o.dept))].filter(Boolean);
   const merged = [...DEPARTMENTS.filter(d=>d!=='Khác')];
   fromOrders.forEach(d=>{ if(!merged.includes(d)) merged.push(d); });
   return merged;
@@ -2671,24 +2870,36 @@ function getSelectedExportDepts(){
 function renderExportDeptChecklist(){
   const universe = getExportDeptUniverse();
   if(!exportDeptSelection) exportDeptSelection = new Set(universe); // mặc định: chọn tất cả
+
+  const searchInput = document.getElementById('exportDeptSearchInput');
+  const query = searchInput ? stripVN(searchInput.value) : '';
+  const filteredUniverse = query ? universe.filter(d => stripVN(d).includes(query)) : universe;
+
   const wrap = document.getElementById('exportDeptCheckList');
-  wrap.innerHTML = universe.map((d,i)=>`
-    <div class="dept-check-item">
-      <input type="checkbox" value="${d}" id="exportDept-${i}" ${exportDeptSelection.has(d)?'checked':''}>
-      <label for="exportDept-${i}">${d}</label>
-    </div>`).join('');
-  wrap.querySelectorAll('input[type=checkbox]').forEach(el=>{
-    el.addEventListener('change', ()=>{
-      if(el.checked) exportDeptSelection.add(el.value);
-      else exportDeptSelection.delete(el.value);
-      updateExportDeptCountLbl();
+  if(!wrap) return;
+
+  if(!filteredUniverse.length){
+    wrap.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:12px 8px;text-align:center;">Không tìm thấy phòng ban nào.</div>`;
+  } else {
+    wrap.innerHTML = filteredUniverse.map((d,i)=>`
+      <div class="dept-check-item">
+        <input type="checkbox" value="${escapeHtml(d)}" id="exportDept-${i}" ${exportDeptSelection.has(d)?'checked':''}>
+        <label for="exportDept-${i}">${escapeHtml(d)}</label>
+      </div>`).join('');
+    wrap.querySelectorAll('input[type=checkbox]').forEach(el=>{
+      el.addEventListener('change', ()=>{
+        if(el.checked) exportDeptSelection.add(el.value);
+        else exportDeptSelection.delete(el.value);
+        updateExportDeptCountLbl();
+      });
     });
-  });
+  }
   updateExportDeptCountLbl();
 }
 function updateExportDeptCountLbl(){
   const universe = getExportDeptUniverse();
   const lbl = document.getElementById('exportDeptCountLbl');
+  if(!lbl) return;
   const n = exportDeptSelection ? exportDeptSelection.size : universe.length;
   lbl.textContent = (n===universe.length) ? '(tất cả)' : `(${n}/${universe.length})`;
 }
@@ -2705,12 +2916,32 @@ document.addEventListener('click', (e)=>{
     panel.style.display = 'none';
   }
 });
+const exportDeptSearchInputEl = document.getElementById('exportDeptSearchInput');
+if(exportDeptSearchInputEl){
+  exportDeptSearchInputEl.addEventListener('input', renderExportDeptChecklist);
+}
 document.getElementById('exportDeptSelectAllBtn').addEventListener('click', ()=>{
-  exportDeptSelection = new Set(getExportDeptUniverse());
+  const searchInput = document.getElementById('exportDeptSearchInput');
+  const query = searchInput ? stripVN(searchInput.value) : '';
+  const universe = getExportDeptUniverse();
+  if(!exportDeptSelection) exportDeptSelection = new Set(universe);
+  if(query){
+    universe.filter(d => stripVN(d).includes(query)).forEach(d => exportDeptSelection.add(d));
+  } else {
+    exportDeptSelection = new Set(universe);
+  }
   renderExportDeptChecklist();
 });
 document.getElementById('exportDeptClearAllBtn').addEventListener('click', ()=>{
-  exportDeptSelection = new Set();
+  const searchInput = document.getElementById('exportDeptSearchInput');
+  const query = searchInput ? stripVN(searchInput.value) : '';
+  const universe = getExportDeptUniverse();
+  if(!exportDeptSelection) exportDeptSelection = new Set();
+  if(query){
+    universe.filter(d => stripVN(d).includes(query)).forEach(d => exportDeptSelection.delete(d));
+  } else {
+    exportDeptSelection = new Set();
+  }
   renderExportDeptChecklist();
 });
 
@@ -2971,8 +3202,11 @@ function applyPermissionUI(){
   if(typeof renderOrderHistory === 'function') renderOrderHistory();
   if(typeof purgeRestrictedCart === 'function') purgeRestrictedCart();
   if(typeof renderProductGrid === 'function') renderProductGrid();
-  const exportBtn = document.getElementById('exportExcelBtn');
-  if(exportBtn) exportBtn.style.display = admin ? 'inline-flex' : 'none';
+  const adminSearchWrap = document.getElementById('orderAdminSearchWrap');
+  if(adminSearchWrap) adminSearchWrap.style.display = admin ? 'inline-flex' : 'none';
+  const adminExportWrap = document.getElementById('adminExportControlsWrap');
+  if(adminExportWrap) adminExportWrap.style.display = admin ? 'inline-flex' : 'none';
+  if(typeof updateExportDeptCountLbl === 'function') updateExportDeptCountLbl();
 }
 
 /* ============================================================
