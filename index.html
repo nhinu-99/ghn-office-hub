@@ -2190,7 +2190,7 @@ function canWriteCloudKey(key){
   if(!SESSION) return false;
   if(key === 'orders') return true;
   const protectedKeys = ['admins','staffDir','staffNames','departments','catEdits','catAdded','catDeleted','zoneEdits','zoneAdded','zoneDeleted','productEdits','productDeleted','productAdded','staff','assign','inspections','officeExpenses','officeSuppliers'];
-  if(protectedKeys.includes(key)) return isAdmin();
+  if(protectedKeys.includes(key)) return isAdmin() || canFullAccess() || isSuperAdmin();
   return true;
 }
 function cloudSet(key, value){
@@ -5860,5 +5860,5 @@ startPostgresSync();
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="app.js?v=20260827-6"></script>
-<script src="expenses.js?v=20260910-5"></script>
+<script src="expenses.js?v=20260910-6"></script>
 </body></html>

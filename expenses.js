@@ -164,24 +164,6 @@ function setupExpensesEventsOnce(){
   const supSearch = document.getElementById('expSupplierSearchInput');
   if(supSearch) supSearch.addEventListener('input', renderSuppliersList);
 
-  // Header / Toolbar Buttons
-  const btnAddExp = document.getElementById('expAddExpenseBtn');
-  if(btnAddExp) btnAddExp.addEventListener('click', window.openAddExpenseModal);
-
-  const btnAddSup = document.getElementById('expAddSupplierBtn');
-  if(btnAddSup) btnAddSup.addEventListener('click', window.openAddSupplierModal);
-
-  const btnExportExcel = document.getElementById('expExportExcelBtn');
-  if(btnExportExcel) btnExportExcel.addEventListener('click', window.exportExpensesToExcel);
-
-  // Save Expense Form
-  const btnSaveExp = document.getElementById('expBtnSaveExpense');
-  if(btnSaveExp) btnSaveExp.addEventListener('click', handleSaveExpense);
-
-  // Save Supplier Form
-  const btnSaveSup = document.getElementById('expBtnSaveSupplier');
-  if(btnSaveSup) btnSaveSup.addEventListener('click', handleSaveSupplier);
-
   // Detail Modal Advance / Reject
   const btnAdvance = document.getElementById('expDetailAdvanceBtn');
   if(btnAdvance) btnAdvance.addEventListener('click', handleAdvanceDetailStep);
