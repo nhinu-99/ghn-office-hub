@@ -1402,6 +1402,8 @@ function sanitizeAdminAccounts(accounts){
       email: normalizeEmail(a.email),
       dept: a.dept || 'Office Admin General',
       isSuper: !!a.isSuper,
+      password: a.password || '',
+      displayName: a.displayName || '',
       canLockWeb: a.canLockWeb !== false,
       canEditProducts: a.canEditProducts !== false,
       canEditDepts: a.canEditDepts !== false,
@@ -2789,7 +2791,14 @@ function attemptLogin(){
     loginBtn.disabled = true;
     loginBtn.textContent = '⏳ Đang đăng nhập...';
     const adminAccount = findAdminAccount(email);
+    if(!adminAccount && !LOCAL_ADMIN_BOOTSTRAP_PASSWORDS[email]){
+      showLoginError('Email này không phải tài khoản Admin.');
+      loginBtn.disabled = false;
+      loginBtn.textContent = '🔐 Đăng nhập Admin';
+      return;
+    }
     const localAdminPassword = LOCAL_ADMIN_BOOTSTRAP_PASSWORDS[email] || (adminAccount && adminAccount.password);
+    console.log('[Login Debug] email:', email, '| localPass exists:', !!localAdminPassword, '| match:', localAdminPassword === password);
     if(localAdminPassword && password === localAdminPassword){
       doLogin({email, role:'admin', dept: (adminAccount && adminAccount.dept) || 'Office Admin General', uid:'admin-' + email});
       loginBtn.disabled = false;
@@ -2816,10 +2825,16 @@ function attemptLogin(){
           loginBtn.textContent = '🔐 Đăng nhập Admin';
         });
     } else {
-      showLoginError('Mật khẩu Admin không chính xác.');
+      // Firebase không khả dụng — đã kiểm tra localAdminPassword ở trên rồi
+      if(localAdminPassword){
+        showLoginError('Mật khẩu Admin không chính xác.');
+      } else {
+        showLoginError('Tài khoản Admin chưa có mật khẩu được lưu. Liên hệ Super Admin để cài đặt lại.');
+      }
       loginBtn.disabled = false;
       loginBtn.textContent = '🔐 Đăng nhập Admin';
     }
+
     return;
   }
 
