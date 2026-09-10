@@ -3,451 +3,13 @@
    Hệ thống Quản lý Hành chính & Chi phí GHN Office Hub
    ============================================================ */
 
-// ─── Danh mục & Nhà cung cấp mặc định ───
-const DEFAULT_OFFICE_SUPPLIERS = [
-  {
-    id: 'sup-evn',
-    code: 'EVN-HCM',
-    name: 'Tổng Công ty Điện lực TP.HCM (EVN HCMC)',
-    taxCode: '0300951119',
-    phone: '1900 545454',
-    email: 'cskh@evnhcmc.vn',
-    bankName: 'Vietcombank - CN Tân Bình',
-    bankAcc: '0071000889988',
-    bankHolder: 'TONG CONG TY DIEN LUC TP HCM',
-    category: 'Điện lực & Năng lượng',
-    address: '356 Hai Bà Trưng, P. Tân Định, Quận 1, TP.HCM'
-  },
-  {
-    id: 'sup-sawaco',
-    code: 'SAWACO',
-    name: 'Tổng Công ty Cấp nước Sài Gòn (SAWACO)',
-    taxCode: '0304179357',
-    phone: '1900 1567',
-    email: 'sawaco@sawaco.com.vn',
-    bankName: 'VietinBank - CN TP.HCM',
-    bankAcc: '119000045233',
-    bankHolder: 'TONG CONG TY CAP NUOC SAI GON',
-    category: 'Nước sinh hoạt',
-    address: '01 Công Xã Paris, P. Bến Nghé, Quận 1, TP.HCM'
-  },
-  {
-    id: 'sup-viettel',
-    code: 'VIETTEL',
-    name: 'Tập đoàn Công nghiệp - Viễn thông Quân đội (Viettel Telecom)',
-    taxCode: '0100109106',
-    phone: '1800 8000',
-    email: 'cskh@viettel.com.vn',
-    bankName: 'MBBank - Hội sở chính',
-    bankAcc: '0011001234567',
-    bankHolder: 'TAP DOAN VIEN THONG QUAN DOI',
-    category: 'Internet & Viễn thông',
-    address: 'Tòa nhà Viettel Complex, 285 Cách Mạng Tháng 8, Quận 10, TP.HCM'
-  },
-  {
-    id: 'sup-building',
-    code: 'BQL-GHN',
-    name: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)',
-    taxCode: '0312345678',
-    phone: '028 3812 9999',
-    email: 'bql.building@thuanan.vn',
-    bankName: 'Techcombank - CN Tân Phú',
-    bankAcc: '19034567890012',
-    bankHolder: 'CTY CP DAU TU VA DICH VU BDS THUAN AN',
-    category: 'Thuê mặt bằng & Tòa nhà',
-    address: 'Tòa nhà GHN Office Hub, Kho Tân Phú, TP.HCM'
-  },
-  {
-    id: 'sup-daikin',
-    code: 'DAIVET-ME',
-    name: 'Công ty TNHH Cơ Điện Lạnh Đại Việt (Daikin Service)',
-    taxCode: '0311223344',
-    phone: '0903 112 233',
-    email: 'service@daiviet-me.vn',
-    bankName: 'Vietcombank - CN Tân Bình',
-    bankAcc: '0441000778899',
-    bankHolder: 'CTY TNHH CO DIEN LANH DAI VIET',
-    category: 'Bảo trì máy lạnh & CSVC',
-    address: '45/2 Cộng Hòa, P. 13, Q. Tân Bình, TP.HCM'
-  },
-  {
-    id: 'sup-green',
-    code: 'PHUONGNAM-GREEN',
-    name: 'Công ty TNHH Cảnh Quan & Cây Xanh Phương Nam',
-    taxCode: '0313456789',
-    phone: '0918 223 344',
-    email: 'green@phuongnam.vn',
-    bankName: 'Agribank - CN TP.HCM',
-    bankAcc: '6420205123456',
-    bankHolder: 'CTY CANH QUAN PHUONG NAM',
-    category: 'Cây xanh & Cảnh quan',
-    address: '128 Nguyễn Đình Chiểu, Quận 3, TP.HCM'
-  },
-  {
-    id: 'sup-lavie',
-    code: 'LAVIE-VN',
-    name: 'Công ty TNHH La Vie (Chi nhánh TP.HCM)',
-    taxCode: '1100223344',
-    phone: '1900 1906',
-    email: 'orders@laviewater.com',
-    bankName: 'Vietcombank - CN TP.HCM',
-    bankAcc: '0071005556667',
-    bankHolder: 'CONG TY TNHH LA VIE',
-    category: 'Nước uống đóng bình',
-    address: 'KCN Tân Tạo, Q. Bình Tân, TP.HCM'
-  }
-];
+// ─── Danh mục & Nhà cung cấp mặc định (Trống, không dùng dữ liệu mẫu) ───
+const DEFAULT_OFFICE_SUPPLIERS = [];
+const DEFAULT_OFFICE_EXPENSES = [];
 
-// Mock SVG invoice preview
-function generateSampleInvoiceSvg(title, code, amount, date){
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800" style="background:#f8fafc;font-family:sans-serif;">
-    <rect x="20" y="20" width="560" height="760" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
-    <rect x="20" y="20" width="560" height="90" rx="12" fill="#f26522"/>
-    <text x="50" y="60" fill="#ffffff" font-size="22" font-weight="bold">GHN OFFICE HUB - HÓA ĐƠN ĐIỆN TỬ</text>
-    <text x="50" y="88" fill="#ffedd5" font-size="14">Mã chứng từ: ${code} · Ngày: ${date}</text>
-    
-    <text x="50" y="150" fill="#64748b" font-size="12">KHOẢN MỤC CHI PHÍ</text>
-    <text x="50" y="175" fill="#0f172a" font-size="18" font-weight="bold">${title}</text>
-    
-    <line x1="50" y1="200" x2="550" y2="200" stroke="#e2e8f0" stroke-width="1.5"/>
-    
-    <text x="50" y="235" fill="#64748b" font-size="12">TỔNG SỐ TIỀN THANH TOÁN (ĐÃ GỒM VAT)</text>
-    <text x="50" y="275" fill="#f26522" font-size="32" font-weight="bold">${(amount||0).toLocaleString('vi-VN')} VNĐ</text>
-    
-    <rect x="50" y="310" width="500" height="140" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
-    <text x="70" y="340" fill="#334155" font-size="14" font-weight="bold">ĐƠN VỊ THỤ HƯỞNG &amp; THÔNG TIN CHUYỂN KHOẢN</text>
-    <text x="70" y="370" fill="#64748b" font-size="13">Đơn vị cung cấp dịch vụ được chỉ định</text>
-    <text x="70" y="395" fill="#64748b" font-size="13">Nội dung: ${code} GHN THANH TOAN</text>
-    <text x="70" y="420" fill="#10b981" font-size="13" font-weight="bold">✓ Hóa đơn điện tử hợp lệ theo quy định Tổng cục Thuế</text>
-    
-    <circle cx="480" cy="580" r="60" fill="#fef2f2" stroke="#ef4444" stroke-width="2" stroke-dasharray="4"/>
-    <text x="445" y="580" fill="#ef4444" font-size="14" font-weight="bold">ĐÃ KIỂM TRA</text>
-    <text x="450" y="600" fill="#ef4444" font-size="11">HÀNH CHÍNH GHN</text>
-    
-    <text x="50" y="740" fill="#94a3b8" font-size="12">Chứng từ số lưu trữ nội bộ GHN Office Hub · Tự động tạo bởi hệ thống</text>
-  </svg>`;
-  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-}
-
-// ─── Danh sách Khoản chi mẫu phong phú (2025 & 2026) ───
-const DEFAULT_OFFICE_EXPENSES = [
-  // 2026 - T9
-  {
-    id: 'exp-2609-001',
-    code: 'EXP-2609-001',
-    title: 'Hóa đơn tiền điện khối văn phòng & Server T09/2026',
-    category: 'Điện lực',
-    supplierId: 'sup-evn',
-    supplierName: 'Tổng Công ty Điện lực TP.HCM (EVN HCMC)',
-    amount: 38450000,
-    month: 9,
-    year: 2026,
-    date: '2026-09-05',
-    invoiceNo: '0019283',
-    step: 2,
-    receiptUrl: generateSampleInvoiceSvg('Hóa đơn tiền điện T09/2026', 'EXP-2609-001', 38450000, '05/09/2026'),
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Đã gồm lượng điện tiêu thụ máy lạnh trung tâm tầng 2 & tầng 3',
-    history: [
-      { step: 1, at: '2026-09-05 08:30', by: 'nhinu@ghn.vn', note: 'Tiếp nhận hóa đơn điện tử EVN' },
-      { step: 2, at: '2026-09-06 10:15', by: 'nhinu@ghn.vn', note: 'Hành chính đối soát chỉ số công tơ' }
-    ]
-  },
-  {
-    id: 'exp-2609-002',
-    code: 'EXP-2609-002',
-    title: 'Hóa đơn tiền nước sinh hoạt văn phòng T09/2026',
-    category: 'Nước sinh hoạt',
-    supplierId: 'sup-sawaco',
-    supplierName: 'Tổng Công ty Cấp nước Sài Gòn (SAWACO)',
-    amount: 5120000,
-    month: 9,
-    year: 2026,
-    date: '2026-09-04',
-    invoiceNo: '0081273',
-    step: 3,
-    receiptUrl: generateSampleInvoiceSvg('Hóa đơn tiền nước T09/2026', 'EXP-2609-002', 5120000, '04/09/2026'),
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Chỉ số nước tháng 9 ổn định, không có rò rỉ',
-    history: [
-      { step: 1, at: '2026-09-04 09:00', by: 'nhinu@ghn.vn', note: 'Tiếp nhận hóa đơn SAWACO' },
-      { step: 2, at: '2026-09-05 14:00', by: 'nhinu@ghn.vn', note: 'Hành chính xác nhận số khối' },
-      { step: 3, at: '2026-09-06 11:30', by: 'admin@ghn.vn', note: 'Kế toán kiểm tra hóa đơn hợp lệ' }
-    ]
-  },
-  {
-    id: 'exp-2609-003',
-    code: 'EXP-2609-003',
-    title: 'Cước thuê đường truyền cáp quang Leased Line T09/2026',
-    category: 'Internet & Viễn thông',
-    supplierId: 'sup-viettel',
-    supplierName: 'Tập đoàn Công nghiệp - Viễn thông Quân đội (Viettel Telecom)',
-    amount: 14500000,
-    month: 9,
-    year: 2026,
-    date: '2026-09-02',
-    invoiceNo: '0047219',
-    step: 5,
-    receiptUrl: generateSampleInvoiceSvg('Cước Internet Leased Line T09/2026', 'EXP-2609-003', 14500000, '02/09/2026'),
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Gói Leased Line 150Mbps quốc tế + 500Mbps trong nước',
-    history: [
-      { step: 1, at: '2026-09-02 08:30', by: 'nhinu@ghn.vn', note: 'Tiếp nhận hóa đơn Viettel' },
-      { step: 2, at: '2026-09-03 09:00', by: 'nhinu@ghn.vn', note: 'Hành chính xác nhận SLA mạng 99.9%' },
-      { step: 3, at: '2026-09-03 14:20', by: 'admin@ghn.vn', note: 'Kế toán lập đề nghị chi' },
-      { step: 4, at: '2026-09-04 10:00', by: 'nhinu@ghn.vn', note: 'BGĐ duyệt chi' },
-      { step: 5, at: '2026-09-04 15:30', by: 'nhinu@ghn.vn', note: 'Đã hoàn tất thanh toán ủy nhiệm chi' }
-    ]
-  },
-  {
-    id: 'exp-2609-004',
-    code: 'EXP-2609-004',
-    title: 'Tiền thuê mặt bằng văn phòng GHN Hub Tân Phú T09/2026',
-    category: 'Thuê mặt bằng & Tòa nhà',
-    supplierId: 'sup-building',
-    supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)',
-    amount: 125000000,
-    month: 9,
-    year: 2026,
-    date: '2026-09-01',
-    invoiceNo: '0038491',
-    step: 4,
-    receiptUrl: generateSampleInvoiceSvg('Tiền thuê mặt bằng văn phòng T09/2026', 'EXP-2609-004', 125000000, '01/09/2026'),
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Phí thuê diện tích 1.200m2 + phí quản lý tòa nhà',
-    history: [
-      { step: 1, at: '2026-09-01 09:00', by: 'nhinu@ghn.vn', note: 'Tiếp nhận hóa đơn từ BQL Tòa nhà' },
-      { step: 2, at: '2026-09-02 11:00', by: 'nhinu@ghn.vn', note: 'Hành chính kiểm tra hợp đồng thuê' },
-      { step: 3, at: '2026-09-03 16:00', by: 'admin@ghn.vn', note: 'Kế toán hoàn tất hồ sơ trình ký' },
-      { step: 4, at: '2026-09-05 09:30', by: 'nhinu@ghn.vn', note: 'Trình BGĐ duyệt chi chuyển khoản' }
-    ]
-  },
-  {
-    id: 'exp-2609-005',
-    code: 'EXP-2609-005',
-    title: 'Bảo trì bảo dưỡng định kỳ hệ thống máy lạnh VRV T09/2026',
-    category: 'Bảo trì máy lạnh & CSVC',
-    supplierId: 'sup-daikin',
-    supplierName: 'Công ty TNHH Cơ Điện Lạnh Đại Việt (Daikin Service)',
-    amount: 8500000,
-    month: 9,
-    year: 2026,
-    date: '2026-09-07',
-    invoiceNo: '0023419',
-    step: 1,
-    receiptUrl: generateSampleInvoiceSvg('Bảo trì máy lạnh VRV T09/2026', 'EXP-2609-005', 8500000, '07/09/2026'),
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Vệ sinh lưới lọc 14 dàn lạnh, nạp bổ sung gas R410A',
-    history: [
-      { step: 1, at: '2026-09-07 14:00', by: 'nhinu@ghn.vn', note: 'Ký biên bản nghiệm thu & tiếp nhận đề xuất' }
-    ]
-  },
-  {
-    id: 'exp-2609-006',
-    code: 'EXP-2609-006',
-    title: 'Chi phí thuê và chăm sóc cây xanh văn phòng T09/2026',
-    category: 'Cây xanh & Cảnh quan',
-    supplierId: 'sup-green',
-    supplierName: 'Công ty TNHH Cảnh Quan & Cây Xanh Phương Nam',
-    amount: 4800000,
-    month: 9,
-    year: 2026,
-    date: '2026-09-03',
-    invoiceNo: '0011827',
-    step: 5,
-    receiptUrl: generateSampleInvoiceSvg('Thuê & chăm sóc cây xanh T09/2026', 'EXP-2609-006', 4800000, '03/09/2026'),
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Thay mới 12 chậu kim tiền & thiết mộc lan sảnh lễ tân',
-    history: [
-      { step: 1, at: '2026-09-03 10:00', by: 'nhinu@ghn.vn', note: 'Tiếp nhận đề xuất' },
-      { step: 5, at: '2026-09-05 16:00', by: 'nhinu@ghn.vn', note: 'Đã thanh toán hoàn tất' }
-    ]
-  },
-  {
-    id: 'exp-2609-007',
-    code: 'EXP-2609-007',
-    title: 'Cung cấp nước khoáng bình La Vie 19L tháng 09/2026',
-    category: 'Nước uống đóng bình',
-    supplierId: 'sup-lavie',
-    supplierName: 'Công ty TNHH La Vie (Chi nhánh TP.HCM)',
-    amount: 6250000,
-    month: 9,
-    year: 2026,
-    date: '2026-09-06',
-    invoiceNo: '0077182',
-    step: 5,
-    receiptUrl: generateSampleInvoiceSvg('Cung cấp nước khoáng bình La Vie T09/2026', 'EXP-2609-007', 6250000, '06/09/2026'),
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Giao 125 bình 19L cho các tầng văn phòng',
-    history: [
-      { step: 1, at: '2026-09-06 09:30', by: 'nhinu@ghn.vn', note: 'Tiếp nhận hóa đơn' },
-      { step: 5, at: '2026-09-08 14:00', by: 'nhinu@ghn.vn', note: 'Đã thanh toán hoàn tất' }
-    ]
-  },
-
-  // 2026 - T8
-  {
-    id: 'exp-2608-001',
-    code: 'EXP-2608-001',
-    title: 'Hóa đơn tiền điện tòa nhà T08/2026',
-    category: 'Điện lực',
-    supplierId: 'sup-evn',
-    supplierName: 'Tổng Công ty Điện lực TP.HCM (EVN HCMC)',
-    amount: 41200000,
-    month: 8,
-    year: 2026,
-    date: '2026-08-05',
-    invoiceNo: '0018742',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Đã hoàn tất thanh toán'
-  },
-  {
-    id: 'exp-2608-002',
-    code: 'EXP-2608-002',
-    title: 'Hóa đơn tiền nước sinh hoạt T08/2026',
-    category: 'Nước sinh hoạt',
-    supplierId: 'sup-sawaco',
-    supplierName: 'Tổng Công ty Cấp nước Sài Gòn (SAWACO)',
-    amount: 4950000,
-    month: 8,
-    year: 2026,
-    date: '2026-08-04',
-    invoiceNo: '0080129',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Đã hoàn tất thanh toán'
-  },
-  {
-    id: 'exp-2608-003',
-    code: 'EXP-2608-003',
-    title: 'Cước Internet Leased Line Viettel T08/2026',
-    category: 'Internet & Viễn thông',
-    supplierId: 'sup-viettel',
-    supplierName: 'Tập đoàn Công nghiệp - Viễn thông Quân đội (Viettel Telecom)',
-    amount: 14500000,
-    month: 8,
-    year: 2026,
-    date: '2026-08-03',
-    invoiceNo: '0046182',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Đã thanh toán'
-  },
-  {
-    id: 'exp-2608-004',
-    code: 'EXP-2608-004',
-    title: 'Tiền thuê mặt bằng văn phòng T08/2026',
-    category: 'Thuê mặt bằng & Tòa nhà',
-    supplierId: 'sup-building',
-    supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)',
-    amount: 125000000,
-    month: 8,
-    year: 2026,
-    date: '2026-08-01',
-    invoiceNo: '0037812',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Đã hoàn tất'
-  },
-  {
-    id: 'exp-2608-005',
-    code: 'EXP-2608-005',
-    title: 'Chi phí chăm sóc cây xanh & Nước uống La Vie T08/2026',
-    category: 'Cây xanh & Cảnh quan',
-    supplierId: 'sup-green',
-    supplierName: 'Công ty TNHH Cảnh Quan & Cây Xanh Phương Nam',
-    amount: 10650000,
-    month: 8,
-    year: 2026,
-    date: '2026-08-05',
-    invoiceNo: '0010992',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Đã thanh toán'
-  },
-
-  // 2026 - T7
-  {
-    id: 'exp-2607-001',
-    code: 'EXP-2607-001',
-    title: 'Tổng chi phí điện, nước & mạng cáp quang T07/2026',
-    category: 'Điện lực',
-    supplierId: 'sup-evn',
-    supplierName: 'Tổng Công ty Điện lực TP.HCM (EVN HCMC)',
-    amount: 58900000,
-    month: 7,
-    year: 2026,
-    date: '2026-07-05',
-    invoiceNo: '0017652',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Đã thanh toán'
-  },
-  {
-    id: 'exp-2607-002',
-    code: 'EXP-2607-002',
-    title: 'Tiền thuê mặt bằng văn phòng T07/2026',
-    category: 'Thuê mặt bằng & Tòa nhà',
-    supplierId: 'sup-building',
-    supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)',
-    amount: 125000000,
-    month: 7,
-    year: 2026,
-    date: '2026-07-01',
-    invoiceNo: '0036981',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Đã thanh toán'
-  },
-
-  // 2026 - T1..T6
-  { id: 'exp-2606-001', code: 'EXP-2606-001', title: 'Chi phí vận hành văn phòng T06/2026', category: 'Thuê mặt bằng & Tòa nhà', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)', amount: 198500000, month: 6, year: 2026, date: '2026-06-05', step: 5 },
-  { id: 'exp-2605-001', code: 'EXP-2605-001', title: 'Chi phí vận hành văn phòng T05/2026 (Cao điểm)', category: 'Điện lực', supplierId: 'sup-evn', supplierName: 'Tổng Công ty Điện lực TP.HCM (EVN HCMC)', amount: 205300000, month: 5, year: 2026, date: '2026-05-05', step: 5 },
-  { id: 'exp-2604-001', code: 'EXP-2604-001', title: 'Chi phí vận hành văn phòng T04/2026', category: 'Thuê mặt bằng & Tòa nhà', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)', amount: 192000000, month: 4, year: 2026, date: '2026-04-05', step: 5 },
-  { id: 'exp-2603-001', code: 'EXP-2603-001', title: 'Chi phí vận hành văn phòng T03/2026', category: 'Thuê mặt bằng & Tòa nhà', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)', amount: 188400000, month: 3, year: 2026, date: '2026-03-05', step: 5 },
-  { id: 'exp-2602-001', code: 'EXP-2602-001', title: 'Chi phí vận hành văn phòng T02/2026 (Tết)', category: 'Thuê mặt bằng & Tòa nhà', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)', amount: 165200000, month: 2, year: 2026, date: '2026-02-05', step: 5 },
-  { id: 'exp-2601-001', code: 'EXP-2601-001', title: 'Chi phí vận hành văn phòng T01/2026', category: 'Thuê mặt bằng & Tòa nhà', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)', amount: 185000000, month: 1, year: 2026, date: '2026-01-05', step: 5 },
-
-  // Dữ liệu đối sánh 2025
-  { id: 'exp-2501', code: 'EXP-2501', title: 'Tổng chi phí T01/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 172000000, month: 1, year: 2025, step: 5, date: '2025-01-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
-  { id: 'exp-2502', code: 'EXP-2502', title: 'Tổng chi phí T02/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 158000000, month: 2, year: 2025, step: 5, date: '2025-02-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
-  { id: 'exp-2503', code: 'EXP-2503', title: 'Tổng chi phí T03/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 176000000, month: 3, year: 2025, step: 5, date: '2025-03-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
-  { id: 'exp-2504', code: 'EXP-2504', title: 'Tổng chi phí T04/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 182000000, month: 4, year: 2025, step: 5, date: '2025-04-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
-  { id: 'exp-2505', code: 'EXP-2505', title: 'Tổng chi phí T05/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 195000000, month: 5, year: 2025, step: 5, date: '2025-05-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
-  { id: 'exp-2506', code: 'EXP-2506', title: 'Tổng chi phí T06/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 189000000, month: 6, year: 2025, step: 5, date: '2025-06-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
-  { id: 'exp-2507', code: 'EXP-2507', title: 'Tổng chi phí T07/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 184000000, month: 7, year: 2025, step: 5, date: '2025-07-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
-  { id: 'exp-2508', code: 'EXP-2508', title: 'Tổng chi phí T08/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 191000000, month: 8, year: 2025, step: 5, date: '2025-08-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
-  { id: 'exp-2509', code: 'EXP-2509', title: 'Tổng chi phí T09/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 186000000, month: 9, year: 2025, step: 5, date: '2025-09-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
-  { id: 'exp-2510', code: 'EXP-2510', title: 'Tổng chi phí T10/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 188000000, month: 10, year: 2025, step: 5, date: '2025-10-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
-  { id: 'exp-2511', code: 'EXP-2511', title: 'Tổng chi phí T11/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 192000000, month: 11, year: 2025, step: 5, date: '2025-11-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
-  { id: 'exp-2512', code: 'EXP-2512', title: 'Tổng chi phí T12/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 210000000, month: 12, year: 2025, step: 5, date: '2025-12-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' }
-];
-
-// ─── Biến trạng thái toàn cục phân hệ ───
-let OFFICE_SUPPLIERS = null;
-let OFFICE_EXPENSES = null;
+// Biến trạng thái toàn cục phân hệ
+let OFFICE_SUPPLIERS = [];
+let OFFICE_EXPENSES = [];
 
 let expTrendChartInstance = null;
 let expCategoryChartInstance = null;
@@ -456,29 +18,44 @@ let expSupplierChartInstance = null;
 let expCurrentDetailId = null;
 let expensesEventsBound = false;
 
-// ─── Khởi tạo từ Cloud / LocalStorage ───
+// ─── Khởi tạo từ Cloud / LocalStorage & Dọn sạch dữ liệu mẫu cũ ───
 window.initOfficeExpensesFromCloud = function(raw, persistDefaults){
   raw = raw || {};
-  OFFICE_SUPPLIERS = (Array.isArray(raw.officeSuppliers) && raw.officeSuppliers.length) ? raw.officeSuppliers : null;
-  if(!OFFICE_SUPPLIERS){
-    OFFICE_SUPPLIERS = JSON.parse(JSON.stringify(DEFAULT_OFFICE_SUPPLIERS));
-    if(persistDefaults && typeof cloudSet === 'function') cloudSet('officeSuppliers', OFFICE_SUPPLIERS);
+
+  // Lọc và xóa bỏ toàn bộ dữ liệu mẫu cũ nếu còn lưu trong DB hoặc local
+  if(Array.isArray(raw.officeExpenses)){
+    raw.officeExpenses = raw.officeExpenses.filter(e => {
+      const id = String(e.id || '');
+      const code = String(e.code || '');
+      return !id.startsWith('exp-26') && !id.startsWith('exp-25') && !code.startsWith('EXP-26') && !code.startsWith('EXP-25');
+    });
+  } else {
+    raw.officeExpenses = [];
   }
 
-  OFFICE_EXPENSES = (Array.isArray(raw.officeExpenses) && raw.officeExpenses.length) ? raw.officeExpenses : null;
-  if(!OFFICE_EXPENSES){
-    OFFICE_EXPENSES = JSON.parse(JSON.stringify(DEFAULT_OFFICE_EXPENSES));
-    if(persistDefaults && typeof cloudSet === 'function') cloudSet('officeExpenses', OFFICE_EXPENSES);
+  if(Array.isArray(raw.officeSuppliers)){
+    raw.officeSuppliers = raw.officeSuppliers.filter(s => {
+      const id = String(s.id || '');
+      const code = String(s.code || '');
+      return !id.startsWith('sup-') && !['EVN-HCM', 'SAWACO', 'VIETTEL', 'BQL-GHN', 'DAIVET-ME', 'PHUONGNAM-GREEN', 'LAVIE-VN'].includes(code);
+    });
+  } else {
+    raw.officeSuppliers = [];
+  }
+
+  OFFICE_EXPENSES = raw.officeExpenses;
+  OFFICE_SUPPLIERS = raw.officeSuppliers;
+
+  // Cập nhật lại cloud để database không còn lưu dữ liệu mẫu
+  if(typeof cloudSet === 'function'){
+    cloudSet('officeExpenses', OFFICE_EXPENSES);
+    cloudSet('officeSuppliers', OFFICE_SUPPLIERS);
   }
 };
 
 function ensureOfficeExpensesData(){
-  if(!OFFICE_SUPPLIERS || !OFFICE_SUPPLIERS.length){
-    OFFICE_SUPPLIERS = JSON.parse(JSON.stringify(DEFAULT_OFFICE_SUPPLIERS));
-  }
-  if(!OFFICE_EXPENSES || !OFFICE_EXPENSES.length){
-    OFFICE_EXPENSES = JSON.parse(JSON.stringify(DEFAULT_OFFICE_EXPENSES));
-  }
+  if(!Array.isArray(OFFICE_EXPENSES)) OFFICE_EXPENSES = [];
+  if(!Array.isArray(OFFICE_SUPPLIERS)) OFFICE_SUPPLIERS = [];
 }
 
 function saveOfficeExpenses(){
@@ -496,11 +73,11 @@ function getStepInfo(step){
     case '1':
       return { num: 1, label: 'B1: Tiếp nhận đề xuất', cls: 'exp-status-1', desc: 'Đã tiếp nhận đề xuất & hóa đơn' };
     case '2':
-      return { num: 2, label: 'B2: Hành chính đối soát', cls: 'exp-status-2', desc: 'HC đối soát chỉ số & hợp đồng' };
+      return { num: 2, label: 'B2: HC đối soát', cls: 'exp-status-2', desc: 'Hành chính đối soát chỉ số & hợp đồng' };
     case '3':
       return { num: 3, label: 'B3: Kế toán kiểm tra', cls: 'exp-status-3', desc: 'Kế toán rà soát thuế & lập đề nghị chi' };
     case '4':
-      return { num: 4, label: 'B4: BGĐ phê duyệt', cls: 'exp-status-4', desc: 'Đang trình Ban Giám Đốc ký duyệt' };
+      return { num: 4, label: 'B4: BGĐ duyệt chi', cls: 'exp-status-4', desc: 'Đang trình Ban Giám Đốc ký duyệt' };
     case '5':
       return { num: 5, label: 'B5: Đã thanh toán', cls: 'exp-status-5', desc: 'Đã hoàn tất thanh toán ủy nhiệm chi' };
     case 'rejected':
@@ -526,12 +103,11 @@ window.renderExpensesPage = function(){
   setupExpensesEventsOnce();
   populateExpenseDropdowns();
 
-  // Đảm bảo subpage đầu tiên hiển thị
   const activeSubBtn = document.querySelector('#expensesSubNav button.active');
-  const sub = activeSubBtn ? activeSubBtn.dataset.sub : 'analytics';
+  const sub = activeSubBtn ? activeSubBtn.dataset.sub : 'list';
 
-  if(sub === 'analytics') renderExpenseAnalytics();
-  else if(sub === 'list') renderExpenseList();
+  if(sub === 'list') renderExpenseList();
+  else if(sub === 'analytics') renderExpenseAnalytics();
   else if(sub === 'suppliers') renderSuppliersList();
 };
 
@@ -542,8 +118,8 @@ function setupExpensesEventsOnce(){
   // Setup Sub Navigation
   if(typeof setupSubNav === 'function'){
     setupSubNav('expensesSubNav', 'exp', (sub)=>{
-      if(sub === 'analytics') renderExpenseAnalytics();
-      else if(sub === 'list') renderExpenseList();
+      if(sub === 'list') renderExpenseList();
+      else if(sub === 'analytics') renderExpenseAnalytics();
       else if(sub === 'suppliers') renderSuppliersList();
     });
   }
@@ -555,7 +131,7 @@ function setupExpensesEventsOnce(){
   if(anMonth) anMonth.addEventListener('change', renderExpenseAnalytics);
 
   // List Filter events
-  const filterInputs = ['expFilterYear', 'expFilterMonth', 'expFilterCategory', 'expFilterSupplier', 'expFilterStep', 'expSearchInput'];
+  const filterInputs = ['expFilterYear', 'expFilterMonth', 'expFilterCategory', 'expFilterStep', 'expSearchInput'];
   filterInputs.forEach(id=>{
     const el = document.getElementById(id);
     if(el){
@@ -571,7 +147,6 @@ function setupExpensesEventsOnce(){
       const fYear = document.getElementById('expFilterYear'); if(fYear) fYear.value = 'all';
       const fMonth = document.getElementById('expFilterMonth'); if(fMonth) fMonth.value = 'all';
       const fCat = document.getElementById('expFilterCategory'); if(fCat) fCat.value = 'all';
-      const fSup = document.getElementById('expFilterSupplier'); if(fSup) fSup.value = 'all';
       const fStep = document.getElementById('expFilterStep'); if(fStep) fStep.value = 'all';
       renderExpenseList();
     });
@@ -581,7 +156,7 @@ function setupExpensesEventsOnce(){
   const supSearch = document.getElementById('expSupplierSearchInput');
   if(supSearch) supSearch.addEventListener('input', renderSuppliersList);
 
-  // Header Buttons
+  // Header / Toolbar Buttons
   const btnAddExp = document.getElementById('expAddExpenseBtn');
   if(btnAddExp) btnAddExp.addEventListener('click', window.openAddExpenseModal);
 
@@ -630,8 +205,8 @@ function setupExpensesEventsOnce(){
     receiptFile.addEventListener('change', function(e){
       const file = e.target.files[0];
       if(!file) return;
-      if(file.size > 2.5 * 1024 * 1024){
-        if(typeof toast === 'function') toast('Ảnh dung lượng quá lớn, vui lòng chọn file dưới 2.5MB', '⚠️');
+      if(file.size > 3 * 1024 * 1024){
+        if(typeof toast === 'function') toast('Ảnh dung lượng quá lớn, vui lòng chọn file dưới 3MB', '⚠️');
         receiptFile.value = '';
         return;
       }
@@ -676,45 +251,132 @@ function setupExpensesEventsOnce(){
 }
 
 function populateExpenseDropdowns(){
-  // 1. Supplier Selects
   const selSupplier = document.getElementById('expInpSupplierSelect');
-  const filterSupplier = document.getElementById('expFilterSupplier');
-
   if(selSupplier){
     const curVal = selSupplier.value;
     let html = '<option value="">-- Chọn Nhà cung cấp --</option>';
     OFFICE_SUPPLIERS.forEach(s => {
-      html += `<option value="${s.id}">${s.code} - ${s.name}</option>`;
+      html += `<option value="${s.id}">${s.code ? s.code + ' - ' : ''}${escapeHtml(s.name)}</option>`;
     });
     selSupplier.innerHTML = html;
     if(curVal) selSupplier.value = curVal;
   }
 
-  if(filterSupplier){
-    const curVal = filterSupplier.value;
-    let html = '<option value="all">Tất cả nhà cung cấp</option>';
-    OFFICE_SUPPLIERS.forEach(s => {
-      html += `<option value="${s.id}">${s.code} - ${s.name}</option>`;
-    });
-    filterSupplier.innerHTML = html;
-    if(curVal) filterSupplier.value = curVal;
-  }
-
-  // 2. Category Filter
   const filterCat = document.getElementById('expFilterCategory');
   if(filterCat){
     const curVal = filterCat.value;
-    const cats = Array.from(new Set(OFFICE_EXPENSES.map(e => e.category).filter(Boolean)));
+    const defaultCats = [
+      'Điện lực & Năng lượng',
+      'Nước sinh hoạt',
+      'Internet & Viễn thông',
+      'Thuê mặt bằng & Tòa nhà',
+      'Bảo trì máy lạnh & CSVC',
+      'Cây xanh & Cảnh quan',
+      'Nước uống đóng bình',
+      'Vệ sinh định kỳ',
+      'Văn phòng phẩm & In ấn',
+      'Khác'
+    ];
+    const existingCats = Array.from(new Set(OFFICE_EXPENSES.map(e => e.category).filter(Boolean)));
+    const allCats = Array.from(new Set([...defaultCats, ...existingCats]));
+
     let html = '<option value="all">Tất cả danh mục</option>';
-    cats.forEach(c => {
-      html += `<option value="${c}">${c}</option>`;
+    allCats.forEach(c => {
+      html += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
     });
     filterCat.innerHTML = html;
     if(curVal) filterCat.value = curVal;
   }
 }
 
-// ─── TAB 1: PHÂN TÍCH & BÁO CÁO (ANALYTICS) ───
+// ─── TAB 1: DANH SÁCH & TIẾN TRÌNH DUYỆT (LIST) ───
+function renderExpenseList(){
+  ensureOfficeExpensesData();
+  const yearEl = document.getElementById('expFilterYear');
+  const monthEl = document.getElementById('expFilterMonth');
+  const catEl = document.getElementById('expFilterCategory');
+  const stepEl = document.getElementById('expFilterStep');
+  const searchEl = document.getElementById('expSearchInput');
+
+  const yearVal = yearEl ? yearEl.value : 'all';
+  const monthVal = monthEl ? monthEl.value : 'all';
+  const catVal = catEl ? catEl.value : 'all';
+  const stepVal = stepEl ? stepEl.value : 'all';
+  const query = (searchEl ? searchEl.value : '').trim().toLowerCase();
+
+  const filtered = OFFICE_EXPENSES.filter(item => {
+    if(yearVal !== 'all' && String(item.year) !== yearVal) return false;
+    if(monthVal !== 'all' && String(item.month) !== monthVal) return false;
+    if(catVal !== 'all' && item.category !== catVal) return false;
+    if(stepVal !== 'all' && String(item.step) !== stepVal) return false;
+    if(query){
+      const haystack = [item.code, item.title, item.supplierName, item.invoiceNo, item.createdBy, item.note].filter(Boolean).join(' ').toLowerCase();
+      if(!haystack.includes(query)) return false;
+    }
+    return true;
+  });
+
+  filtered.sort((a,b) => new Date(b.date || '2026-01-01').getTime() - new Date(a.date || '2026-01-01').getTime());
+
+  const tbody = document.getElementById('expListTableBody');
+  const emptyNotice = document.getElementById('expEmptyNotice');
+  if(!tbody) return;
+
+  if(!filtered.length){
+    tbody.innerHTML = '';
+    if(emptyNotice) emptyNotice.style.display = 'block';
+    return;
+  }
+  if(emptyNotice) emptyNotice.style.display = 'none';
+
+  let html = '';
+  filtered.forEach(item => {
+    const stepInfo = getStepInfo(item.step);
+    const receiptBtn = item.receiptUrl ? `
+      <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11.5px;color:#0284c7;border-color:#bae6fd;" onclick="window.openReceiptLightbox('${item.receiptUrl}', '${escapeHtml(item.title)}')">
+        🧾 Xem HĐ
+      </button>
+    ` : `<span style="color:#94a3b8;font-size:12px;">--</span>`;
+
+    let dotsHtml = '<div class="exp-mini-stepper">';
+    for(let s = 1; s <= 5; s++){
+      const active = (stepInfo.num >= s);
+      dotsHtml += `<div class="exp-mini-dot ${active ? 'active' : ''}" title="Bước ${s}"></div>`;
+    }
+    dotsHtml += '</div>';
+
+    html += `<tr>
+      <td><span class="pill cam" style="font-size:12px;font-weight:700;">${item.code || 'EXP'}</span></td>
+      <td>
+        <b>T${item.month}/${item.year}</b>
+        <div style="font-size:11px;color:#64748b;">${item.date ? item.date.split('-').reverse().join('/') : '--'}</div>
+      </td>
+      <td>
+        <b style="color:#0f172a;cursor:pointer;" onclick="window.openExpenseDetailModal('${item.id}')">${escapeHtml(item.title)}</b>
+        ${item.invoiceNo ? `<div style="font-size:11px;color:#64748b;">Số HĐ: ${escapeHtml(item.invoiceNo)}</div>` : ''}
+      </td>
+      <td><span class="pill" style="background:#f1f5f9;color:#334155;font-size:12px;">${escapeHtml(item.category || 'Khác')}</span></td>
+      <td style="font-size:12.5px;color:#334155;max-width:180px;">${escapeHtml(item.supplierName || '--')}</td>
+      <td style="text-align:right;"><b style="color:var(--cam);font-size:14px;">${(Number(item.amount)||0).toLocaleString('vi-VN')} ₫</b></td>
+      <td style="text-align:center;">${receiptBtn}</td>
+      <td style="text-align:center;">
+        <div style="margin-bottom:4px;"><span class="exp-status-pill ${stepInfo.cls}">${stepInfo.label}</span></div>
+        ${dotsHtml}
+      </td>
+      <td style="text-align:center;">
+        <div style="display:inline-flex;gap:4px;">
+          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="window.openExpenseDetailModal('${item.id}')" title="Xem chi tiết & duyệt">👁️</button>
+          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="window.openEditExpenseModal('${item.id}')" title="Chỉnh sửa">✏️</button>
+          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:#ef4444;" onclick="window.handleDeleteExpenseRow('${item.id}')" title="Xóa khoản chi">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  });
+
+  tbody.innerHTML = html;
+}
+
+// ─── TAB 2: PHÂN TÍCH & BÁO CÁO (ANALYTICS) ───
 function renderExpenseAnalytics(){
   ensureOfficeExpensesData();
   const yearEl = document.getElementById('expAnalyticsYearSelect');
@@ -779,7 +441,7 @@ function renderExpenseAnalytics(){
           elMom.innerHTML = `<span class="exp-diff-badge neg">${pct}% ↘</span> so với T${prevM}`;
         }
       } else {
-        elMom.textContent = 'Kỳ phát sinh mới';
+        elMom.textContent = 'Chưa có dữ liệu kỳ trước';
       }
     } else {
       const priorTotal = expensesPriorYear.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
@@ -839,9 +501,9 @@ function renderTrendChart(yearCur, yearPrior, dataCur, dataPrior){
   const ctx = canvas.getContext('2d');
   if(expTrendChartInstance) expTrendChartInstance.destroy();
 
-  const grad = ctx.createLinearGradient(0, 0, 0, 260);
-  grad.addColorStop(0, 'rgba(242, 101, 34, 0.25)');
-  grad.addColorStop(1, 'rgba(242, 101, 34, 0.00)');
+  const grad = ctx.createLinearGradient(0, 0, 0, 240);
+  grad.addColorStop(0, 'rgba(242, 101, 34, 0.2)');
+  grad.addColorStop(1, 'rgba(242, 101, 34, 0.0)');
 
   expTrendChartInstance = new Chart(ctx, {
     type: 'line',
@@ -853,25 +515,25 @@ function renderTrendChart(yearCur, yearPrior, dataCur, dataPrior){
           data: dataCur,
           borderColor: '#f26522',
           backgroundColor: grad,
-          borderWidth: 3,
+          borderWidth: 2.5,
           fill: true,
           tension: 0.35,
           pointBackgroundColor: '#f26522',
           pointBorderColor: '#ffffff',
           pointBorderWidth: 2,
-          pointRadius: 5
+          pointRadius: 4
         },
         {
           label: `Năm trước ${yearPrior} (VNĐ)`,
           data: dataPrior,
           borderColor: '#0284c7',
           borderDash: [5, 5],
-          borderWidth: 2,
+          borderWidth: 1.8,
           fill: false,
           tension: 0.35,
           pointBackgroundColor: '#0284c7',
           pointBorderColor: '#ffffff',
-          pointRadius: 4
+          pointRadius: 3
         }
       ]
     },
@@ -918,6 +580,27 @@ function renderCategoryChart(catTotals){
 
   const labels = Object.keys(catTotals);
   const data = Object.values(catTotals);
+
+  if(!labels.length){
+    expCategoryChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Chưa có dữ liệu'],
+        datasets: [{ data: [1], backgroundColor: ['#e2e8f0'], borderWidth: 0 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 10, font: { family: 'Mulish', size: 11 } } },
+          tooltip: { enabled: false }
+        }
+      }
+    });
+    return;
+  }
+
   const colors = ['#f26522', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
   expCategoryChartInstance = new Chart(ctx, {
@@ -963,16 +646,16 @@ function renderSupplierChart(supTotals){
   if(expSupplierChartInstance) expSupplierChartInstance.destroy();
 
   const sorted = Object.entries(supTotals).sort((a,b)=>b[1]-a[1]).slice(0, 5);
-  const labels = sorted.map(s => s[0].length > 22 ? s[0].substring(0, 22) + '...' : s[0]);
+  const labels = sorted.map(s => s[0].length > 20 ? s[0].substring(0, 20) + '...' : s[0]);
   const data = sorted.map(s => s[1]);
 
   expSupplierChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: labels,
+      labels: labels.length ? labels : ['Chưa có dữ liệu'],
       datasets: [{
         label: 'Số tiền chi trả (VNĐ)',
-        data: data,
+        data: data.length ? data : [0],
         backgroundColor: '#0284c7',
         borderRadius: 6,
         maxBarThickness: 32
@@ -1019,13 +702,13 @@ function renderMonthlyVarianceTable(yearCur, yearPrior, curArr, priorArr){
     const priorVal = priorArr[i] || 0;
     const diff = curVal - priorVal;
     let pctBadge = '<span class="exp-diff-badge">--</span>';
-    let note = '';
+    let note = 'Chưa phát sinh dữ liệu';
 
     if(priorVal > 0){
       const pct = ((diff / priorVal) * 100).toFixed(1);
       if(diff > 0){
         pctBadge = `<span class="exp-diff-badge pos">+${pct}% ↗</span>`;
-        note = curVal > 40000000 ? 'Tăng do cao điểm phụ tải hoặc diện tích sử dụng' : 'Tăng chi phí dịch vụ';
+        note = 'Tăng chi phí so với cùng kỳ';
       } else if(diff < 0){
         pctBadge = `<span class="exp-diff-badge neg">${pct}% ↘</span>`;
         note = 'Tiết kiệm chi phí so với cùng kỳ';
@@ -1036,8 +719,6 @@ function renderMonthlyVarianceTable(yearCur, yearPrior, curArr, priorArr){
     } else if(curVal > 0){
       pctBadge = `<span class="exp-diff-badge pos">Mới ↗</span>`;
       note = 'Kỳ phát sinh mới';
-    } else {
-      note = 'Chưa phát sinh dữ liệu';
     }
 
     const diffFormatted = (diff >= 0 ? '+' : '') + diff.toLocaleString('vi-VN') + ' ₫';
@@ -1052,96 +733,6 @@ function renderMonthlyVarianceTable(yearCur, yearPrior, curArr, priorArr){
     </tr>`;
   }
   tbody.innerHTML = rowsHtml;
-}
-
-// ─── TAB 2: DANH SÁCH & TIẾN TRÌNH DUYỆT (LIST) ───
-function renderExpenseList(){
-  ensureOfficeExpensesData();
-  const yearEl = document.getElementById('expFilterYear');
-  const monthEl = document.getElementById('expFilterMonth');
-  const catEl = document.getElementById('expFilterCategory');
-  const supEl = document.getElementById('expFilterSupplier');
-  const stepEl = document.getElementById('expFilterStep');
-  const searchEl = document.getElementById('expSearchInput');
-
-  const yearVal = yearEl ? yearEl.value : 'all';
-  const monthVal = monthEl ? monthEl.value : 'all';
-  const catVal = catEl ? catEl.value : 'all';
-  const supVal = supEl ? supEl.value : 'all';
-  const stepVal = stepEl ? stepEl.value : 'all';
-  const query = (searchEl ? searchEl.value : '').trim().toLowerCase();
-
-  const filtered = OFFICE_EXPENSES.filter(item => {
-    if(yearVal !== 'all' && String(item.year) !== yearVal) return false;
-    if(monthVal !== 'all' && String(item.month) !== monthVal) return false;
-    if(catVal !== 'all' && item.category !== catVal) return false;
-    if(supVal !== 'all' && item.supplierId !== supVal) return false;
-    if(stepVal !== 'all' && String(item.step) !== stepVal) return false;
-    if(query){
-      const haystack = [item.code, item.title, item.supplierName, item.invoiceNo, item.createdBy, item.note].filter(Boolean).join(' ').toLowerCase();
-      if(!haystack.includes(query)) return false;
-    }
-    return true;
-  });
-
-  filtered.sort((a,b) => new Date(b.date || '2026-01-01').getTime() - new Date(a.date || '2026-01-01').getTime());
-
-  const tbody = document.getElementById('expListTableBody');
-  const emptyNotice = document.getElementById('expEmptyNotice');
-  if(!tbody) return;
-
-  if(!filtered.length){
-    tbody.innerHTML = '';
-    if(emptyNotice) emptyNotice.style.display = 'block';
-    return;
-  }
-  if(emptyNotice) emptyNotice.style.display = 'none';
-
-  let html = '';
-  filtered.forEach(item => {
-    const stepInfo = getStepInfo(item.step);
-    const receiptBtn = item.receiptUrl ? `
-      <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11.5px;color:#0284c7;border-color:#bae6fd;" onclick="window.openReceiptLightbox('${item.receiptUrl}', '${escapeHtml(item.title)}')">
-        🧾 Xem HĐ
-      </button>
-    ` : `<span style="color:#94a3b8;font-size:12px;">--</span>`;
-
-    let dotsHtml = '<div class="exp-mini-stepper">';
-    for(let s = 1; s <= 5; s++){
-      const active = (stepInfo.num >= s);
-      dotsHtml += `<div class="exp-mini-dot ${active ? 'active' : ''}" title="Bước ${s}"></div>`;
-    }
-    dotsHtml += '</div>';
-
-    html += `<tr>
-      <td><span class="pill cam" style="font-size:12px;font-weight:700;">${item.code || 'EXP'}</span></td>
-      <td>
-        <b>T${item.month}/${item.year}</b>
-        <div style="font-size:11px;color:#64748b;">${item.date ? item.date.split('-').reverse().join('/') : '--'}</div>
-      </td>
-      <td>
-        <b style="color:#0f172a;cursor:pointer;" onclick="window.openExpenseDetailModal('${item.id}')">${escapeHtml(item.title)}</b>
-        ${item.invoiceNo ? `<div style="font-size:11px;color:#64748b;">Số HĐ: ${item.invoiceNo}</div>` : ''}
-      </td>
-      <td><span class="pill" style="background:#f1f5f9;color:#334155;font-size:12px;">${item.category || 'Khác'}</span></td>
-      <td style="font-size:12.5px;color:#334155;max-width:180px;">${escapeHtml(item.supplierName || '--')}</td>
-      <td style="text-align:right;"><b style="color:var(--cam);font-size:14px;">${(Number(item.amount)||0).toLocaleString('vi-VN')} ₫</b></td>
-      <td style="text-align:center;">${receiptBtn}</td>
-      <td style="text-align:center;">
-        <div style="margin-bottom:4px;"><span class="exp-status-pill ${stepInfo.cls}">${stepInfo.label}</span></div>
-        ${dotsHtml}
-      </td>
-      <td style="text-align:center;">
-        <div style="display:inline-flex;gap:4px;">
-          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="window.openExpenseDetailModal('${item.id}')" title="Xem chi tiết & duyệt">👁️</button>
-          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="window.openEditExpenseModal('${item.id}')" title="Chỉnh sửa">✏️</button>
-          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:#ef4444;" onclick="window.handleDeleteExpenseRow('${item.id}')" title="Xóa khoản chi">🗑️</button>
-        </div>
-      </td>
-    </tr>`;
-  });
-
-  tbody.innerHTML = html;
 }
 
 // ─── TAB 3: QUẢN LÝ NHÀ CUNG CẤP (SUPPLIERS) ───
@@ -1163,9 +754,11 @@ function renderSuppliersList(){
   if(!grid) return;
 
   if(!filtered.length){
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:#94a3b8;background:#fff;border-radius:14px;border:1px dashed #cbd5e1;">
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px 20px;color:#94a3b8;background:#fff;border-radius:18px;box-shadow:var(--shadow);">
       <span style="font-size:40px;display:block;margin-bottom:8px;">🏢</span>
-      Không tìm thấy Nhà cung cấp nào phù hợp.
+      <div style="font-weight:700;font-size:15px;color:#1e293b;margin-bottom:4px;">Chưa có nhà cung cấp nào</div>
+      <p style="margin:0 0 16px;font-size:13px;color:#64748b;">Bắt đầu lưu thông tin nhà cung cấp dịch vụ để đối soát và thanh toán nhanh chóng.</p>
+      <button class="btn btn-cam btn-sm" onclick="window.openAddSupplierModal()">🏢 + Thêm Nhà cung cấp</button>
     </div>`;
     return;
   }
@@ -1182,47 +775,47 @@ function renderSuppliersList(){
         <div class="supplier-avatar">🏢</div>
         <div style="flex:1;">
           <h4 style="margin:0;font-size:14.5px;color:#0f172a;line-height:1.3;">${escapeHtml(s.name)}</h4>
-          <span class="pill cam" style="font-size:11px;padding:2px 8px;margin-top:4px;display:inline-block;">${s.code || 'NCC'}</span>
+          ${s.code ? `<span class="pill cam" style="font-size:11px;padding:2px 8px;margin-top:4px;display:inline-block;">${escapeHtml(s.code)}</span>` : ''}
         </div>
       </div>
 
       <div class="supplier-meta">
         <div class="supplier-meta-row">
-          <span class="lbl">Mã số thuế:</span>
-          <span class="val"><b>${s.taxCode || '--'}</b></span>
+          <span style="color:#64748b;">Mã số thuế:</span>
+          <span><b>${escapeHtml(s.taxCode || '--')}</b></span>
         </div>
         <div class="supplier-meta-row">
-          <span class="lbl">Hotline/SĐT:</span>
-          <span class="val">${s.phone || '--'}</span>
+          <span style="color:#64748b;">Hotline/SĐT:</span>
+          <span>${escapeHtml(s.phone || '--')}</span>
         </div>
         <div class="supplier-meta-row">
-          <span class="lbl">Email:</span>
-          <span class="val" style="color:#0284c7;">${s.email || '--'}</span>
+          <span style="color:#64748b;">Email:</span>
+          <span style="color:#0284c7;">${escapeHtml(s.email || '--')}</span>
         </div>
         <div class="supplier-meta-row">
-          <span class="lbl">Lĩnh vực:</span>
-          <span class="val">${s.category || '--'}</span>
+          <span style="color:#64748b;">Lĩnh vực:</span>
+          <span>${escapeHtml(s.category || '--')}</span>
         </div>
       </div>
 
       <div class="supplier-bank-box">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <span style="font-weight:700;font-size:11.5px;color:#0284c7;">💳 TÀI KHOẢN NGÂN HÀNG:</span>
-          <button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:11px;" onclick="window.copyToClipboard('${s.bankAcc || ''}')">📋 Copy STK</button>
+          ${s.bankAcc ? `<button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:11px;" onclick="window.copyToClipboard('${escapeHtml(s.bankAcc)}')">📋 Copy STK</button>` : ''}
         </div>
-        <div><b>${s.bankName || '--'}</b></div>
+        <div><b>${escapeHtml(s.bankName || '--')}</b></div>
         <div style="font-family:monospace;font-size:13.5px;color:#0f172a;font-weight:800;letter-spacing:0.5px;margin:2px 0;">
-          ${s.bankAcc || '--'}
+          ${escapeHtml(s.bankAcc || '--')}
         </div>
-        <div style="font-size:11.5px;color:#64748b;">Chủ TK: <b>${s.bankHolder || '--'}</b></div>
+        <div style="font-size:11.5px;color:#64748b;">Chủ TK: <b>${escapeHtml(s.bankHolder || '--')}</b></div>
       </div>
 
-      <div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;padding:10px 12px;border-radius:10px;margin-bottom:12px;font-size:12.5px;">
-        <span style="color:#64748b;">Tổng lũy kế:</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;padding:10px 12px;border-radius:10px;margin-bottom:4px;font-size:12.5px;">
+        <span style="color:#64748b;">Tổng chi trả:</span>
         <span style="font-weight:800;color:var(--cam);">${totalPaid.toLocaleString('vi-VN')} ₫ (${invoiceCount} HĐ)</span>
       </div>
 
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;margin-top:6px;">
         <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;" onclick="window.openEditSupplierModal('${s.id}')">✏️ Sửa</button>
         <button class="btn btn-ghost btn-sm" style="color:#ef4444;border-color:#fca5a5;padding:5px 10px;" onclick="window.deleteSupplier('${s.id}')">🗑️</button>
       </div>
@@ -1295,14 +888,14 @@ window.openExpenseDetailModal = function(id){
       supBox.innerHTML = `
         <div style="font-weight:700;color:#0f172a;margin-bottom:4px;">${escapeHtml(sup.name)}</div>
         <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:4px;">
-          <span>MST: <b>${sup.taxCode || '--'}</b></span>
-          <span>Hotline: ${sup.phone || '--'}</span>
+          <span>MST: <b>${escapeHtml(sup.taxCode || '--')}</b></span>
+          <span>Hotline: ${escapeHtml(sup.phone || '--')}</span>
         </div>
         <div style="border-top:1px dashed #cbd5e1;padding-top:6px;margin-top:6px;">
           <div style="font-size:11.5px;color:#0284c7;font-weight:700;">💳 NGÂN HÀNG THỤ HƯỞNG:</div>
-          <div style="font-weight:700;font-size:13px;color:#0f172a;">${sup.bankName || '--'}</div>
-          <div style="font-family:monospace;font-weight:800;font-size:14px;color:var(--cam);">${sup.bankAcc || '--'}</div>
-          <div style="font-size:11.5px;color:#64748b;">Chủ TK: <b>${sup.bankHolder || '--'}</b></div>
+          <div style="font-weight:700;font-size:13px;color:#0f172a;">${escapeHtml(sup.bankName || '--')}</div>
+          <div style="font-family:monospace;font-weight:800;font-size:14px;color:var(--cam);">${escapeHtml(sup.bankAcc || '--')}</div>
+          <div style="font-size:11.5px;color:#64748b;">Chủ TK: <b>${escapeHtml(sup.bankHolder || '--')}</b></div>
         </div>
       `;
     } else {
@@ -1396,7 +989,7 @@ window.openAddExpenseModal = function(){
   document.getElementById('expInpCode').value = autoCode;
 
   document.getElementById('expInpTitle').value = '';
-  document.getElementById('expInpCategory').value = 'Điện lực';
+  document.getElementById('expInpCategory').value = 'Điện lực & Năng lượng';
   document.getElementById('expInpAmount').value = '';
   document.getElementById('expInpMonth').value = String(now.getMonth() + 1);
   document.getElementById('expInpYear').value = String(now.getFullYear());
@@ -1428,7 +1021,7 @@ window.openEditExpenseModal = function(id){
   document.getElementById('expInpEditId').value = item.id;
   document.getElementById('expInpCode').value = item.code || '';
   document.getElementById('expInpTitle').value = item.title || '';
-  document.getElementById('expInpCategory').value = item.category || 'Điện lực';
+  document.getElementById('expInpCategory').value = item.category || 'Điện lực & Năng lượng';
   document.getElementById('expInpAmount').value = item.amount || '';
   document.getElementById('expInpMonth').value = String(item.month || 9);
   document.getElementById('expInpYear').value = String(item.year || 2026);
@@ -1503,7 +1096,7 @@ function handleSaveExpense(){
       date: date || new Date().toISOString().split('T')[0],
       invoiceNo,
       step,
-      receiptUrl: receiptUrl || generateSampleInvoiceSvg(title, code, amount, date || 'Hôm nay'),
+      receiptUrl: receiptUrl || '',
       createdBy: (window.SESSION && SESSION.email) || 'nhinu@ghn.vn',
       department: (window.SESSION && SESSION.dept) || 'Office Admin General',
       note,
@@ -1652,6 +1245,11 @@ window.openReceiptLightbox = function(url, title){
 // ─── XUẤT BÁO CÁO EXCEL CHUYÊN NGHIỆP ───
 window.exportExpensesToExcel = function(){
   ensureOfficeExpensesData();
+  if(!OFFICE_EXPENSES.length){
+    if(typeof toast==='function') toast('Chưa có dữ liệu khoản chi để xuất file Excel!', 'ℹ️');
+    return;
+  }
+
   if(typeof XLSX === 'undefined'){
     if(typeof toast==='function') toast('Thư viện Excel đang tải, vui lòng thử lại sau vài giây!', '⚠️');
     return;
@@ -1665,6 +1263,11 @@ window.exportExpensesToExcel = function(){
     if(monthVal !== 'all' && String(e.month) !== monthVal) return false;
     return true;
   });
+
+  if(!filtered.length){
+    if(typeof toast==='function') toast('Không có dữ liệu phù hợp với bộ lọc để xuất Excel!', 'ℹ️');
+    return;
+  }
 
   const rows = [
     ['BÁO CÁO KHOẢN CHI VĂN PHÒNG - GHN OFFICE HUB'],

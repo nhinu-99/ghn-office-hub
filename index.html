@@ -555,107 +555,61 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
   .nav-tabs button{padding:8px 12px;font-size:13px;}
   .report-summary{grid-template-columns:1fr;}
   .bar-row .lbl{width:110px;font-size:11.5px;}
+}
+
 /* ============================================================
    CHI PHÍ VĂN PHÒNG (OFFICE EXPENSES) STYLES
    ============================================================ */
-.exp-sub-tabs{display:flex;gap:10px;margin-bottom:22px;border-bottom:2px solid #e2e8f0;padding-bottom:12px;flex-wrap:wrap;}
-.exp-sub-tabs button{
-  background:#fff;border:1.5px solid #cbd5e1;padding:9px 18px;border-radius:999px;
-  font-weight:700;font-size:13.5px;color:#475569;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
-  transition:all .2s ease;
-}
-.exp-sub-tabs button:hover{border-color:var(--cam);color:var(--cam);background:#fff7ed;}
-.exp-sub-tabs button.active{
-  background:linear-gradient(135deg,var(--cam) 0%,var(--cam-dark) 100%);
-  color:#fff;border-color:var(--cam);box-shadow:0 4px 12px rgba(242,101,34,.3);
-}
-
-.exp-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:24px;}
-.exp-kpi-card{
-  background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px 20px;
-  box-shadow:0 2px 10px rgba(0,0,0,.03);display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;
-}
-.exp-kpi-card::before{
-  content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--cam);
-}
-.exp-kpi-card.kpi-blue::before{background:#0284c7;}
-.exp-kpi-card.kpi-green::before{background:#10b981;}
-.exp-kpi-card.kpi-purple::before{background:#8b5cf6;}
-.exp-kpi-title{font-size:12.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.3px;display:flex;justify-content:space-between;align-items:center;}
-.exp-kpi-val{font-size:24px;font-weight:800;color:#0f172a;}
-.exp-kpi-sub{font-size:12px;color:#64748b;display:flex;align-items:center;gap:6px;}
-
-.exp-filter-bar{
-  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 18px;
-  margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.02);
-}
-.exp-filter-bar select, .exp-filter-bar input{
-  padding:8px 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:13px;outline:none;background:#f8fafc;
-}
-.exp-filter-bar select:focus, .exp-filter-bar input:focus{border-color:var(--cam);background:#fff;}
-
 /* Mini inline stepper in table */
 .exp-mini-stepper{display:inline-flex;align-items:center;gap:3px;}
-.exp-mini-dot{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;background:#e2e8f0;color:#64748b;}
-.exp-mini-dot.done{background:#10b981;color:#fff;}
-.exp-mini-dot.active{background:#f59e0b;color:#fff;box-shadow:0 0 6px rgba(245,158,11,.6);animation:pulse-dot 1.8s infinite;}
-.exp-mini-bar{width:10px;height:2px;background:#e2e8f0;}
-.exp-mini-bar.done{background:#10b981;}
-@keyframes pulse-dot{0%,100%{transform:scale(1);}50%{transform:scale(1.2);}}
+.exp-mini-dot{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;background:#e2e8f0;color:#64748b;}
+.exp-mini-dot.active{background:var(--xanh);color:#fff;}
 
 /* Full Stepper in Detail Modal */
-.exp-stepper{display:flex;align-items:flex-start;justify-content:space-between;margin:24px 0 28px;position:relative;}
+.exp-stepper{display:flex;align-items:flex-start;justify-content:space-between;margin:20px 0 24px;position:relative;}
 .exp-stepper-item{flex:1;text-align:center;position:relative;z-index:2;}
 .exp-stepper-circle{
-  width:36px;height:36px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;
   font-weight:800;font-size:13px;background:#f1f5f9;border:2px solid #cbd5e1;color:#64748b;transition:all .3s ease;
 }
-.exp-stepper-item.done .exp-stepper-circle{background:#10b981;border-color:#10b981;color:#fff;box-shadow:0 2px 8px rgba(16,185,129,.35);}
-.exp-stepper-item.active .exp-stepper-circle{background:#f59e0b;border-color:#f59e0b;color:#fff;box-shadow:0 0 12px rgba(245,158,11,.5);animation:pulse-dot 2s infinite;}
-.exp-stepper-item.rejected .exp-stepper-circle{background:#ef4444;border-color:#ef4444;color:#fff;}
-.exp-stepper-title{font-size:12px;font-weight:700;color:#334155;line-height:1.3;}
-.exp-stepper-desc{font-size:10.5px;color:#94a3b8;margin-top:2px;}
-.exp-stepper-line{
-  position:absolute;top:18px;left:5%;width:90%;height:3px;background:#e2e8f0;z-index:1;
-}
-.exp-stepper-progress{
-  position:absolute;top:18px;left:5%;height:3px;background:#10b981;z-index:1;transition:width .4s ease;
-}
+.exp-stepper-item.completed .exp-stepper-circle{background:#10b981;border-color:#10b981;color:#fff;}
+.exp-stepper-item.active .exp-stepper-circle{background:var(--cam);border-color:var(--cam-dark);color:#fff;box-shadow:0 0 10px rgba(242,101,34,.5);}
+.exp-stepper-title{font-size:11.5px;font-weight:700;color:#334155;line-height:1.2;}
+.exp-stepper-desc{font-size:10px;color:#94a3b8;margin-top:2px;}
+.exp-stepper-line{position:absolute;top:17px;left:10%;width:80%;height:3px;background:#e2e8f0;z-index:1;}
+.exp-stepper-progress{position:absolute;top:17px;left:10%;height:3px;background:var(--cam);z-index:1;transition:width .3s ease;}
 
 /* Status Pill */
 .exp-status-pill{
-  display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap;
 }
 .exp-status-1{background:#e0f2fe;color:#0369a1;}
 .exp-status-2{background:#fef3c7;color:#b45309;}
 .exp-status-3{background:#fae8ff;color:#86198f;}
 .exp-status-4{background:#ffedd5;color:#c2410c;}
 .exp-status-5{background:#dcfce7;color:#15803d;}
-.exp-status-rejected{background:#fee2e2;color:#b91c1c;}
+.exp-status-rej{background:#fee2e2;color:#b91c1c;}
 
-/* Receipt Badge */
-.exp-receipt-btn{
-  display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:6px;
-  background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;font-size:11.5px;font-weight:600;cursor:pointer;
-  transition:all .2s;
-}
-.exp-receipt-btn:hover{background:#e2e8f0;border-color:var(--cam);color:var(--cam);}
+/* Diff Badges */
+.exp-diff-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;}
+.exp-diff-badge.pos{background:#fee2e2;color:#b91c1c;}
+.exp-diff-badge.neg{background:#dcfce7;color:#15803d;}
 
-/* Supplier Grid & Cards */
-.supplier-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;}
+/* Supplier Cards Grid */
+.supplier-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px;}
 .supplier-card{
-  background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:20px;
-  box-shadow:0 2px 8px rgba(0,0,0,.03);display:flex;flex-direction:column;gap:12px;transition:all .2s ease;
+  background:#fff;border-radius:18px;padding:18px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;gap:10px;transition:.2s;
 }
-.supplier-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.06);border-color:#cbd5e1;}
+.supplier-card:hover{transform:translateY(-2px);}
 .supplier-card-header{display:flex;gap:12px;align-items:center;}
 .supplier-avatar{
-  width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#fff7ed,#ffedd5);
-  border:1.5px solid #fdba74;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+  width:42px;height:42px;border-radius:12px;background:var(--cam-light);
+  color:var(--cam-dark);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
 }
-.supplier-bank-box{
-  background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:12px;color:#334155;
-}
+.supplier-meta{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:#475569;}
+.supplier-meta-row{display:flex;justify-content:space-between;}
+.supplier-bank-box{background:#f8fafc;border-radius:12px;padding:10px 12px;font-size:12px;color:#334155;}
 </style>
 <link rel="stylesheet" href="style.css" />
 </head><body>
@@ -1313,198 +1267,60 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
   <!-- ============ CHI PHÍ VĂN PHÒNG ============ -->
   <section class="page" id="page-expenses">
     <!-- Header bar -->
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px;">
-      <div>
-        <h2 class="section-title" style="margin:0 0 6px;">💰 Quản lý Chi phí văn phòng</h2>
-        <p class="section-sub" style="margin:0;">Theo dõi chi phí vận hành, lưu trữ chứng từ hóa đơn, thông tin nhà cung cấp, quy trình duyệt 5 bước &amp; phân tích xu hướng.</p>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" id="expAddSupplierBtn" style="border-radius:10px;">🏢 + Thêm Nhà cung cấp</button>
-        <button class="btn btn-cam btn-sm" id="expAddExpenseBtn" style="border-radius:10px;">➕ Thêm khoản chi mới</button>
-        <button class="btn btn-xanh btn-sm" id="expExportExcelBtn" style="border-radius:10px;">📥 Xuất Excel</button>
-      </div>
+    <h2 class="section-title">💰 Quản lý Chi phí văn phòng</h2>
+    <p class="section-sub">Theo dõi chi phí vận hành, lưu trữ chứng từ hóa đơn, thông tin nhà cung cấp và quy trình phê duyệt.</p>
+
+    <!-- Sub-tabs đồng bộ với toàn hệ thống -->
+    <div class="sub-tabs" id="expensesSubNav">
+      <button data-sub="list" class="active">📋 Danh sách chi phí &amp; Tiến trình</button>
+      <button data-sub="analytics">📊 Báo cáo &amp; Xu hướng</button>
+      <button data-sub="suppliers">🏢 Quản lý Nhà cung cấp</button>
     </div>
 
-    <!-- Sub-tabs -->
-    <div class="exp-sub-tabs" id="expensesSubNav">
-      <button class="active" data-sub="analytics">📊 Báo cáo &amp; Xu hướng chi phí</button>
-      <button data-sub="list">📋 Danh sách chi phí &amp; Tiến trình</button>
-      <button data-sub="suppliers">🏢 Danh bạ Nhà cung cấp</button>
-    </div>
-
-    <!-- 1. BÁO CÁO & XU HƯỚNG -->
-    <div class="subpage active" id="exp-analytics">
-      <!-- Filter Bar for Analytics -->
-      <div class="exp-filter-bar" style="justify-content:space-between;">
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-          <span style="font-weight:700;font-size:13px;color:#334155;">📅 Xem dữ liệu năm:</span>
-          <select id="expAnalyticsYearSelect" style="font-weight:700;color:var(--cam);background:#fff;">
+    <!-- 1. DANH SÁCH CHI PHÍ & TIẾN TRÌNH XỬ LÝ (TAB MẶC ĐỊNH) -->
+    <div class="subpage active" id="exp-list">
+      <!-- Toolbar gọn gàng, đồng bộ -->
+      <div style="background:#fff;border-radius:16px;padding:14px 18px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;flex:1;">
+          <div class="search-box" style="min-width:220px;flex:1;max-width:360px;">
+            <span class="ic">🔍</span>
+            <input type="text" id="expSearchInput" placeholder="Tìm kiếm mã, nội dung, HĐ, NCC...">
+          </div>
+          <select id="expFilterYear">
+            <option value="all">Tất cả năm</option>
             <option value="2026" selected>Năm 2026</option>
             <option value="2025">Năm 2025</option>
-            <option value="2024">Năm 2024</option>
           </select>
-          <span style="font-weight:700;font-size:13px;color:#334155;margin-left:8px;">Kỳ chi tiết:</span>
-          <select id="expAnalyticsMonthSelect" style="background:#fff;">
-            <option value="all">Toàn bộ 12 tháng</option>
-            <option value="1">Tháng 01</option>
-            <option value="2">Tháng 02</option>
-            <option value="3">Tháng 03</option>
-            <option value="4">Tháng 04</option>
-            <option value="5">Tháng 05</option>
-            <option value="6">Tháng 06</option>
-            <option value="7">Tháng 07</option>
-            <option value="8">Tháng 08</option>
-            <option value="9">Tháng 09</option>
-            <option value="10">Tháng 10</option>
-            <option value="11">Tháng 11</option>
-            <option value="12">Tháng 12</option>
+          <select id="expFilterMonth">
+            <option value="all">Tất cả tháng</option>
+            <option value="1">Tháng 01</option><option value="2">Tháng 02</option><option value="3">Tháng 03</option>
+            <option value="4">Tháng 04</option><option value="5">Tháng 05</option><option value="6">Tháng 06</option>
+            <option value="7">Tháng 07</option><option value="8">Tháng 08</option><option value="9">Tháng 09</option>
+            <option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
           </select>
+          <select id="expFilterCategory">
+            <option value="all">Tất cả danh mục</option>
+          </select>
+          <select id="expFilterStep">
+            <option value="all">Tất cả trạng thái</option>
+            <option value="1">B1: Tiếp nhận đề xuất</option>
+            <option value="2">B2: HC đối soát</option>
+            <option value="3">B3: Kế toán kiểm tra</option>
+            <option value="4">B4: BGĐ duyệt chi</option>
+            <option value="5">B5: Đã thanh toán</option>
+            <option value="rejected">Đã từ chối</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" id="expResetFilterBtn" style="padding:8px 12px;">✕ Xóa lọc</button>
         </div>
-        <div style="font-size:12px;color:#64748b;">
-          Đơn vị: <b>Việt Nam Đồng (VNĐ)</b>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button class="btn btn-cam btn-sm" id="expAddExpenseBtn" style="padding:9px 18px;border-radius:10px;font-weight:700;">➕ Thêm khoản chi</button>
+          <button class="btn btn-xanh btn-sm" id="expExportExcelBtn" style="padding:9px 16px;border-radius:10px;font-weight:700;">📥 Xuất Excel</button>
         </div>
-      </div>
-
-      <!-- KPI summary grid -->
-      <div class="exp-kpi-grid">
-        <div class="exp-kpi-card">
-          <div class="exp-kpi-title">
-            <span>Tổng chi phí năm</span>
-            <span>💳</span>
-          </div>
-          <div class="exp-kpi-val" id="expKpiTotalYear">0 ₫</div>
-          <div class="exp-kpi-sub" id="expKpiCountYear">0 khoản chi</div>
-        </div>
-        <div class="exp-kpi-card kpi-blue">
-          <div class="exp-kpi-title">
-            <span>Chi phí tháng gần nhất</span>
-            <span>📅</span>
-          </div>
-          <div class="exp-kpi-val" id="expKpiCurrentMonth">0 ₫</div>
-          <div class="exp-kpi-sub" id="expKpiMomChange">Đang cập nhật...</div>
-        </div>
-        <div class="exp-kpi-card kpi-green">
-          <div class="exp-kpi-title">
-            <span>Đã hoàn tất thanh toán</span>
-            <span>✅</span>
-          </div>
-          <div class="exp-kpi-val" id="expKpiPaidAmount">0 ₫</div>
-          <div class="exp-kpi-sub" id="expKpiPaidCount">0 khoản chi hoàn tất</div>
-        </div>
-        <div class="exp-kpi-card kpi-purple">
-          <div class="exp-kpi-title">
-            <span>Chờ duyệt &amp; Chi trả</span>
-            <span>⏳</span>
-          </div>
-          <div class="exp-kpi-val" id="expKpiPendingAmount">0 ₫</div>
-          <div class="exp-kpi-sub" id="expKpiPendingCount">0 khoản đang xử lý</div>
-        </div>
-      </div>
-
-      <!-- Charts Row 1: Line trend (60%) + Doughnut category (40%) -->
-      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-bottom:24px;">
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.03);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-            <h4 style="margin:0;font-size:15px;color:#1e293b;display:flex;align-items:center;gap:8px;">
-              <span>📈 Xu hướng chi phí qua từng tháng</span>
-            </h4>
-            <span style="font-size:11.5px;color:#64748b;background:#f1f5f9;padding:4px 8px;border-radius:6px;">Đối chiếu năm trước</span>
-          </div>
-          <div style="height:280px;position:relative;">
-            <canvas id="expTrendChartCanvas"></canvas>
-          </div>
-        </div>
-
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.03);">
-          <h4 style="margin:0 0 14px;font-size:15px;color:#1e293b;display:flex;align-items:center;gap:8px;">
-            <span>🍩 Cơ cấu chi phí theo danh mục</span>
-          </h4>
-          <div style="height:280px;position:relative;">
-            <canvas id="expCategoryChartCanvas"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- Charts Row 2: Top suppliers bar chart -->
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.03);margin-bottom:24px;">
-        <h4 style="margin:0 0 14px;font-size:15px;color:#1e293b;display:flex;align-items:center;gap:8px;">
-          <span>🏢 Top Nhà cung cấp có giá trị thanh toán lớn nhất</span>
-        </h4>
-        <div style="height:260px;position:relative;">
-          <canvas id="expSupplierChartCanvas"></canvas>
-        </div>
-      </div>
-
-      <!-- Monthly Breakdown Variance Table -->
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.03);">
-        <h4 style="margin:0 0 12px;font-size:15px;color:#1e293b;display:flex;align-items:center;gap:8px;">
-          <span>📋 Bảng phân tích chi phí &amp; tỷ lệ tăng/giảm theo từng tháng</span>
-        </h4>
-        <div style="overflow-x:auto;">
-          <table class="report-data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
-            <thead>
-              <tr>
-                <th>Tháng / Kỳ</th>
-                <th style="text-align:right;">Chi phí năm chọn</th>
-                <th style="text-align:right;">Chi phí năm trước</th>
-                <th style="text-align:right;">Chênh lệch (VNĐ)</th>
-                <th style="text-align:center;">Biến động (% MoM / YoY)</th>
-                <th>Nhận xét &amp; Ghi chú vận hành</th>
-              </tr>
-            </thead>
-            <tbody id="expMonthlyTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. DANH SÁCH CHI PHÍ & TIẾN TRÌNH XỬ LÝ -->
-    <div class="subpage" id="exp-list">
-      <!-- Filter bar for Expenses List -->
-      <div class="exp-filter-bar">
-        <input type="text" id="expSearchInput" placeholder="🔍 Tìm kiếm mã, nội dung, HĐ..." style="width:220px;flex:1;min-width:180px;">
-        <select id="expFilterYear">
-          <option value="all">Tất cả năm</option>
-          <option value="2026" selected>Năm 2026</option>
-          <option value="2025">Năm 2025</option>
-          <option value="2024">Năm 2024</option>
-        </select>
-        <select id="expFilterMonth">
-          <option value="all">Tất cả tháng</option>
-          <option value="1">Tháng 01</option>
-          <option value="2">Tháng 02</option>
-          <option value="3">Tháng 03</option>
-          <option value="4">Tháng 04</option>
-          <option value="5">Tháng 05</option>
-          <option value="6">Tháng 06</option>
-          <option value="7">Tháng 07</option>
-          <option value="8">Tháng 08</option>
-          <option value="9">Tháng 09</option>
-          <option value="10">Tháng 10</option>
-          <option value="11">Tháng 11</option>
-          <option value="12">Tháng 12</option>
-        </select>
-        <select id="expFilterCategory">
-          <option value="all">Tất cả danh mục</option>
-        </select>
-        <select id="expFilterSupplier">
-          <option value="all">Tất cả nhà cung cấp</option>
-        </select>
-        <select id="expFilterStep">
-          <option value="all">Tất cả bước tiến trình</option>
-          <option value="1">Bước 1: Tiếp nhận đề xuất &amp; HĐ</option>
-          <option value="2">Bước 2: Hành chính đối soát</option>
-          <option value="3">Bước 3: Kế toán kiểm tra</option>
-          <option value="4">Bước 4: BGĐ phê duyệt</option>
-          <option value="5">Bước 5: Đã thanh toán</option>
-          <option value="rejected">Đã từ chối / Hủy</option>
-        </select>
-        <button class="btn btn-ghost btn-sm" id="expResetFilterBtn" style="padding:7px 12px;font-size:12px;">✕ Xóa lọc</button>
       </div>
 
       <!-- Quick Step Legend -->
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;font-size:12px;color:#475569;flex-wrap:wrap;">
-        <span style="font-weight:700;">🔄 Quy trình 5 bước:</span>
+      <div style="background:#fff;border-radius:12px;padding:10px 16px;margin-bottom:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;font-size:12px;color:#475569;flex-wrap:wrap;">
+        <span style="font-weight:700;color:#1e293b;">🔄 Quy trình 5 bước:</span>
         <span><b>B1</b> Tiếp nhận</span> ➔
         <span><b>B2</b> HC đối soát</span> ➔
         <span><b>B3</b> Kế toán rà soát</span> ➔
@@ -1513,38 +1329,141 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
       </div>
 
       <!-- Expenses Data Table -->
-      <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.03);overflow:hidden;">
+      <div style="background:#fff;border-radius:18px;box-shadow:var(--shadow);overflow:hidden;padding:6px;">
         <div style="overflow-x:auto;">
-          <table class="report-data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+          <table class="report-table" style="width:100%;border-collapse:collapse;font-size:13px;">
             <thead>
               <tr>
                 <th style="width:110px;">Mã chi phí</th>
-                <th style="width:105px;">Ngày / Kỳ</th>
-                <th>Khoản mục &amp; Nội dung chi</th>
+                <th style="width:110px;">Ngày / Kỳ</th>
+                <th>Khoản mục chi</th>
                 <th>Danh mục</th>
                 <th>Nhà cung cấp</th>
                 <th style="text-align:right;">Số tiền (VNĐ)</th>
                 <th style="text-align:center;">Chứng từ</th>
-                <th style="text-align:center;">Tiến trình xử lý</th>
-                <th style="text-align:center;width:130px;">Thao tác</th>
+                <th style="text-align:center;">Tiến trình</th>
+                <th style="text-align:center;width:120px;">Thao tác</th>
               </tr>
             </thead>
             <tbody id="expListTableBody"></tbody>
           </table>
         </div>
-        <div id="expEmptyNotice" style="display:none;padding:40px;text-align:center;color:#64748b;">
-          <div style="font-size:36px;margin-bottom:10px;">📭</div>
-          <p style="margin:0;font-weight:600;">Không tìm thấy khoản chi phí nào phù hợp với bộ lọc.</p>
+        <div id="expEmptyNotice" style="display:none;padding:50px 20px;text-align:center;color:#64748b;">
+          <div style="font-size:36px;margin-bottom:8px;">📭</div>
+          <div style="font-weight:700;font-size:15px;color:#1e293b;margin-bottom:4px;">Chưa có khoản chi phí nào</div>
+          <p style="margin:0;font-size:13px;">Bấm vào nút <b>"➕ Thêm khoản chi"</b> ở trên để tạo khoản chi phí đầu tiên.</p>
         </div>
       </div>
     </div>
 
-    <!-- 3. DANH BẠ NHÀ CUNG CẤP -->
+    <!-- 2. BÁO CÁO & XU HƯỚNG -->
+    <div class="subpage" id="exp-analytics">
+      <!-- Filter Bar for Analytics -->
+      <div style="background:#fff;border-radius:16px;padding:14px 18px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <span style="font-weight:700;font-size:13px;color:#334155;">📅 Xem năm:</span>
+          <select id="expAnalyticsYearSelect" style="font-weight:700;color:var(--cam);">
+            <option value="2026" selected>Năm 2026</option>
+            <option value="2025">Năm 2025</option>
+            <option value="2024">Năm 2024</option>
+          </select>
+          <span style="font-weight:700;font-size:13px;color:#334155;margin-left:8px;">Kỳ chi tiết:</span>
+          <select id="expAnalyticsMonthSelect">
+            <option value="all">Toàn bộ 12 tháng</option>
+            <option value="1">Tháng 01</option><option value="2">Tháng 02</option><option value="3">Tháng 03</option>
+            <option value="4">Tháng 04</option><option value="5">Tháng 05</option><option value="6">Tháng 06</option>
+            <option value="7">Tháng 07</option><option value="8">Tháng 08</option><option value="9">Tháng 09</option>
+            <option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
+          </select>
+        </div>
+        <div style="font-size:12.5px;color:var(--muted);">Đơn vị tính: <b>Việt Nam Đồng (VNĐ)</b></div>
+      </div>
+
+      <!-- KPI summary grid matching .home-stats & .stat-box -->
+      <div class="home-stats" style="margin-bottom:22px;">
+        <div class="stat-box">
+          <div class="lbl">TỔNG CHI TIÊU NĂM</div>
+          <div class="num" id="expKpiTotalYear" style="color:var(--cam);">0 ₫</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="expKpiCountYear">0 khoản chi</div>
+        </div>
+        <div class="stat-box">
+          <div class="lbl">CHI TIÊU KỲ CHỌN</div>
+          <div class="num" id="expKpiCurrentMonth" style="color:var(--xanh);">0 ₫</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="expKpiMomChange">--</div>
+        </div>
+        <div class="stat-box">
+          <div class="lbl">ĐÃ HOÀN TẤT CHI TRẢ</div>
+          <div class="num" id="expKpiPaidAmount" style="color:#10b981;">0 ₫</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="expKpiPaidCount">0 khoản chi</div>
+        </div>
+        <div class="stat-box">
+          <div class="lbl">CHỜ DUYỆT / XỬ LÝ</div>
+          <div class="num" id="expKpiPendingAmount" style="color:#f59e0b;">0 ₫</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="expKpiPendingCount">0 khoản chi</div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1: Line trend (60%) + Doughnut category (40%) -->
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-bottom:22px;">
+        <div style="background:#fff;border-radius:18px;padding:20px;box-shadow:var(--shadow);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <h4 style="margin:0;font-size:14.5px;color:#1e293b;">📈 Xu hướng chi phí qua từng tháng</h4>
+            <span style="font-size:11.5px;color:#64748b;background:#f1f5f9;padding:4px 8px;border-radius:6px;">Đối chiếu năm trước</span>
+          </div>
+          <div style="height:260px;position:relative;">
+            <canvas id="expTrendChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:18px;padding:20px;box-shadow:var(--shadow);">
+          <h4 style="margin:0 0 14px;font-size:14.5px;color:#1e293b;">🍩 Cơ cấu chi phí theo danh mục</h4>
+          <div style="height:260px;position:relative;">
+            <canvas id="expCategoryChartCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2: Top suppliers bar chart -->
+      <div style="background:#fff;border-radius:18px;padding:20px;box-shadow:var(--shadow);margin-bottom:22px;">
+        <h4 style="margin:0 0 14px;font-size:14.5px;color:#1e293b;">🏢 Top Nhà cung cấp có giá trị thanh toán lớn nhất</h4>
+        <div style="height:240px;position:relative;">
+          <canvas id="expSupplierChartCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Monthly Breakdown Variance Table -->
+      <div style="background:#fff;border-radius:18px;padding:20px;box-shadow:var(--shadow);">
+        <h4 style="margin:0 0 12px;font-size:14.5px;color:#1e293b;">📋 Bảng phân tích chi phí &amp; biến động theo từng tháng</h4>
+        <div style="overflow-x:auto;">
+          <table class="report-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr>
+                <th>Tháng / Kỳ</th>
+                <th style="text-align:right;">Chi phí năm chọn</th>
+                <th style="text-align:right;">Chi phí năm trước</th>
+                <th style="text-align:right;">Chênh lệch (VNĐ)</th>
+                <th style="text-align:center;">Biến động (% MoM / YoY)</th>
+                <th>Nhận xét &amp; Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody id="expMonthlyTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. QUẢN LÝ NHÀ CUNG CẤP -->
     <div class="subpage" id="exp-suppliers">
       <!-- Search & actions -->
-      <div class="exp-filter-bar" style="justify-content:space-between;">
-        <input type="text" id="expSupplierSearchInput" placeholder="🔍 Tìm kiếm nhà cung cấp theo tên, MST, số điện thoại..." style="flex:1;max-width:380px;">
-        <div style="font-size:12.5px;color:#64748b;" id="expSupplierCountLabel">0 nhà cung cấp</div>
+      <div style="background:#fff;border-radius:16px;padding:14px 18px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div class="search-box" style="min-width:260px;flex:1;max-width:400px;">
+          <span class="ic">🔍</span>
+          <input type="text" id="expSupplierSearchInput" placeholder="Tìm kiếm nhà cung cấp theo tên, MST, SĐT...">
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span style="font-size:13px;color:var(--muted);" id="expSupplierCountLabel">0 nhà cung cấp</span>
+          <button class="btn btn-cam btn-sm" id="expAddSupplierBtn" style="padding:9px 18px;border-radius:10px;font-weight:700;">🏢 + Thêm Nhà cung cấp</button>
+        </div>
       </div>
 
       <!-- Supplier Cards Grid -->
@@ -5941,5 +5860,5 @@ startPostgresSync();
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="app.js?v=20260827-6"></script>
-<script src="expenses.js?v=20260910-1"></script>
+<script src="expenses.js?v=20260910-3"></script>
 </body></html>
