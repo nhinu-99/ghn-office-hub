@@ -1877,7 +1877,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
 </div>
 
 <!-- Modal: Thêm / Chỉnh sửa Nhà cung cấp -->
-<div class="modal-overlay" id="expModalSupplierForm">
+<div class="modal-overlay" id="expModalSupplierForm" onclick="if(event.target===this) closeModal('expModalSupplierForm')">
   <div class="zoom-box" style="max-width:520px;">
     <button class="zoom-close" onclick="closeModal('expModalSupplierForm')">✕</button>
     <h3 style="margin:0 0 4px;" id="expSupplierModalTitle">🏢 Thêm Nhà cung cấp</h3>
@@ -5860,5 +5860,5 @@ startPostgresSync();
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="app.js?v=20260827-6"></script>
-<script src="expenses.js?v=20260910-4"></script>
+<script src="expenses.js?v=20260910-5"></script>
 </body></html>
