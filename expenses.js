@@ -41,7 +41,7 @@ const DEFAULT_OFFICE_SUPPLIERS = [
     bankName: 'MBBank - Hội sở chính',
     bankAcc: '0011001234567',
     bankHolder: 'TAP DOAN VIEN THONG QUAN DOI',
-    category: 'Internet & Viễn thông cáp quang',
+    category: 'Internet & Viễn thông',
     address: 'Tòa nhà Viettel Complex, 285 Cách Mạng Tháng 8, Quận 10, TP.HCM'
   },
   {
@@ -422,122 +422,15 @@ const DEFAULT_OFFICE_EXPENSES = [
     note: 'Đã thanh toán'
   },
 
-  // 2026 - T6 (Tổng ~ 198tr)
-  {
-    id: 'exp-2606-001',
-    code: 'EXP-2606-001',
-    title: 'Chi phí vận hành văn phòng tổng hợp T06/2026',
-    category: 'Thuê mặt bằng & Tòa nhà',
-    supplierId: 'sup-building',
-    supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)',
-    amount: 198500000,
-    month: 6,
-    year: 2026,
-    date: '2026-06-05',
-    invoiceNo: '0035128',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Gồm thuê mặt bằng và điện nước'
-  },
-  // 2026 - T5 (Tổng ~ 205tr)
-  {
-    id: 'exp-2605-001',
-    code: 'EXP-2605-001',
-    title: 'Chi phí vận hành văn phòng tổng hợp T05/2026 (Cao điểm nắng nóng)',
-    category: 'Điện lực',
-    supplierId: 'sup-evn',
-    supplierName: 'Tổng Công ty Điện lực TP.HCM (EVN HCMC)',
-    amount: 205300000,
-    month: 5,
-    year: 2026,
-    date: '2026-05-05',
-    invoiceNo: '0034192',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Điện tăng cao do cao điểm nắng nóng'
-  },
-  // 2026 - T4 (Tổng ~ 192tr)
-  {
-    id: 'exp-2604-001',
-    code: 'EXP-2604-001',
-    title: 'Chi phí vận hành văn phòng tổng hợp T04/2026',
-    category: 'Thuê mặt bằng & Tòa nhà',
-    supplierId: 'sup-building',
-    supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)',
-    amount: 192000000,
-    month: 4,
-    year: 2026,
-    date: '2026-04-05',
-    invoiceNo: '0033102',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Đã thanh toán'
-  },
-  // 2026 - T3 (Tổng ~ 188tr)
-  {
-    id: 'exp-2603-001',
-    code: 'EXP-2603-001',
-    title: 'Chi phí vận hành văn phòng tổng hợp T03/2026',
-    category: 'Thuê mặt bằng & Tòa nhà',
-    supplierId: 'sup-building',
-    supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)',
-    amount: 188400000,
-    month: 3,
-    year: 2026,
-    date: '2026-03-05',
-    invoiceNo: '0032190',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Đã thanh toán'
-  },
-  // 2026 - T2 (Tổng ~ 165tr - Tháng Tết)
-  {
-    id: 'exp-2602-001',
-    code: 'EXP-2602-001',
-    title: 'Chi phí vận hành văn phòng T02/2026 (Kỳ nghỉ Tết Nguyên Đán)',
-    category: 'Thuê mặt bằng & Tòa nhà',
-    supplierId: 'sup-building',
-    supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)',
-    amount: 165200000,
-    month: 2,
-    year: 2026,
-    date: '2026-02-05',
-    invoiceNo: '0031124',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Chi phí điện nước giảm do nghỉ Tết'
-  },
-  // 2026 - T1 (Tổng ~ 185tr)
-  {
-    id: 'exp-2601-001',
-    code: 'EXP-2601-001',
-    title: 'Chi phí vận hành văn phòng tổng hợp T01/2026',
-    category: 'Thuê mặt bằng & Tòa nhà',
-    supplierId: 'sup-building',
-    supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)',
-    amount: 185000000,
-    month: 1,
-    year: 2026,
-    date: '2026-01-05',
-    invoiceNo: '0030112',
-    step: 5,
-    receiptUrl: '',
-    createdBy: 'nhinu@ghn.vn',
-    department: 'Office Admin General',
-    note: 'Đã thanh toán'
-  },
+  // 2026 - T1..T6
+  { id: 'exp-2606-001', code: 'EXP-2606-001', title: 'Chi phí vận hành văn phòng T06/2026', category: 'Thuê mặt bằng & Tòa nhà', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)', amount: 198500000, month: 6, year: 2026, date: '2026-06-05', step: 5 },
+  { id: 'exp-2605-001', code: 'EXP-2605-001', title: 'Chi phí vận hành văn phòng T05/2026 (Cao điểm)', category: 'Điện lực', supplierId: 'sup-evn', supplierName: 'Tổng Công ty Điện lực TP.HCM (EVN HCMC)', amount: 205300000, month: 5, year: 2026, date: '2026-05-05', step: 5 },
+  { id: 'exp-2604-001', code: 'EXP-2604-001', title: 'Chi phí vận hành văn phòng T04/2026', category: 'Thuê mặt bằng & Tòa nhà', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)', amount: 192000000, month: 4, year: 2026, date: '2026-04-05', step: 5 },
+  { id: 'exp-2603-001', code: 'EXP-2603-001', title: 'Chi phí vận hành văn phòng T03/2026', category: 'Thuê mặt bằng & Tòa nhà', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)', amount: 188400000, month: 3, year: 2026, date: '2026-03-05', step: 5 },
+  { id: 'exp-2602-001', code: 'EXP-2602-001', title: 'Chi phí vận hành văn phòng T02/2026 (Tết)', category: 'Thuê mặt bằng & Tòa nhà', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)', amount: 165200000, month: 2, year: 2026, date: '2026-02-05', step: 5 },
+  { id: 'exp-2601-001', code: 'EXP-2601-001', title: 'Chi phí vận hành văn phòng T01/2026', category: 'Thuê mặt bằng & Tòa nhà', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)', amount: 185000000, month: 1, year: 2026, date: '2026-01-05', step: 5 },
 
-  // ─── Dữ liệu đối sánh 2025 (Để so sánh chi phí qua các năm) ───
+  // Dữ liệu đối sánh 2025
   { id: 'exp-2501', code: 'EXP-2501', title: 'Tổng chi phí T01/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 172000000, month: 1, year: 2025, step: 5, date: '2025-01-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
   { id: 'exp-2502', code: 'EXP-2502', title: 'Tổng chi phí T02/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 158000000, month: 2, year: 2025, step: 5, date: '2025-02-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
   { id: 'exp-2503', code: 'EXP-2503', title: 'Tổng chi phí T03/2025', category: 'Thuê mặt bằng & Tòa nhà', amount: 176000000, month: 3, year: 2025, step: 5, date: '2025-03-05', supplierId: 'sup-building', supplierName: 'Công ty CP Đầu Tư & Dịch Vụ BĐS Thuận An (BQL Tòa Nhà)' },
@@ -556,12 +449,10 @@ const DEFAULT_OFFICE_EXPENSES = [
 let OFFICE_SUPPLIERS = null;
 let OFFICE_EXPENSES = null;
 
-// Biến biểu đồ Chart.js
-let expTrendLineChartInstance = null;
-let expCategoryDoughnutChartInstance = null;
-let expSupplierBarChartInstance = null;
+let expTrendChartInstance = null;
+let expCategoryChartInstance = null;
+let expSupplierChartInstance = null;
 
-// Trạng thái modal & chỉnh sửa
 let expCurrentDetailId = null;
 let expensesEventsBound = false;
 
@@ -598,7 +489,7 @@ function saveOfficeSuppliers(){
   if(typeof cloudSet === 'function') cloudSet('officeSuppliers', OFFICE_SUPPLIERS);
 }
 
-// ─── Định dạng & Tiện ích ───
+// ─── Helper Functions ───
 function getStepInfo(step){
   step = String(step);
   switch(step){
@@ -619,25 +510,25 @@ function getStepInfo(step){
   }
 }
 
-function openModal(modalId){
-  const el = document.getElementById(modalId);
-  if(el) el.classList.add('show');
-}
-
-function closeModal(modalId){
+window.closeModal = function(modalId){
   const el = document.getElementById(modalId);
   if(el) el.classList.remove('show');
-}
+};
+
+window.openModal = function(modalId){
+  const el = document.getElementById(modalId);
+  if(el) el.classList.add('show');
+};
 
 // ─── Khởi động trang & Sự kiện ───
 window.renderExpensesPage = function(){
   ensureOfficeExpensesData();
   setupExpensesEventsOnce();
-  populateExpenseSupplierSelects();
+  populateExpenseDropdowns();
 
-  // Kiểm tra subpage nào đang active
-  const activeSubpage = document.querySelector('#expensesSubNav button.active');
-  const sub = activeSubpage ? activeSubpage.dataset.sub : 'analytics';
+  // Đảm bảo subpage đầu tiên hiển thị
+  const activeSubBtn = document.querySelector('#expensesSubNav button.active');
+  const sub = activeSubBtn ? activeSubBtn.dataset.sub : 'analytics';
 
   if(sub === 'analytics') renderExpenseAnalytics();
   else if(sub === 'list') renderExpenseList();
@@ -672,17 +563,33 @@ function setupExpensesEventsOnce(){
     }
   });
 
+  // Reset Filter Button
+  const resetBtn = document.getElementById('expResetFilterBtn');
+  if(resetBtn){
+    resetBtn.addEventListener('click', ()=>{
+      const sInp = document.getElementById('expSearchInput'); if(sInp) sInp.value = '';
+      const fYear = document.getElementById('expFilterYear'); if(fYear) fYear.value = 'all';
+      const fMonth = document.getElementById('expFilterMonth'); if(fMonth) fMonth.value = 'all';
+      const fCat = document.getElementById('expFilterCategory'); if(fCat) fCat.value = 'all';
+      const fSup = document.getElementById('expFilterSupplier'); if(fSup) fSup.value = 'all';
+      const fStep = document.getElementById('expFilterStep'); if(fStep) fStep.value = 'all';
+      renderExpenseList();
+    });
+  }
+
   // Supplier Search
   const supSearch = document.getElementById('expSupplierSearchInput');
   if(supSearch) supSearch.addEventListener('input', renderSuppliersList);
 
-  // Add Expense Button
-  const btnAddExp = document.getElementById('expBtnOpenAddModal');
-  if(btnAddExp) btnAddExp.addEventListener('click', openAddExpenseModal);
+  // Header Buttons
+  const btnAddExp = document.getElementById('expAddExpenseBtn');
+  if(btnAddExp) btnAddExp.addEventListener('click', window.openAddExpenseModal);
 
-  // Add Supplier Button
-  const btnAddSup = document.getElementById('expBtnOpenAddSupplierModal');
-  if(btnAddSup) btnAddSup.addEventListener('click', openAddSupplierModal);
+  const btnAddSup = document.getElementById('expAddSupplierBtn');
+  if(btnAddSup) btnAddSup.addEventListener('click', window.openAddSupplierModal);
+
+  const btnExportExcel = document.getElementById('expExportExcelBtn');
+  if(btnExportExcel) btnExportExcel.addEventListener('click', window.exportExpensesToExcel);
 
   // Save Expense Form
   const btnSaveExp = document.getElementById('expBtnSaveExpense');
@@ -702,8 +609,8 @@ function setupExpensesEventsOnce(){
   const btnEditDetail = document.getElementById('expDetailEditBtn');
   if(btnEditDetail) btnEditDetail.addEventListener('click', ()=>{
     if(expCurrentDetailId){
-      closeModal('expModalExpenseDetail');
-      openEditExpenseModal(expCurrentDetailId);
+      window.closeModal('expModalExpenseDetail');
+      window.openEditExpenseModal(expCurrentDetailId);
     }
   });
 
@@ -712,19 +619,19 @@ function setupExpensesEventsOnce(){
     if(expCurrentDetailId){
       if(confirm('Bạn có chắc muốn xóa khoản chi này không?')){
         deleteExpense(expCurrentDetailId);
-        closeModal('expModalExpenseDetail');
+        window.closeModal('expModalExpenseDetail');
       }
     }
   });
 
-  // Receipt File upload input
+  // Receipt File upload
   const receiptFile = document.getElementById('expInpReceiptFile');
   if(receiptFile){
     receiptFile.addEventListener('change', function(e){
       const file = e.target.files[0];
       if(!file) return;
       if(file.size > 2.5 * 1024 * 1024){
-        toast('Ảnh dung lượng quá lớn, vui lòng chọn file dưới 2.5MB', '⚠️');
+        if(typeof toast === 'function') toast('Ảnh dung lượng quá lớn, vui lòng chọn file dưới 2.5MB', '⚠️');
         receiptFile.value = '';
         return;
       }
@@ -750,7 +657,8 @@ function setupExpensesEventsOnce(){
     clearReceiptBtn.addEventListener('click', function(){
       document.getElementById('expInpReceiptBase64').value = '';
       if(receiptFile) receiptFile.value = '';
-      document.getElementById('expReceiptPreviewThumbWrap').style.display = 'none';
+      const thumbWrap = document.getElementById('expReceiptPreviewThumbWrap');
+      if(thumbWrap) thumbWrap.style.display = 'none';
       clearReceiptBtn.style.display = 'none';
     });
   }
@@ -760,171 +668,182 @@ function setupExpensesEventsOnce(){
   const zoomBtn = document.getElementById('expDetailReceiptZoomBtn');
   const triggerZoom = function(){
     if(detailImg && detailImg.src){
-      openReceiptLightbox(detailImg.src, document.getElementById('expDetailTitle').textContent);
+      window.openReceiptLightbox(detailImg.src, document.getElementById('expDetailTitle').textContent);
     }
   };
   if(detailImg) detailImg.addEventListener('click', triggerZoom);
   if(zoomBtn) zoomBtn.addEventListener('click', triggerZoom);
-
-  // Excel Export Buttons
-  const btnExportExcel = document.getElementById('expBtnExportExcel');
-  if(btnExportExcel) btnExportExcel.addEventListener('click', exportExpensesToExcel);
-
-  const btnExportFullExcel = document.getElementById('expBtnExportFullExcel');
-  if(btnExportFullExcel) btnExportFullExcel.addEventListener('click', exportExpensesToExcel);
 }
 
-function populateExpenseSupplierSelects(){
-  const selects = ['expFilterSupplier', 'expInpSupplierSelect'];
-  selects.forEach(id=>{
-    const sel = document.getElementById(id);
-    if(!sel) return;
-    const curVal = sel.value;
-    const isFilter = (id === 'expFilterSupplier');
-    
-    let html = isFilter ? '<option value="all">Tất cả nhà cung cấp</option>' : '<option value="">-- Chọn Nhà cung cấp --</option>';
-    OFFICE_SUPPLIERS.forEach(s=>{
+function populateExpenseDropdowns(){
+  // 1. Supplier Selects
+  const selSupplier = document.getElementById('expInpSupplierSelect');
+  const filterSupplier = document.getElementById('expFilterSupplier');
+
+  if(selSupplier){
+    const curVal = selSupplier.value;
+    let html = '<option value="">-- Chọn Nhà cung cấp --</option>';
+    OFFICE_SUPPLIERS.forEach(s => {
       html += `<option value="${s.id}">${s.code} - ${s.name}</option>`;
     });
-    sel.innerHTML = html;
-    if(curVal) sel.value = curVal;
-  });
+    selSupplier.innerHTML = html;
+    if(curVal) selSupplier.value = curVal;
+  }
+
+  if(filterSupplier){
+    const curVal = filterSupplier.value;
+    let html = '<option value="all">Tất cả nhà cung cấp</option>';
+    OFFICE_SUPPLIERS.forEach(s => {
+      html += `<option value="${s.id}">${s.code} - ${s.name}</option>`;
+    });
+    filterSupplier.innerHTML = html;
+    if(curVal) filterSupplier.value = curVal;
+  }
+
+  // 2. Category Filter
+  const filterCat = document.getElementById('expFilterCategory');
+  if(filterCat){
+    const curVal = filterCat.value;
+    const cats = Array.from(new Set(OFFICE_EXPENSES.map(e => e.category).filter(Boolean)));
+    let html = '<option value="all">Tất cả danh mục</option>';
+    cats.forEach(c => {
+      html += `<option value="${c}">${c}</option>`;
+    });
+    filterCat.innerHTML = html;
+    if(curVal) filterCat.value = curVal;
+  }
 }
 
 // ─── TAB 1: PHÂN TÍCH & BÁO CÁO (ANALYTICS) ───
 function renderExpenseAnalytics(){
   ensureOfficeExpensesData();
-  const selectedYear = parseInt(document.getElementById('expAnalyticsYearSelect').value, 10) || 2026;
-  const selectedMonthVal = document.getElementById('expAnalyticsMonthSelect').value; // 'all' or 1..12
+  const yearEl = document.getElementById('expAnalyticsYearSelect');
+  const monthEl = document.getElementById('expAnalyticsMonthSelect');
+  const selectedYear = parseInt(yearEl ? yearEl.value : '2026', 10) || 2026;
+  const selectedMonthVal = monthEl ? monthEl.value : 'all';
   const priorYear = selectedYear - 1;
 
-  // Lọc dữ liệu theo năm
-  const expensesCurYear = OFFICE_EXPENSES.filter(e=>e.year === selectedYear && e.step !== 'rejected');
-  const expensesPriorYear = OFFICE_EXPENSES.filter(e=>e.year === priorYear && e.step !== 'rejected');
+  const expensesCurYear = OFFICE_EXPENSES.filter(e => e.year === selectedYear && e.step !== 'rejected');
+  const expensesPriorYear = OFFICE_EXPENSES.filter(e => e.year === priorYear && e.step !== 'rejected');
 
-  // Lọc dữ liệu theo tháng được chọn
-  let expensesForKPI = expensesCurYear;
+  let expensesForPeriod = expensesCurYear;
   if(selectedMonthVal !== 'all'){
     const m = parseInt(selectedMonthVal, 10);
-    expensesForKPI = expensesCurYear.filter(e=>e.month === m);
+    expensesForPeriod = expensesCurYear.filter(e => e.month === m);
   }
 
-  // 1. Tính toán KPIs
-  const totalCurYearSpend = expensesCurYear.reduce((sum, e)=> sum + (Number(e.amount)||0), 0);
-  const totalPeriodSpend = expensesForKPI.reduce((sum, e)=> sum + (Number(e.amount)||0), 0);
+  // 1. Cập nhật KPIs
+  const totalAnnual = expensesCurYear.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
+  const totalPeriod = expensesForPeriod.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
+  const paidList = expensesForPeriod.filter(e => String(e.step) === '5');
+  const pendingList = expensesForPeriod.filter(e => String(e.step) !== '5');
 
-  const totalPaid = expensesForKPI.filter(e=>String(e.step)==='5').reduce((sum, e)=> sum + (Number(e.amount)||0), 0);
-  const countPaid = expensesForKPI.filter(e=>String(e.step)==='5').length;
+  const totalPaid = paidList.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
+  const totalPending = pendingList.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
 
-  const totalPending = expensesForKPI.filter(e=>String(e.step)!=='5').reduce((sum, e)=> sum + (Number(e.amount)||0), 0);
-  const countPending = expensesForKPI.filter(e=>String(e.step)!=='5').length;
+  const elTotalYear = document.getElementById('expKpiTotalYear');
+  if(elTotalYear) elTotalYear.textContent = (totalAnnual||0).toLocaleString('vi-VN') + ' ₫';
+  const elCountYear = document.getElementById('expKpiCountYear');
+  if(elCountYear) elCountYear.textContent = `${expensesCurYear.length} khoản chi trong năm ${selectedYear}`;
 
-  // Cập nhật DOM KPIs
-  const elTotalAnnual = document.getElementById('expKpiTotalAnnual');
-  if(elTotalAnnual) elTotalAnnual.textContent = (totalCurYearSpend||0).toLocaleString('vi-VN') + ' ₫';
+  const elCurMonth = document.getElementById('expKpiCurrentMonth');
+  if(elCurMonth) elCurMonth.textContent = (totalPeriod||0).toLocaleString('vi-VN') + ' ₫';
 
-  const elTotalMonth = document.getElementById('expKpiTotalMonth');
-  if(elTotalMonth) elTotalMonth.textContent = (totalPeriodSpend||0).toLocaleString('vi-VN') + ' ₫';
+  const elPaidAmt = document.getElementById('expKpiPaidAmount');
+  if(elPaidAmt) elPaidAmt.textContent = (totalPaid||0).toLocaleString('vi-VN') + ' ₫';
+  const elPaidCnt = document.getElementById('expKpiPaidCount');
+  if(elPaidCnt) elPaidCnt.textContent = `Đã thanh toán: ${paidList.length} khoản chi`;
 
-  const elPaid = document.getElementById('expKpiPaid');
-  if(elPaid) elPaid.textContent = (totalPaid||0).toLocaleString('vi-VN') + ' ₫';
-  const elPaidCount = document.getElementById('expKpiPaidCount');
-  if(elPaidCount) elPaidCount.textContent = `Đã thanh toán: ${countPaid} khoản chi`;
+  const elPendingAmt = document.getElementById('expKpiPendingAmount');
+  if(elPendingAmt) elPendingAmt.textContent = (totalPending||0).toLocaleString('vi-VN') + ' ₫';
+  const elPendingCnt = document.getElementById('expKpiPendingCount');
+  if(elPendingCnt) elPendingCnt.textContent = `Chờ duyệt/xử lý: ${pendingList.length} khoản`;
 
-  const elPending = document.getElementById('expKpiPending');
-  if(elPending) elPending.textContent = (totalPending||0).toLocaleString('vi-VN') + ' ₫';
-  const elPendingCount = document.getElementById('expKpiPendingCount');
-  if(elPendingCount) elPendingCount.textContent = `Đang xử lý / chờ duyệt: ${countPending} khoản`;
-
-  // Tính % tăng giảm MoM hoặc so sánh năm
-  const elMomTrend = document.getElementById('expKpiMonthTrend');
-  if(elMomTrend){
+  // MoM / YoY Trend badge
+  const elMom = document.getElementById('expKpiMomChange');
+  if(elMom){
     if(selectedMonthVal !== 'all'){
       const curM = parseInt(selectedMonthVal, 10);
       const prevM = curM === 1 ? 12 : curM - 1;
       const prevMYear = curM === 1 ? priorYear : selectedYear;
       const prevMTotal = OFFICE_EXPENSES
-        .filter(e=>e.year === prevMYear && e.month === prevM && e.step !== 'rejected')
-        .reduce((sum, e)=> sum + (Number(e.amount)||0), 0);
+        .filter(e => e.year === prevMYear && e.month === prevM && e.step !== 'rejected')
+        .reduce((sum, e) => sum + (Number(e.amount)||0), 0);
 
       if(prevMTotal > 0){
-        const diff = totalPeriodSpend - prevMTotal;
+        const diff = totalPeriod - prevMTotal;
         const pct = ((diff / prevMTotal) * 100).toFixed(1);
         if(diff >= 0){
-          elMomTrend.innerHTML = `<span class="exp-diff-badge pos">+${pct}% ↗</span> vs T${prevM}`;
+          elMom.innerHTML = `<span class="exp-diff-badge pos">+${pct}% ↗</span> so với T${prevM}`;
         } else {
-          elMomTrend.innerHTML = `<span class="exp-diff-badge neg">${pct}% ↘</span> vs T${prevM}`;
+          elMom.innerHTML = `<span class="exp-diff-badge neg">${pct}% ↘</span> so với T${prevM}`;
         }
       } else {
-        elMomTrend.textContent = 'Kỳ đầu tiên ghi nhận';
+        elMom.textContent = 'Kỳ phát sinh mới';
       }
     } else {
-      const priorYearTotal = expensesPriorYear.reduce((sum, e)=> sum + (Number(e.amount)||0), 0);
-      if(priorYearTotal > 0){
-        const diff = totalCurYearSpend - priorYearTotal;
-        const pct = ((diff / priorYearTotal) * 100).toFixed(1);
+      const priorTotal = expensesPriorYear.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
+      if(priorTotal > 0){
+        const diff = totalAnnual - priorTotal;
+        const pct = ((diff / priorTotal) * 100).toFixed(1);
         if(diff >= 0){
-          elMomTrend.innerHTML = `<span class="exp-diff-badge pos">+${pct}% ↗</span> vs Năm ${priorYear}`;
+          elMom.innerHTML = `<span class="exp-diff-badge pos">+${pct}% ↗</span> vs Năm ${priorYear}`;
         } else {
-          elMomTrend.innerHTML = `<span class="exp-diff-badge neg">${pct}% ↘</span> vs Năm ${priorYear}`;
+          elMom.innerHTML = `<span class="exp-diff-badge neg">${pct}% ↘</span> vs Năm ${priorYear}`;
         }
       } else {
-        elMomTrend.textContent = `Năm ${selectedYear}`;
+        elMom.textContent = `Tổng chi năm ${selectedYear}`;
       }
     }
   }
 
-  // 2. Chuẩn bị mảng 12 tháng cho Biểu đồ đường
-  const curMonthlyTotals = Array(12).fill(0);
-  expensesCurYear.forEach(e=>{
+  // 2. Mảng 12 tháng cho Biểu đồ đường
+  const curMonthly = Array(12).fill(0);
+  expensesCurYear.forEach(e => {
     const m = (Number(e.month)||1) - 1;
-    if(m >= 0 && m < 12) curMonthlyTotals[m] += Number(e.amount)||0;
+    if(m >= 0 && m < 12) curMonthly[m] += Number(e.amount)||0;
   });
 
-  const priorMonthlyTotals = Array(12).fill(0);
-  expensesPriorYear.forEach(e=>{
+  const priorMonthly = Array(12).fill(0);
+  expensesPriorYear.forEach(e => {
     const m = (Number(e.month)||1) - 1;
-    if(m >= 0 && m < 12) priorMonthlyTotals[m] += Number(e.amount)||0;
+    if(m >= 0 && m < 12) priorMonthly[m] += Number(e.amount)||0;
   });
 
-  // Render Chart.js Biểu đồ đường Trend Line
-  renderTrendLineChart(selectedYear, priorYear, curMonthlyTotals, priorMonthlyTotals);
+  renderTrendChart(selectedYear, priorYear, curMonthly, priorMonthly);
 
-  // 3. Chuẩn bị dữ liệu Cơ cấu chi phí theo Danh mục (Doughnut Chart)
+  // 3. Cơ cấu chi phí Doughnut
   const catTotals = {};
-  expensesForKPI.forEach(e=>{
+  expensesForPeriod.forEach(e => {
     const cat = e.category || 'Khác';
     catTotals[cat] = (catTotals[cat] || 0) + (Number(e.amount)||0);
   });
-  renderCategoryDoughnutChart(catTotals);
+  renderCategoryChart(catTotals);
 
-  // 4. Chuẩn bị dữ liệu Top Nhà cung cấp (Bar Chart)
+  // 4. Top NCC Bar Chart
   const supTotals = {};
-  expensesForKPI.forEach(e=>{
-    const sName = e.supplierName || 'Khác';
-    supTotals[sName] = (supTotals[sName] || 0) + (Number(e.amount)||0);
+  expensesForPeriod.forEach(e => {
+    const name = e.supplierName || 'Khác';
+    supTotals[name] = (supTotals[name] || 0) + (Number(e.amount)||0);
   });
-  renderSupplierBarChart(supTotals);
+  renderSupplierChart(supTotals);
 
-  // 5. Bảng Biến động Chi phí theo Tháng (Variance Table)
-  renderVarianceTable(selectedYear, priorYear, curMonthlyTotals, priorMonthlyTotals);
+  // 5. Bảng phân tích biến động 12 tháng
+  renderMonthlyVarianceTable(selectedYear, priorYear, curMonthly, priorMonthly);
 }
 
-function renderTrendLineChart(yearCur, yearPrior, dataCur, dataPrior){
-  const canvas = document.getElementById('expTrendLineChart');
+function renderTrendChart(yearCur, yearPrior, dataCur, dataPrior){
+  const canvas = document.getElementById('expTrendChartCanvas');
   if(!canvas || typeof Chart === 'undefined') return;
 
   const ctx = canvas.getContext('2d');
-  if(expTrendLineChartInstance){
-    expTrendLineChartInstance.destroy();
-  }
+  if(expTrendChartInstance) expTrendChartInstance.destroy();
 
-  // Gradient fill cho line hiện tại
-  const grad = ctx.createLinearGradient(0, 0, 0, 300);
-  grad.addColorStop(0, 'rgba(242, 101, 34, 0.28)');
+  const grad = ctx.createLinearGradient(0, 0, 0, 260);
+  grad.addColorStop(0, 'rgba(242, 101, 34, 0.25)');
   grad.addColorStop(1, 'rgba(242, 101, 34, 0.00)');
 
-  expTrendLineChartInstance = new Chart(ctx, {
+  expTrendChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
@@ -940,8 +859,7 @@ function renderTrendLineChart(yearCur, yearPrior, dataCur, dataPrior){
           pointBackgroundColor: '#f26522',
           pointBorderColor: '#ffffff',
           pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7
+          pointRadius: 5
         },
         {
           label: `Năm trước ${yearPrior} (VNĐ)`,
@@ -953,8 +871,7 @@ function renderTrendLineChart(yearCur, yearPrior, dataCur, dataPrior){
           tension: 0.35,
           pointBackgroundColor: '#0284c7',
           pointBorderColor: '#ffffff',
-          pointRadius: 4,
-          pointHoverRadius: 6
+          pointRadius: 4
         }
       ]
     },
@@ -969,17 +886,14 @@ function renderTrendLineChart(yearCur, yearPrior, dataCur, dataPrior){
         },
         tooltip: {
           callbacks: {
-            label: function(context){
-              const val = context.raw || 0;
-              return ` ${context.dataset.label}: ${val.toLocaleString('vi-VN')} ₫`;
+            label: function(ctx){
+              return ` ${ctx.dataset.label}: ${(ctx.raw||0).toLocaleString('vi-VN')} ₫`;
             }
           }
         }
       },
       scales: {
-        x: {
-          grid: { display: false }
-        },
+        x: { grid: { display: false } },
         y: {
           beginAtZero: true,
           grid: { color: '#f1f5f9' },
@@ -995,24 +909,18 @@ function renderTrendLineChart(yearCur, yearPrior, dataCur, dataPrior){
   });
 }
 
-function renderCategoryDoughnutChart(catTotals){
-  const canvas = document.getElementById('expCategoryDoughnutChart');
+function renderCategoryChart(catTotals){
+  const canvas = document.getElementById('expCategoryChartCanvas');
   if(!canvas || typeof Chart === 'undefined') return;
 
   const ctx = canvas.getContext('2d');
-  if(expCategoryDoughnutChartInstance){
-    expCategoryDoughnutChartInstance.destroy();
-  }
+  if(expCategoryChartInstance) expCategoryChartInstance.destroy();
 
   const labels = Object.keys(catTotals);
   const data = Object.values(catTotals);
+  const colors = ['#f26522', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
-  const colors = [
-    '#f26522', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6',
-    '#ec4899', '#06b6d4', '#84cc16', '#64748b', '#14b8a6'
-  ];
-
-  expCategoryDoughnutChartInstance = new Chart(ctx, {
+  expCategoryChartInstance = new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels: labels,
@@ -1020,8 +928,7 @@ function renderCategoryDoughnutChart(catTotals){
         data: data,
         backgroundColor: colors.slice(0, labels.length),
         borderWidth: 2,
-        borderColor: '#ffffff',
-        hoverOffset: 6
+        borderColor: '#ffffff'
       }]
     },
     options: {
@@ -1048,24 +955,18 @@ function renderCategoryDoughnutChart(catTotals){
   });
 }
 
-function renderSupplierBarChart(supTotals){
-  const canvas = document.getElementById('expSupplierBarChart');
+function renderSupplierChart(supTotals){
+  const canvas = document.getElementById('expSupplierChartCanvas');
   if(!canvas || typeof Chart === 'undefined') return;
 
   const ctx = canvas.getContext('2d');
-  if(expSupplierBarChartInstance){
-    expSupplierBarChartInstance.destroy();
-  }
+  if(expSupplierChartInstance) expSupplierChartInstance.destroy();
 
-  // Sắp xếp top nhà cung cấp
   const sorted = Object.entries(supTotals).sort((a,b)=>b[1]-a[1]).slice(0, 5);
-  const labels = sorted.map(s => {
-    const name = s[0];
-    return name.length > 20 ? name.substring(0, 20) + '...' : name;
-  });
+  const labels = sorted.map(s => s[0].length > 22 ? s[0].substring(0, 22) + '...' : s[0]);
   const data = sorted.map(s => s[1]);
 
-  expSupplierBarChartInstance = new Chart(ctx, {
+  expSupplierChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,
@@ -1084,8 +985,8 @@ function renderSupplierBarChart(supTotals){
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: function(context){
-              return ` Chi trả: ${(context.raw||0).toLocaleString('vi-VN')} ₫`;
+            label: function(ctx){
+              return ` Chi trả: ${(ctx.raw||0).toLocaleString('vi-VN')} ₫`;
             }
           }
         }
@@ -1107,8 +1008,8 @@ function renderSupplierBarChart(supTotals){
   });
 }
 
-function renderVarianceTable(yearCur, yearPrior, curArr, priorArr){
-  const tbody = document.getElementById('expVarianceTableBody');
+function renderMonthlyVarianceTable(yearCur, yearPrior, curArr, priorArr){
+  const tbody = document.getElementById('expMonthlyTableBody');
   if(!tbody) return;
 
   let rowsHtml = '';
@@ -1117,7 +1018,6 @@ function renderVarianceTable(yearCur, yearPrior, curArr, priorArr){
     const curVal = curArr[i] || 0;
     const priorVal = priorArr[i] || 0;
     const diff = curVal - priorVal;
-    let pctStr = '--';
     let pctBadge = '<span class="exp-diff-badge">--</span>';
     let note = '';
 
@@ -1125,13 +1025,13 @@ function renderVarianceTable(yearCur, yearPrior, curArr, priorArr){
       const pct = ((diff / priorVal) * 100).toFixed(1);
       if(diff > 0){
         pctBadge = `<span class="exp-diff-badge pos">+${pct}% ↗</span>`;
-        note = curVal > 40000000 ? 'Tăng do cao điểm nắng nóng hoặc diện tích sử dụng' : 'Tăng chi phí phụ tải';
+        note = curVal > 40000000 ? 'Tăng do cao điểm phụ tải hoặc diện tích sử dụng' : 'Tăng chi phí dịch vụ';
       } else if(diff < 0){
         pctBadge = `<span class="exp-diff-badge neg">${pct}% ↘</span>`;
-        note = 'Tiết kiệm chi phí vận hành so với cùng kỳ';
+        note = 'Tiết kiệm chi phí so với cùng kỳ';
       } else {
         pctBadge = `<span class="exp-diff-badge">0.0%</span>`;
-        note = 'Ổn định so với năm trước';
+        note = 'Chi phí ổn định';
       }
     } else if(curVal > 0){
       pctBadge = `<span class="exp-diff-badge pos">Mới ↗</span>`;
@@ -1144,25 +1044,32 @@ function renderVarianceTable(yearCur, yearPrior, curArr, priorArr){
 
     rowsHtml += `<tr>
       <td><b>Tháng ${m}</b></td>
-      <td><b style="color:#0f172a;">${curVal.toLocaleString('vi-VN')} ₫</b></td>
-      <td style="color:#64748b;">${priorVal.toLocaleString('vi-VN')} ₫</td>
-      <td style="font-weight:700;color:${diff > 0 ? '#ef4444' : (diff < 0 ? '#10b981' : '#64748b')};">${diffFormatted}</td>
-      <td>${pctBadge}</td>
+      <td style="text-align:right;"><b style="color:#0f172a;">${curVal.toLocaleString('vi-VN')} ₫</b></td>
+      <td style="text-align:right;color:#64748b;">${priorVal.toLocaleString('vi-VN')} ₫</td>
+      <td style="text-align:right;font-weight:700;color:${diff > 0 ? '#ef4444' : (diff < 0 ? '#10b981' : '#64748b')};">${diffFormatted}</td>
+      <td style="text-align:center;">${pctBadge}</td>
       <td style="font-size:12px;color:#475569;">${note}</td>
     </tr>`;
   }
   tbody.innerHTML = rowsHtml;
 }
 
-// ─── TAB 2: DANH SÁCH & TIẾN TRÌNH DUYỆT (LIST & WORKFLOW) ───
+// ─── TAB 2: DANH SÁCH & TIẾN TRÌNH DUYỆT (LIST) ───
 function renderExpenseList(){
   ensureOfficeExpensesData();
-  const yearVal = document.getElementById('expFilterYear').value;
-  const monthVal = document.getElementById('expFilterMonth').value;
-  const catVal = document.getElementById('expFilterCategory').value;
-  const supVal = document.getElementById('expFilterSupplier').value;
-  const stepVal = document.getElementById('expFilterStep').value;
-  const query = (document.getElementById('expSearchInput').value || '').trim().toLowerCase();
+  const yearEl = document.getElementById('expFilterYear');
+  const monthEl = document.getElementById('expFilterMonth');
+  const catEl = document.getElementById('expFilterCategory');
+  const supEl = document.getElementById('expFilterSupplier');
+  const stepEl = document.getElementById('expFilterStep');
+  const searchEl = document.getElementById('expSearchInput');
+
+  const yearVal = yearEl ? yearEl.value : 'all';
+  const monthVal = monthEl ? monthEl.value : 'all';
+  const catVal = catEl ? catEl.value : 'all';
+  const supVal = supEl ? supEl.value : 'all';
+  const stepVal = stepEl ? stepEl.value : 'all';
+  const query = (searchEl ? searchEl.value : '').trim().toLowerCase();
 
   const filtered = OFFICE_EXPENSES.filter(item => {
     if(yearVal !== 'all' && String(item.year) !== yearVal) return false;
@@ -1171,48 +1078,34 @@ function renderExpenseList(){
     if(supVal !== 'all' && item.supplierId !== supVal) return false;
     if(stepVal !== 'all' && String(item.step) !== stepVal) return false;
     if(query){
-      const haystack = [
-        item.code, item.title, item.supplierName, item.invoiceNo, item.createdBy, item.note
-      ].filter(Boolean).join(' ').toLowerCase();
+      const haystack = [item.code, item.title, item.supplierName, item.invoiceNo, item.createdBy, item.note].filter(Boolean).join(' ').toLowerCase();
       if(!haystack.includes(query)) return false;
     }
     return true;
   });
 
-  // Sắp xếp ngày mới nhất lên đầu
-  filtered.sort((a,b) => {
-    const da = new Date(a.date || '2026-01-01').getTime();
-    const db = new Date(b.date || '2026-01-01').getTime();
-    return db - da;
-  });
-
-  // Cập nhật số lượng
-  const countEl = document.getElementById('expListFilterCount');
-  if(countEl) countEl.textContent = `(Hiển thị ${filtered.length} / ${OFFICE_EXPENSES.length} khoản chi)`;
+  filtered.sort((a,b) => new Date(b.date || '2026-01-01').getTime() - new Date(a.date || '2026-01-01').getTime());
 
   const tbody = document.getElementById('expListTableBody');
+  const emptyNotice = document.getElementById('expEmptyNotice');
   if(!tbody) return;
 
   if(!filtered.length){
-    tbody.innerHTML = `<tr>
-      <td colspan="9" style="text-align:center;padding:40px 10px;color:#94a3b8;">
-        <span style="font-size:36px;display:block;margin-bottom:8px;">🔍</span>
-        Không tìm thấy khoản chi phí nào phù hợp với bộ lọc tìm kiếm.
-      </td>
-    </tr>`;
+    tbody.innerHTML = '';
+    if(emptyNotice) emptyNotice.style.display = 'block';
     return;
   }
+  if(emptyNotice) emptyNotice.style.display = 'none';
 
   let html = '';
   filtered.forEach(item => {
     const stepInfo = getStepInfo(item.step);
-    const receiptBadge = item.receiptUrl ? `
-      <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11.5px;color:#0284c7;border-color:#bae6fd;" onclick="openReceiptLightbox('${item.receiptUrl}', '${escapeHtml(item.title)}')">
+    const receiptBtn = item.receiptUrl ? `
+      <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:11.5px;color:#0284c7;border-color:#bae6fd;" onclick="window.openReceiptLightbox('${item.receiptUrl}', '${escapeHtml(item.title)}')">
         🧾 Xem HĐ
       </button>
-    ` : `<span style="color:#94a3b8;font-size:12px;">Chưa đính kèm</span>`;
+    ` : `<span style="color:#94a3b8;font-size:12px;">--</span>`;
 
-    // Mini stepper 5 chấm tròn
     let dotsHtml = '<div class="exp-mini-stepper">';
     for(let s = 1; s <= 5; s++){
       const active = (stepInfo.num >= s);
@@ -1224,25 +1117,25 @@ function renderExpenseList(){
       <td><span class="pill cam" style="font-size:12px;font-weight:700;">${item.code || 'EXP'}</span></td>
       <td>
         <b>T${item.month}/${item.year}</b>
-        <div style="font-size:11.5px;color:#64748b;">${item.date ? item.date.split('-').reverse().join('/') : '--'}</div>
+        <div style="font-size:11px;color:#64748b;">${item.date ? item.date.split('-').reverse().join('/') : '--'}</div>
       </td>
       <td>
-        <b style="color:#0f172a;cursor:pointer;" onclick="openExpenseDetailModal('${item.id}')">${escapeHtml(item.title)}</b>
-        ${item.invoiceNo ? `<div style="font-size:11.5px;color:#64748b;">Số HĐ: ${item.invoiceNo}</div>` : ''}
+        <b style="color:#0f172a;cursor:pointer;" onclick="window.openExpenseDetailModal('${item.id}')">${escapeHtml(item.title)}</b>
+        ${item.invoiceNo ? `<div style="font-size:11px;color:#64748b;">Số HĐ: ${item.invoiceNo}</div>` : ''}
       </td>
       <td><span class="pill" style="background:#f1f5f9;color:#334155;font-size:12px;">${item.category || 'Khác'}</span></td>
       <td style="font-size:12.5px;color:#334155;max-width:180px;">${escapeHtml(item.supplierName || '--')}</td>
-      <td><b style="color:var(--cam);font-size:14px;">${(Number(item.amount)||0).toLocaleString('vi-VN')} ₫</b></td>
-      <td style="text-align:center;">${receiptBadge}</td>
-      <td>
+      <td style="text-align:right;"><b style="color:var(--cam);font-size:14px;">${(Number(item.amount)||0).toLocaleString('vi-VN')} ₫</b></td>
+      <td style="text-align:center;">${receiptBtn}</td>
+      <td style="text-align:center;">
         <div style="margin-bottom:4px;"><span class="exp-status-pill ${stepInfo.cls}">${stepInfo.label}</span></div>
         ${dotsHtml}
       </td>
-      <td>
-        <div style="display:flex;gap:4px;align-items:center;">
-          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="openExpenseDetailModal('${item.id}')" title="Xem chi tiết & duyệt">👁️</button>
-          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="openEditExpenseModal('${item.id}')" title="Chỉnh sửa">✏️</button>
-          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:#ef4444;" onclick="handleDeleteExpenseRow('${item.id}')" title="Xóa khoản chi">🗑️</button>
+      <td style="text-align:center;">
+        <div style="display:inline-flex;gap:4px;">
+          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="window.openExpenseDetailModal('${item.id}')" title="Xem chi tiết & duyệt">👁️</button>
+          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;" onclick="window.openEditExpenseModal('${item.id}')" title="Chỉnh sửa">✏️</button>
+          <button class="btn btn-ghost btn-sm" style="padding:4px 8px;color:#ef4444;" onclick="window.handleDeleteExpenseRow('${item.id}')" title="Xóa khoản chi">🗑️</button>
         </div>
       </td>
     </tr>`;
@@ -1254,13 +1147,17 @@ function renderExpenseList(){
 // ─── TAB 3: QUẢN LÝ NHÀ CUNG CẤP (SUPPLIERS) ───
 function renderSuppliersList(){
   ensureOfficeExpensesData();
-  const q = (document.getElementById('expSupplierSearchInput').value || '').trim().toLowerCase();
+  const searchEl = document.getElementById('expSupplierSearchInput');
+  const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
 
   const filtered = OFFICE_SUPPLIERS.filter(s => {
     if(!q) return true;
     const haystack = [s.name, s.code, s.taxCode, s.phone, s.email, s.bankName, s.bankAcc, s.category].filter(Boolean).join(' ').toLowerCase();
     return haystack.includes(q);
   });
+
+  const countLabel = document.getElementById('expSupplierCountLabel');
+  if(countLabel) countLabel.textContent = `${filtered.length} nhà cung cấp`;
 
   const grid = document.getElementById('expSupplierGrid');
   if(!grid) return;
@@ -1275,7 +1172,6 @@ function renderSuppliersList(){
 
   let html = '';
   filtered.forEach(s => {
-    // Tính tổng số tiền đã chi trả cho nhà cung cấp này
     const totalPaid = OFFICE_EXPENSES
       .filter(e => e.supplierId === s.id && e.step !== 'rejected')
       .reduce((sum, e) => sum + (Number(e.amount)||0), 0);
@@ -1309,11 +1205,10 @@ function renderSuppliersList(){
         </div>
       </div>
 
-      <!-- Khung tài khoản ngân hàng thụ hưởng -->
       <div class="supplier-bank-box">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <span style="font-weight:700;font-size:11.5px;color:#0284c7;">💳 TÀI KHOẢN NGÂN HÀNG:</span>
-          <button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:11px;" onclick="copyToClipboard('${s.bankAcc || ''}')">📋 Copy STK</button>
+          <button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:11px;" onclick="window.copyToClipboard('${s.bankAcc || ''}')">📋 Copy STK</button>
         </div>
         <div><b>${s.bankName || '--'}</b></div>
         <div style="font-family:monospace;font-size:13.5px;color:#0f172a;font-weight:800;letter-spacing:0.5px;margin:2px 0;">
@@ -1322,15 +1217,14 @@ function renderSuppliersList(){
         <div style="font-size:11.5px;color:#64748b;">Chủ TK: <b>${s.bankHolder || '--'}</b></div>
       </div>
 
-      <!-- Footer Thống kê chi trả -->
       <div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;padding:10px 12px;border-radius:10px;margin-bottom:12px;font-size:12.5px;">
         <span style="color:#64748b;">Tổng lũy kế:</span>
         <span style="font-weight:800;color:var(--cam);">${totalPaid.toLocaleString('vi-VN')} ₫ (${invoiceCount} HĐ)</span>
       </div>
 
       <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;" onclick="openEditSupplierModal('${s.id}')">✏️ Sửa</button>
-        <button class="btn btn-ghost btn-sm" style="color:#ef4444;border-color:#fca5a5;padding:5px 10px;" onclick="deleteSupplier('${s.id}')">🗑️</button>
+        <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;" onclick="window.openEditSupplierModal('${s.id}')">✏️ Sửa</button>
+        <button class="btn btn-ghost btn-sm" style="color:#ef4444;border-color:#fca5a5;padding:5px 10px;" onclick="window.deleteSupplier('${s.id}')">🗑️</button>
       </div>
     </div>`;
   });
@@ -1339,7 +1233,7 @@ function renderSuppliersList(){
 }
 
 // ─── MODAL DETAIL: XEM CHI TIẾT & STEPPER 5 BƯỚC ───
-function openExpenseDetailModal(id){
+window.openExpenseDetailModal = function(id){
   ensureOfficeExpensesData();
   const item = OFFICE_EXPENSES.find(e => e.id === id);
   if(!item) return;
@@ -1357,7 +1251,6 @@ function openExpenseDetailModal(id){
     statusPill.textContent = stepInfo.label;
   }
 
-  // Cập nhật Stepper visual 5 bước
   const curNum = stepInfo.num;
   const pct = curNum === 0 ? 0 : Math.max(0, Math.min(100, (curNum - 1) * 25));
   const progressLine = document.getElementById('expDetailStepperProgress');
@@ -1372,7 +1265,6 @@ function openExpenseDetailModal(id){
     }
   }
 
-  // Nút duyệt bước tiếp theo
   const advBtn = document.getElementById('expDetailAdvanceBtn');
   if(advBtn){
     if(curNum >= 5){
@@ -1390,26 +1282,24 @@ function openExpenseDetailModal(id){
     }
   }
 
-  // Cột thông tin trái
   document.getElementById('expDetailPeriod').textContent = `Tháng ${item.month} / Năm ${item.year}`;
   document.getElementById('expDetailDate').textContent = item.date ? item.date.split('-').reverse().join('/') : '--';
   document.getElementById('expDetailInvoiceNo').textContent = item.invoiceNo || 'Chưa cập nhật';
   document.getElementById('expDetailCreator').textContent = item.createdBy || '--';
   document.getElementById('expDetailNote').textContent = item.note || 'Không có ghi chú thêm.';
 
-  // Thông tin nhà cung cấp
   const sup = OFFICE_SUPPLIERS.find(s => s.id === item.supplierId);
   const supBox = document.getElementById('expDetailSupplierBox');
   if(supBox){
     if(sup){
       supBox.innerHTML = `
         <div style="font-weight:700;color:#0f172a;margin-bottom:4px;">${escapeHtml(sup.name)}</div>
-        <div style="display:flex;justify-content:space-between;font-size:12.5px;color:#64748b;margin-bottom:4px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:4px;">
           <span>MST: <b>${sup.taxCode || '--'}</b></span>
           <span>Hotline: ${sup.phone || '--'}</span>
         </div>
         <div style="border-top:1px dashed #cbd5e1;padding-top:6px;margin-top:6px;">
-          <div style="font-size:12px;color:#0284c7;font-weight:700;">💳 NGÂN HÀNG THỤ HƯỞNG:</div>
+          <div style="font-size:11.5px;color:#0284c7;font-weight:700;">💳 NGÂN HÀNG THỤ HƯỞNG:</div>
           <div style="font-weight:700;font-size:13px;color:#0f172a;">${sup.bankName || '--'}</div>
           <div style="font-family:monospace;font-weight:800;font-size:14px;color:var(--cam);">${sup.bankAcc || '--'}</div>
           <div style="font-size:11.5px;color:#64748b;">Chủ TK: <b>${sup.bankHolder || '--'}</b></div>
@@ -1420,7 +1310,6 @@ function openExpenseDetailModal(id){
     }
   }
 
-  // Cột chứng từ phải
   const receiptImg = document.getElementById('expDetailReceiptImg');
   const receiptEmpty = document.getElementById('expDetailReceiptEmpty');
   const receiptZoomBtn = document.getElementById('expDetailReceiptZoomBtn');
@@ -1437,8 +1326,8 @@ function openExpenseDetailModal(id){
     receiptZoomBtn.style.display = 'none';
   }
 
-  openModal('expModalExpenseDetail');
-}
+  window.openModal('expModalExpenseDetail');
+};
 
 function handleAdvanceDetailStep(){
   if(!expCurrentDetailId) return;
@@ -1447,7 +1336,7 @@ function handleAdvanceDetailStep(){
 
   const curStep = Number(item.step) || 1;
   if(curStep >= 5){
-    toast('Khoản chi này đã hoàn tất thanh toán!', 'ℹ️');
+    if(typeof toast === 'function') toast('Khoản chi này đã hoàn tất thanh toán!', 'ℹ️');
     return;
   }
   const nextStep = curStep + 1;
@@ -1462,10 +1351,10 @@ function handleAdvanceDetailStep(){
   });
 
   saveOfficeExpenses();
-  openExpenseDetailModal(expCurrentDetailId);
+  window.openExpenseDetailModal(expCurrentDetailId);
   renderExpenseList();
   renderExpenseAnalytics();
-  toast(`✅ Đã phê duyệt chuyển sang Bước ${nextStep}!`, '✅');
+  if(typeof toast === 'function') toast(`✅ Đã phê duyệt chuyển sang Bước ${nextStep}!`, '✅');
 }
 
 function handleRejectDetailStep(){
@@ -1485,21 +1374,20 @@ function handleRejectDetailStep(){
   });
 
   saveOfficeExpenses();
-  openExpenseDetailModal(expCurrentDetailId);
+  window.openExpenseDetailModal(expCurrentDetailId);
   renderExpenseList();
   renderExpenseAnalytics();
-  toast('Đã từ chối khoản chi!', '⚠️');
+  if(typeof toast === 'function') toast('Đã từ chối khoản chi!', '⚠️');
 }
 
 // ─── THÊM / SỬA KHOẢN CHI ───
-function openAddExpenseModal(){
+window.openAddExpenseModal = function(){
   ensureOfficeExpensesData();
-  populateExpenseSupplierSelects();
+  populateExpenseDropdowns();
 
   document.getElementById('expExpenseModalTitle').textContent = '➕ Thêm khoản chi văn phòng';
   document.getElementById('expInpEditId').value = '';
 
-  // Tạo mã tự động
   const now = new Date();
   const y = String(now.getFullYear()).slice(-2);
   const m = String(now.getMonth() + 1).padStart(2, '0');
@@ -1519,16 +1407,19 @@ function openAddExpenseModal(){
   document.getElementById('expInpNote').value = '';
 
   document.getElementById('expInpReceiptBase64').value = '';
-  document.getElementById('expInpReceiptFile').value = '';
-  document.getElementById('expReceiptPreviewThumbWrap').style.display = 'none';
-  document.getElementById('expBtnClearReceipt').style.display = 'none';
+  const receiptFile = document.getElementById('expInpReceiptFile');
+  if(receiptFile) receiptFile.value = '';
+  const thumbWrap = document.getElementById('expReceiptPreviewThumbWrap');
+  if(thumbWrap) thumbWrap.style.display = 'none';
+  const clearBtn = document.getElementById('expBtnClearReceipt');
+  if(clearBtn) clearBtn.style.display = 'none';
 
-  openModal('expModalExpenseForm');
-}
+  window.openModal('expModalExpenseForm');
+};
 
-function openEditExpenseModal(id){
+window.openEditExpenseModal = function(id){
   ensureOfficeExpensesData();
-  populateExpenseSupplierSelects();
+  populateExpenseDropdowns();
 
   const item = OFFICE_EXPENSES.find(e => e.id === id);
   if(!item) return;
@@ -1548,22 +1439,23 @@ function openEditExpenseModal(id){
   document.getElementById('expInpNote').value = item.note || '';
 
   document.getElementById('expInpReceiptBase64').value = item.receiptUrl || '';
-  document.getElementById('expInpReceiptFile').value = '';
+  const receiptFile = document.getElementById('expInpReceiptFile');
+  if(receiptFile) receiptFile.value = '';
   const thumbWrap = document.getElementById('expReceiptPreviewThumbWrap');
   const thumbImg = document.getElementById('expReceiptPreviewThumb');
   const clearBtn = document.getElementById('expBtnClearReceipt');
 
   if(item.receiptUrl){
-    thumbImg.src = item.receiptUrl;
-    thumbWrap.style.display = 'flex';
-    clearBtn.style.display = 'inline-block';
+    if(thumbImg) thumbImg.src = item.receiptUrl;
+    if(thumbWrap) thumbWrap.style.display = 'flex';
+    if(clearBtn) clearBtn.style.display = 'inline-block';
   } else {
-    thumbWrap.style.display = 'none';
-    clearBtn.style.display = 'none';
+    if(thumbWrap) thumbWrap.style.display = 'none';
+    if(clearBtn) clearBtn.style.display = 'none';
   }
 
-  openModal('expModalExpenseForm');
-}
+  window.openModal('expModalExpenseForm');
+};
 
 function handleSaveExpense(){
   const editId = document.getElementById('expInpEditId').value.trim();
@@ -1580,15 +1472,14 @@ function handleSaveExpense(){
   const note = document.getElementById('expInpNote').value.trim();
   const receiptUrl = document.getElementById('expInpReceiptBase64').value;
 
-  if(!code){ toast('Vui lòng nhập mã chi phí', '⚠️'); return; }
-  if(!title){ toast('Vui lòng nhập nội dung chi phí', '⚠️'); return; }
-  if(amount <= 0){ toast('Vui lòng nhập số tiền thanh toán hợp lệ', '⚠️'); return; }
+  if(!code){ if(typeof toast==='function') toast('Vui lòng nhập mã chi phí', '⚠️'); return; }
+  if(!title){ if(typeof toast==='function') toast('Vui lòng nhập nội dung chi phí', '⚠️'); return; }
+  if(amount <= 0){ if(typeof toast==='function') toast('Vui lòng nhập số tiền thanh toán hợp lệ', '⚠️'); return; }
 
   const sup = OFFICE_SUPPLIERS.find(s => s.id === supplierId);
   const supplierName = sup ? sup.name : '';
 
   if(editId){
-    // Update
     const idx = OFFICE_EXPENSES.findIndex(e => e.id === editId);
     if(idx !== -1){
       OFFICE_EXPENSES[idx] = {
@@ -1596,10 +1487,9 @@ function handleSaveExpense(){
         code, title, category, amount, month, year, supplierId, supplierName, date, invoiceNo, step, note,
         receiptUrl: receiptUrl || OFFICE_EXPENSES[idx].receiptUrl
       };
-      toast('✅ Đã cập nhật khoản chi phí!', '✅');
+      if(typeof toast==='function') toast('✅ Đã cập nhật khoản chi phí!', '✅');
     }
   } else {
-    // Insert new
     const newExp = {
       id: 'exp-' + Date.now(),
       code,
@@ -1625,30 +1515,32 @@ function handleSaveExpense(){
       }]
     };
     OFFICE_EXPENSES.unshift(newExp);
-    toast('✅ Đã thêm mới khoản chi thành công!', '✅');
+    if(typeof toast==='function') toast('✅ Đã thêm mới khoản chi thành công!', '✅');
   }
 
   saveOfficeExpenses();
-  closeModal('expModalExpenseForm');
+  window.closeModal('expModalExpenseForm');
+  populateExpenseDropdowns();
   renderExpenseList();
   renderExpenseAnalytics();
 }
 
-function handleDeleteExpenseRow(id){
+window.handleDeleteExpenseRow = function(id){
   if(!confirm('Bạn có chắc chắn muốn xóa khoản chi này khỏi hệ thống?')) return;
   deleteExpense(id);
-}
+};
 
 function deleteExpense(id){
   OFFICE_EXPENSES = OFFICE_EXPENSES.filter(e => e.id !== id);
   saveOfficeExpenses();
+  populateExpenseDropdowns();
   renderExpenseList();
   renderExpenseAnalytics();
-  toast('Đã xóa khoản chi!', '🗑️');
+  if(typeof toast==='function') toast('Đã xóa khoản chi!', '🗑️');
 }
 
 // ─── THÊM / SỬA NHÀ CUNG CẤP ───
-function openAddSupplierModal(){
+window.openAddSupplierModal = function(){
   document.getElementById('expSupplierModalTitle').textContent = '🏢 Thêm Nhà cung cấp mới';
   document.getElementById('supInpEditId').value = '';
   document.getElementById('supInpName').value = '';
@@ -1662,10 +1554,10 @@ function openAddSupplierModal(){
   document.getElementById('supInpCategory').value = '';
   document.getElementById('supInpAddress').value = '';
 
-  openModal('expModalSupplierForm');
-}
+  window.openModal('expModalSupplierForm');
+};
 
-function openEditSupplierModal(id){
+window.openEditSupplierModal = function(id){
   const sup = OFFICE_SUPPLIERS.find(s => s.id === id);
   if(!sup) return;
 
@@ -1682,8 +1574,8 @@ function openEditSupplierModal(id){
   document.getElementById('supInpCategory').value = sup.category || '';
   document.getElementById('supInpAddress').value = sup.address || '';
 
-  openModal('expModalSupplierForm');
-}
+  window.openModal('expModalSupplierForm');
+};
 
 function handleSaveSupplier(){
   const editId = document.getElementById('supInpEditId').value.trim();
@@ -1698,7 +1590,7 @@ function handleSaveSupplier(){
   const category = document.getElementById('supInpCategory').value.trim();
   const address = document.getElementById('supInpAddress').value.trim();
 
-  if(!name){ toast('Vui lòng nhập tên công ty / nhà cung cấp', '⚠️'); return; }
+  if(!name){ if(typeof toast==='function') toast('Vui lòng nhập tên công ty / nhà cung cấp', '⚠️'); return; }
 
   if(editId){
     const idx = OFFICE_SUPPLIERS.findIndex(s => s.id === editId);
@@ -1707,7 +1599,7 @@ function handleSaveSupplier(){
         ...OFFICE_SUPPLIERS[idx],
         name, code, taxCode, phone, email, bankName, bankAcc, bankHolder, category, address
       };
-      toast('✅ Đã cập nhật thông tin NCC!', '✅');
+      if(typeof toast==='function') toast('✅ Đã cập nhật thông tin NCC!', '✅');
     }
   } else {
     const newSup = {
@@ -1715,32 +1607,32 @@ function handleSaveSupplier(){
       name, code, taxCode, phone, email, bankName, bankAcc, bankHolder, category, address
     };
     OFFICE_SUPPLIERS.push(newSup);
-    toast('✅ Đã lưu Nhà cung cấp mới!', '✅');
+    if(typeof toast==='function') toast('✅ Đã lưu Nhà cung cấp mới!', '✅');
   }
 
   saveOfficeSuppliers();
-  populateExpenseSupplierSelects();
-  closeModal('expModalSupplierForm');
+  populateExpenseDropdowns();
+  window.closeModal('expModalSupplierForm');
   renderSuppliersList();
 }
 
-function deleteSupplier(id){
+window.deleteSupplier = function(id){
   const inUse = OFFICE_EXPENSES.some(e => e.supplierId === id);
   if(inUse){
-    toast('Không thể xóa NCC này vì đang có hóa đơn chi phí liên kết!', '⚠️');
+    if(typeof toast==='function') toast('Không thể xóa NCC này vì đang có hóa đơn chi phí liên kết!', '⚠️');
     return;
   }
   if(!confirm('Bạn có chắc muốn xóa nhà cung cấp này?')) return;
 
   OFFICE_SUPPLIERS = OFFICE_SUPPLIERS.filter(s => s.id !== id);
   saveOfficeSuppliers();
-  populateExpenseSupplierSelects();
+  populateExpenseDropdowns();
   renderSuppliersList();
-  toast('Đã xóa nhà cung cấp!', '🗑️');
-}
+  if(typeof toast==='function') toast('Đã xóa nhà cung cấp!', '🗑️');
+};
 
 // ─── PHÓNG TO XEM CHỨNG TỪ (LIGHTBOX) ───
-function openReceiptLightbox(url, title){
+window.openReceiptLightbox = function(url, title){
   if(!url) return;
   const zoomImg = document.getElementById('expReceiptZoomImg');
   const zoomTitle = document.getElementById('expReceiptPreviewTitle');
@@ -1754,14 +1646,14 @@ function openReceiptLightbox(url, title){
     downloadBtn.href = url;
     downloadBtn.download = `chung-tu-${Date.now()}.png`;
   }
-  openModal('expModalReceiptPreview');
-}
+  window.openModal('expModalReceiptPreview');
+};
 
 // ─── XUẤT BÁO CÁO EXCEL CHUYÊN NGHIỆP ───
-function exportExpensesToExcel(){
+window.exportExpensesToExcel = function(){
   ensureOfficeExpensesData();
   if(typeof XLSX === 'undefined'){
-    toast('Thư viện Excel đang tải, vui lòng thử lại sau vài giây!', '⚠️');
+    if(typeof toast==='function') toast('Thư viện Excel đang tải, vui lòng thử lại sau vài giây!', '⚠️');
     return;
   }
 
@@ -1817,13 +1709,10 @@ function exportExpensesToExcel(){
     ]);
   });
 
-  // Dòng tổng cộng
   rows.push([]);
   rows.push(['TỔNG CỘNG', '', '', '', '', totalAmount, '', '', '', '', '', '']);
 
   const ws = XLSX.utils.aoa_to_sheet(rows);
-
-  // Set width cho cột
   ws['!cols'] = [
     { wch: 6 },
     { wch: 16 },
@@ -1844,17 +1733,17 @@ function exportExpensesToExcel(){
 
   const fileName = `GHN_Chi_Phi_Van_Phong_${yearVal !== 'all' ? yearVal : 'All'}_${Date.now()}.xlsx`;
   XLSX.writeFile(wb, fileName);
-  toast(`📥 Đã tải xuống file Excel: ${fileName}`, '✅');
-}
+  if(typeof toast==='function') toast(`📥 Đã tải xuống file Excel: ${fileName}`, '✅');
+};
 
-function copyToClipboard(text){
+window.copyToClipboard = function(text){
   if(!text) return;
   navigator.clipboard.writeText(text).then(()=>{
-    toast(`📋 Đã sao chép STK: ${text}`, '✅');
+    if(typeof toast==='function') toast(`📋 Đã sao chép STK: ${text}`, '✅');
   }).catch(()=>{
-    toast(`STK: ${text}`, 'ℹ️');
+    if(typeof toast==='function') toast(`STK: ${text}`, 'ℹ️');
   });
-}
+};
 
 function escapeHtml(str){
   if(!str) return '';

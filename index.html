@@ -1308,6 +1308,8 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         <p id="idcard-loading-text">Đang xử lý...</p>
       </div>
     </div>
+  </section>
+
   <!-- ============ CHI PHÍ VĂN PHÒNG ============ -->
   <section class="page" id="page-expenses">
     <!-- Header bar -->
@@ -2689,6 +2691,9 @@ setupSubNav('orderSubNav','or', (sub)=>{
   }
   if(sub==='history') renderOrderHistory();
   if(sub==='reports') renderOrderReports();
+});
+setupSubNav('expensesSubNav','exp', (sub)=>{
+  if(typeof renderExpensesPage === 'function') renderExpensesPage();
 });
 
 /* ============================================================
