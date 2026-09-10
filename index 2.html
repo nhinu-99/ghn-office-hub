@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GHN – Tạo Thẻ Nhân Viên</title>
+  <meta name="description" content="Công cụ tạo thẻ nhân viên GiaoHangNhanh – nhập thông tin, xem trước và xuất file PNG / PDF chuẩn A4." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ===== TOP NAV ===== -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-logo">
+      <div class="ghn-icon">GHN</div>
+      <div class="topbar-brand">
+        <span class="brand-main">GiaoHangNhanh</span>
+        <span class="brand-sub">Tạo Thẻ Nhân Viên</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="btn-export-png" class="btn btn-secondary" title="Xuất PNG">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-3 7l4-4 2 2 3-3 4 5"/></svg>
+        Xuất PNG
+      </button>
+      <button id="btn-export-pdf" class="btn btn-primary" title="Xuất PDF">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Xuất PDF
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== MAIN LAYOUT ===== -->
+<main class="layout">
+
+  <!-- LEFT: INPUT PANEL -->
+  <aside class="panel-left">
+    <div class="panel-section">
+      <h2 class="section-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Nhập thông tin nhân viên
+      </h2>
+
+      <div class="form-group">
+        <label for="inp-name">Họ và tên <span class="req">*</span></label>
+        <input id="inp-name" type="text" placeholder="Nguyễn Văn A" maxlength="60" />
+      </div>
+
+      <div class="form-group">
+        <label for="inp-title">Chức danh <span class="req">*</span></label>
+        <input id="inp-title" type="text" placeholder="Nhân viên giao hàng" maxlength="60" />
+      </div>
+
+      <div class="form-group">
+        <label for="inp-id">Mã số nhân viên</label>
+        <input id="inp-id" type="text" placeholder="GHN-0001" maxlength="20" />
+      </div>
+
+      <div class="form-group">
+        <label>Ảnh đại diện</label>
+        <div class="photo-upload" id="photo-drop-zone">
+          <input type="file" id="inp-photo" accept="image/*" hidden />
+          <div class="photo-placeholder" id="photo-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Kéo thả hoặc <label for="inp-photo" class="upload-link">chọn ảnh</label></span>
+          </div>
+          <img id="photo-preview" class="photo-preview hidden" alt="preview" />
+          <button id="btn-remove-photo" class="btn-remove-photo hidden" title="Xóa ảnh">✕</button>
+        </div>
+      </div>
+
+      <button id="btn-add" class="btn btn-primary btn-full">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Thêm vào danh sách
+      </button>
+    </div>
+
+    <!-- IMPORT EXCEL -->
+    <div class="panel-section">
+      <h2 class="section-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Import Excel / CSV
+      </h2>
+      <p class="hint">File cần có cột: <strong>Họ tên</strong>, <strong>Chức danh</strong>, <strong>MSNV</strong></p>
+      <div class="excel-drop" id="excel-drop-zone">
+        <input type="file" id="inp-excel" accept=".xlsx,.xls,.csv" hidden />
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#21a366" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Kéo thả hoặc <label for="inp-excel" class="upload-link">chọn file Excel</label></span>
+      </div>
+      <button id="btn-download-template" class="btn btn-ghost btn-full" style="margin-top:8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Tải file mẫu (.csv)
+      </button>
+    </div>
+    <!-- BULK IMAGE UPLOAD -->
+    <div class="panel-section">
+      <h2 class="section-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Nạp ảnh hàng loạt
+      </h2>
+      <p class="hint">Đổi tên ảnh thành <strong>Họ tên</strong> (ví dụ: <code>Võ Ngọc Hân.jpg</code>)</p>
+      <div class="excel-drop" id="bulk-image-drop-zone">
+        <input type="file" id="inp-bulk-images" accept="image/*" multiple hidden />
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f16321" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>Kéo thả hoặc <label for="inp-bulk-images" class="upload-link">chọn nhiều ảnh</label></span>
+      </div>
+    </div>
+
+    <!-- LAYOUT CONTROLS -->
+    <div class="panel-section">
+      <h2 class="section-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        Tùy chỉnh Bố cục
+      </h2>
+      
+      <div class="layout-controls">
+        <div class="control-row">
+          <label>Logo (To / Nhỏ)</label>
+          <input type="range" id="ctrl-logo-scale" min="0.5" max="1.5" step="0.02" value="1">
+        </div>
+        <div class="control-row">
+          <label>Logo (Lên / Xuống)</label>
+          <input type="range" id="ctrl-logo-y" min="-60" max="60" step="1" value="0">
+        </div>
+        
+        <div class="control-row" style="margin-top: 12px;">
+          <label>Ảnh đại diện (To / Nhỏ)</label>
+          <input type="range" id="ctrl-avatar-scale" min="0.7" max="1.3" step="0.02" value="1">
+        </div>
+        <div class="control-row">
+          <label>Ảnh đại diện (Lên / Xuống)</label>
+          <input type="range" id="ctrl-avatar-y" min="-60" max="60" step="1" value="0">
+        </div>
+
+        <div class="control-row" style="margin-top: 12px;">
+          <label>Phần chữ (To / Nhỏ)</label>
+          <input type="range" id="ctrl-info-scale" min="0.8" max="1.2" step="0.02" value="1">
+        </div>
+        <div class="control-row">
+          <label>Phần chữ (Lên / Xuống)</label>
+          <input type="range" id="ctrl-info-y" min="-40" max="40" step="1" value="0">
+        </div>
+
+        <div class="control-row" style="margin-top: 12px;">
+          <label>Footer (Lên / Xuống)</label>
+          <input type="range" id="ctrl-footer-y" min="-40" max="40" step="1" value="0">
+        </div>
+
+        <button id="btn-reset-layout" class="btn btn-outline btn-full" style="margin-top: 12px;">Khôi phục mặc định</button>
+      </div>
+    </div>
+
+    <!-- EMPLOYEE LIST -->
+    <div class="panel-section">
+      <div class="list-header">
+        <h2 class="section-title" style="margin-bottom:0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Danh sách (<span id="count">0</span>)
+        </h2>
+        <button id="btn-clear-all" class="btn-text-danger">Xóa tất cả</button>
+      </div>
+      <div id="employee-list" class="employee-list">
+        <div class="empty-state">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <p>Chưa có nhân viên nào</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT: PREVIEW -->
+  <section class="panel-right">
+    <div class="preview-toolbar">
+      <h2 class="section-title" style="margin-bottom:0">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Xem trước
+      </h2>
+      <div class="preview-controls">
+        <label class="control-label">Zoom</label>
+        <input type="range" id="zoom-slider" min="40" max="100" value="70" class="zoom-slider" />
+        <span id="zoom-value">70%</span>
+      </div>
+    </div>
+
+    <div class="preview-scroll">
+      <div id="preview-pages" class="preview-pages"></div>
+      <div id="empty-preview" class="empty-preview">
+        <div class="empty-preview-inner">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-3 7l4-4 2 2 3-3 4 5"/></svg>
+          <p>Thêm nhân viên để xem trước thẻ</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ===== TOAST ===== -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- ===== LOADING OVERLAY ===== -->
+<div id="loading-overlay" class="loading-overlay hidden">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p id="loading-text">Đang xử lý...</p>
+  </div>
+</div>
+
+<!-- LIBS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -618,7 +618,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
     <p class="section-sub">Quản lý email đăng nhập theo phòng ban và tài khoản Admin của hệ thống.</p>
 
     <!-- ===== CARD: KHOÁ WEB ===== -->
-    <div class="card" style="margin-bottom:16px;border:2px solid #fee2e2;">
+    <div class="card" id="weblockCard" style="margin-bottom:16px;border:2px solid #fee2e2; display:none;">
       <button type="button" class="collapsible-toggle" data-collapse-target="cc-weblock">
         <span class="collapsible-title-wrap">
           <span class="collapsible-title">🔒 Khoá / Mở khoá web</span>
@@ -635,7 +635,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
       </div>
     </div>
 
-    <div class="card" style="margin-bottom:16px;">
+    <div class="card" id="staffDirCard" style="margin-bottom:16px; display:none;">
       <button type="button" class="collapsible-toggle" data-collapse-target="cc-staffdir">
         <span class="collapsible-title-wrap">
           <span class="collapsible-title">📧 Email nhân viên theo phòng ban</span>
@@ -645,12 +645,14 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
       </button>
       <div class="collapsible-body" id="cc-staffdir">
         <div style="overflow-x:auto;margin-bottom:14px;">
+          <input type="text" id="staffDirSearch" placeholder="🔍 Tìm theo tên nhân viên, email hoặc phòng ban..." style="width:100%;padding:10px 14px;border-radius:10px;border:2px solid #f0f0f0;margin-bottom:12px;font-size:13px;" oninput="renderStaffDirTable()">
           <table class="assign-table" id="staffDirTable">
-            <thead><tr><th>Email</th><th>Phòng ban</th><th style="width:70px;"></th></tr></thead>
+            <thead><tr><th>Tên nhân viên</th><th>Email</th><th>Phòng ban</th><th style="width:120px;"></th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <input type="text" id="newDirName" placeholder="Tên nhân viên (tuỳ chọn)" style="flex:1;min-width:180px;padding:10px 14px;border-radius:10px;border:2px solid #f0f0f0;">
           <input type="email" id="newDirEmail" placeholder="email@ghn.vn" style="flex:1;min-width:200px;padding:10px 14px;border-radius:10px;border:2px solid #f0f0f0;">
           <select id="newDirDept" style="padding:10px 14px;border-radius:10px;border:2px solid #f0f0f0;"></select>
           <button class="btn btn-cam btn-sm" id="addDirBtn">+ Thêm email</button>
@@ -691,7 +693,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
       <div class="collapsible-body" id="cc-admins">
         <div style="overflow-x:auto;margin-bottom:14px;">
           <table class="assign-table" id="adminTable">
-            <thead><tr><th>Email</th><th>Vai trò</th><th style="width:70px;"></th></tr></thead>
+            <thead><tr><th>Email</th><th>Vai trò & Quyền hạn</th><th style="width:70px;"></th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -1358,7 +1360,7 @@ function lsSet(key, val){
 function canWriteCloudKey(key){
   if(!SESSION) return false;
   if(key === 'orders') return true;
-  const protectedKeys = ['admins','staffDir','departments','catEdits','catAdded','catDeleted','zoneEdits','zoneAdded','zoneDeleted','productEdits','productDeleted','productAdded','staff','assign','inspections'];
+  const protectedKeys = ['admins','staffDir','staffNames','departments','catEdits','catAdded','catDeleted','zoneEdits','zoneAdded','zoneDeleted','productEdits','productDeleted','productAdded','staff','assign','inspections'];
   if(protectedKeys.includes(key)) return isAdmin();
   return true;
 }
@@ -1379,6 +1381,7 @@ const LOCAL_ADMIN_BOOTSTRAP_PASSWORDS = {
 };
 let ADMIN_ACCOUNTS = [];
 let STAFF_DIRECTORY = {};
+let STAFF_NAMES = {}; // {email: displayName}
 let SESSION = lsGet(LS_KEY.session, null); // phiên đăng nhập: riêng từng máy
 
 function findAdminAccount(email){
@@ -1398,13 +1401,54 @@ function sanitizeAdminAccounts(accounts){
     .map(a=>({
       email: normalizeEmail(a.email),
       dept: a.dept || 'Office Admin General',
-      isSuper: !!a.isSuper
+      isSuper: !!a.isSuper,
+      canLockWeb: a.canLockWeb !== false,
+      canEditProducts: a.canEditProducts !== false,
+      canEditDepts: a.canEditDepts !== false,
+      canEditStaff: a.canEditStaff !== false
     }))
     .filter(a=>a.email);
 }
 /* ---------- Admin và Super Admin đều có quyền truy cập đầy đủ hệ thống ---------- */
 function canFullAccess(){
   return !!(SESSION && (SESSION.email === SUPER_ADMIN_EMAIL || SESSION.role === 'admin' || SESSION.dept === 'Office Admin General'));
+}
+
+/* ---------- Các hàm kiểm tra quyền Admin chi tiết ---------- */
+function canLockWeb(){
+  if(isSuperAdmin()) return true;
+  if(isAdmin()){
+    const admin = findAdminAccount(SESSION.email);
+    return admin && admin.canLockWeb !== false;
+  }
+  return false;
+}
+
+function canEditProducts(){
+  if(isSuperAdmin()) return true;
+  if(isAdmin()){
+    const admin = findAdminAccount(SESSION.email);
+    return admin && admin.canEditProducts !== false;
+  }
+  return false;
+}
+
+function canEditDepts(){
+  if(isSuperAdmin()) return true;
+  if(isAdmin()){
+    const admin = findAdminAccount(SESSION.email);
+    return admin && admin.canEditDepts !== false;
+  }
+  return false;
+}
+
+function canEditStaff(){
+  if(isSuperAdmin()) return true;
+  if(isAdmin()){
+    const admin = findAdminAccount(SESSION.email);
+    return admin && admin.canEditStaff !== false;
+  }
+  return false;
 }
 
 /* ---------- Sản phẩm giới hạn phòng ban (Admin cấp cao nhất cấu hình theo từng sản phẩm) ---------- */
@@ -1468,6 +1512,7 @@ function applyCloudInitial(raw, options){
   }
   if(typeof ensureAdminFirebaseUsers === 'function') ensureAdminFirebaseUsers();
   STAFF_DIRECTORY = raw.staffDir || {};
+  STAFF_NAMES = raw.staffNames || {};
 
   STAFF = (raw.staff && raw.staff.length) ? raw.staff : null;
   ASSIGN = raw.assign || null;
@@ -2992,39 +3037,62 @@ function importUsersFromWorkbookUrl(url, options){
 function renderAccountsPage(){
   if(!isAdmin()){ gotoPage('home'); return; }
 
-  document.getElementById('productManageCard').style.display = isSuperAdmin() ? 'block' : 'none';
-  if(isSuperAdmin() && typeof renderProductManageTable === 'function') renderProductManageTable();
+  document.getElementById('productManageCard').style.display = canEditProducts() ? 'block' : 'none';
+  if(canEditProducts() && typeof renderProductManageTable === 'function') renderProductManageTable();
 
-  document.getElementById('deptManageCard').style.display = isSuperAdmin() ? 'block' : 'none';
-  if(isSuperAdmin() && typeof renderDeptManageTable === 'function') renderDeptManageTable();
+  document.getElementById('deptManageCard').style.display = canEditDepts() ? 'block' : 'none';
+  if(canEditDepts() && typeof renderDeptManageTable === 'function') renderDeptManageTable();
+
+  document.getElementById('weblockCard').style.display = canLockWeb() ? 'block' : 'none';
+  document.getElementById('staffDirCard').style.display = canEditStaff() ? 'block' : 'none';
 
   const sel = document.getElementById('newDirDept');
   const prevSelVal = sel.value;
   sel.innerHTML = DEPARTMENTS.filter(d=>d!=='Khác').map(d=>`<option value="${d}">${d}</option>`).join('');
   if(DEPARTMENTS.includes(prevSelVal)) sel.value = prevSelVal;
 
-  const tbody = document.querySelector('#staffDirTable tbody');
-  const emails = Object.keys(STAFF_DIRECTORY).sort();
-  tbody.innerHTML = emails.length ? emails.map(e=>`
-    <tr><td>${escapeHtml(e)}</td><td>${escapeHtml(STAFF_DIRECTORY[e])}</td>
-    <td><button class="btn btn-danger btn-sm" data-rmdir="${escapeHtml(e)}">Xoá</button></td></tr>
-  `).join('') : `<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:16px;">Chưa có email nào được cấp quyền phòng ban.</td></tr>`;
-  tbody.querySelectorAll('[data-rmdir]').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      delete STAFF_DIRECTORY[b.dataset.rmdir];
-      cloudSet('staffDir', STAFF_DIRECTORY);
-      renderAccountsPage();
-      toast('Đã xoá email khỏi danh sách','🗑️');
-    });
-  });
+  renderStaffDirTable();
 
   const atbody = document.querySelector('#adminTable tbody');
   atbody.innerHTML = ADMIN_ACCOUNTS.map(a=>`
-    <tr><td>${escapeHtml(a.email)}</td><td>${a.isSuper ? '👑 Quản trị cao nhất' : 'Admin'}</td>
-    <td>${a.isSuper ? '' : `<button class="btn btn-danger btn-sm" data-rmadmin="${escapeHtml(a.email)}">Xoá</button>`}</td></tr>
+    <tr><td>${escapeHtml(a.email)}</td>
+    <td>
+      ${a.isSuper ? '👑 Quản trị cao nhất (Toàn quyền)' : `
+        <div style="font-weight:600;margin-bottom:6px;">Admin</div>
+        <div style="font-size:12px; display:flex; flex-direction:column; gap:4px;">
+          <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canLockWeb" ${a.canLockWeb?'checked':''} ${isSuperAdmin()?'':'disabled'}> Khoá Web</label>
+          <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canEditProducts" ${a.canEditProducts?'checked':''} ${isSuperAdmin()?'':'disabled'}> QL Sản phẩm</label>
+          <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canEditDepts" ${a.canEditDepts?'checked':''} ${isSuperAdmin()?'':'disabled'}> QL Phòng ban</label>
+          <label><input type="checkbox" class="admin-perm-cb" data-email="${escapeHtml(a.email)}" data-perm="canEditStaff" ${a.canEditStaff?'checked':''} ${isSuperAdmin()?'':'disabled'}> QL Danh bạ NV</label>
+        </div>
+      `}
+    </td>
+    <td style="vertical-align:top;padding-top:14px;">${a.isSuper ? '' : `<button class="btn btn-danger btn-sm" data-rmadmin="${escapeHtml(a.email)}" ${isSuperAdmin()?'':'disabled'}>Xoá</button>`}</td></tr>
   `).join('');
+  
+  atbody.querySelectorAll('.admin-perm-cb').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      if(!isSuperAdmin()) {
+        e.target.checked = !e.target.checked;
+        return;
+      }
+      const targetEmail = e.target.dataset.email;
+      const perm = e.target.dataset.perm;
+      const admin = ADMIN_ACCOUNTS.find(acc => acc.email === targetEmail);
+      if(admin) {
+        admin[perm] = e.target.checked;
+        cloudSet('admins', ADMIN_ACCOUNTS);
+        toast('Đã cập nhật quyền', '✅');
+      }
+    });
+  });
+
   atbody.querySelectorAll('[data-rmadmin]').forEach(b=>{
     b.addEventListener('click', ()=>{
+      if(!isSuperAdmin()) {
+        toast('Chỉ Super Admin mới được xoá Admin khác', '⚠️');
+        return;
+      }
       if(!confirm('Xoá tài khoản Admin này?')) return;
       ADMIN_ACCOUNTS = ADMIN_ACCOUNTS.filter(a=>a.email!==b.dataset.rmadmin);
       cloudSet('admins', ADMIN_ACCOUNTS);
@@ -3034,19 +3102,124 @@ function renderAccountsPage(){
   });
 }
 
+function renderStaffDirTable(){
+  const tbody = document.querySelector('#staffDirTable tbody');
+  if(!tbody) return;
+  const q = ((document.getElementById('staffDirSearch')||{}).value||'').trim().toLowerCase();
+  let emails = Object.keys(STAFF_DIRECTORY).sort((a,b)=>{
+    const na = (STAFF_NAMES[a]||'').toLowerCase();
+    const nb = (STAFF_NAMES[b]||'').toLowerCase();
+    return na.localeCompare(nb) || a.localeCompare(b);
+  });
+  if(q){
+    emails = emails.filter(e=>{
+      const name = (STAFF_NAMES[e]||'').toLowerCase();
+      const dept = (STAFF_DIRECTORY[e]||'').toLowerCase();
+      return e.toLowerCase().includes(q) || name.includes(q) || dept.includes(q);
+    });
+  }
+  if(!emails.length){
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:16px;">${q ? 'Không tìm thấy kết quả phù hợp.' : 'Chưa có email nào được cấp quyền phòng ban.'}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = emails.map(e=>`
+    <tr>
+      <td>${escapeHtml(STAFF_NAMES[e]||'—')}</td>
+      <td>${escapeHtml(e)}</td>
+      <td>${escapeHtml(STAFF_DIRECTORY[e])}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-ghost btn-sm" data-editdir="${escapeHtml(e)}" style="margin-right:4px;">✏️ Sửa</button>
+        <button class="btn btn-danger btn-sm" data-rmdir="${escapeHtml(e)}">Xoá</button>
+      </td>
+    </tr>
+  `).join('');
+  tbody.querySelectorAll('[data-rmdir]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      if(!confirm('Xoá email "'+b.dataset.rmdir+'" khỏi danh sách?')) return;
+      delete STAFF_DIRECTORY[b.dataset.rmdir];
+      delete STAFF_NAMES[b.dataset.rmdir];
+      cloudSet('staffDir', STAFF_DIRECTORY);
+      cloudSet('staffNames', STAFF_NAMES);
+      renderStaffDirTable();
+      toast('Đã xoá email khỏi danh sách','🗑️');
+    });
+  });
+  tbody.querySelectorAll('[data-editdir]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const email = b.dataset.editdir;
+      showEditStaffDirModal(email);
+    });
+  });
+}
+
+function showEditStaffDirModal(email){
+  const curName = STAFF_NAMES[email] || '';
+  const curDept = STAFF_DIRECTORY[email] || '';
+  const deptOptions = DEPARTMENTS.filter(d=>d!=='Khác').map(d=>`<option value="${escapeHtml(d)}" ${d===curDept?'selected':''}>${escapeHtml(d)}</option>`).join('');
+  const overlay = document.createElement('div');
+  overlay.id = 'editStaffDirOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:18px;padding:28px 28px 22px;min-width:320px;max-width:90vw;box-shadow:0 8px 40px rgba(0,0,0,.18);">
+      <h3 style="margin:0 0 18px;font-size:16px;font-weight:700;">✏️ Chỉnh sửa nhân viên</h3>
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:4px;">Tên nhân viên</label>
+      <input id="editDirName" type="text" value="${escapeHtml(curName)}" placeholder="Nhập tên nhân viên..." style="width:100%;padding:10px 14px;border-radius:10px;border:2px solid #f0f0f0;margin-bottom:12px;box-sizing:border-box;font-size:13.5px;">
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:4px;">Email</label>
+      <input id="editDirEmail" type="email" value="${escapeHtml(email)}" placeholder="email@ghn.vn" style="width:100%;padding:10px 14px;border-radius:10px;border:2px solid #f0f0f0;margin-bottom:12px;box-sizing:border-box;font-size:13.5px;">
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:4px;">Phòng ban</label>
+      <select id="editDirDept" style="width:100%;padding:10px 14px;border-radius:10px;border:2px solid #f0f0f0;margin-bottom:20px;font-size:13.5px;">${deptOptions}</select>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="editDirCancelBtn" class="btn btn-ghost btn-sm">Huỷ</button>
+        <button id="editDirSaveBtn" class="btn btn-xanh btn-sm">💾 Lưu thay đổi</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('editDirCancelBtn').addEventListener('click', ()=>{ overlay.remove(); });
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  document.getElementById('editDirSaveBtn').addEventListener('click', ()=>{
+    const newName = document.getElementById('editDirName').value.trim();
+    const newEmail = normalizeEmail(document.getElementById('editDirEmail').value);
+    const newDept = document.getElementById('editDirDept').value;
+    if(!newEmail || !newEmail.includes('@')){ toast('Email không hợp lệ','⚠️'); return; }
+    if(newEmail !== email){
+      if(STAFF_DIRECTORY[newEmail] !== undefined){ toast('Email này đã tồn tại trong danh sách','⚠️'); return; }
+      if(findAdminAccount(newEmail)){ toast('Email này đã là tài khoản Admin','⚠️'); return; }
+      STAFF_DIRECTORY[newEmail] = newDept;
+      STAFF_NAMES[newEmail] = newName;
+      delete STAFF_DIRECTORY[email];
+      delete STAFF_NAMES[email];
+    } else {
+      STAFF_DIRECTORY[email] = newDept;
+      STAFF_NAMES[email] = newName;
+    }
+    cloudSet('staffDir', STAFF_DIRECTORY);
+    cloudSet('staffNames', STAFF_NAMES);
+    overlay.remove();
+    renderStaffDirTable();
+    toast('Đã cập nhật thông tin nhân viên','✅');
+  });
+}
+
 document.getElementById('addDirBtn').addEventListener('click', ()=>{
+  if(!canEditStaff()){ toast('Chỉ Admin có quyền quản lý danh bạ mới được thao tác','🔒'); return; }
+  const name = (document.getElementById('newDirName').value||'').trim();
   const email = normalizeEmail(document.getElementById('newDirEmail').value);
   const dept = document.getElementById('newDirDept').value;
   if(!email || !email.includes('@')){ toast('Email không hợp lệ','⚠️'); return; }
   if(findAdminAccount(email)){ toast('Email này đã là tài khoản Admin','⚠️'); return; }
   STAFF_DIRECTORY[email] = dept;
+  if(name) STAFF_NAMES[email] = name;
   cloudSet('staffDir', STAFF_DIRECTORY);
+  cloudSet('staffNames', STAFF_NAMES);
+  document.getElementById('newDirName').value='';
   document.getElementById('newDirEmail').value='';
-  renderAccountsPage();
+  renderStaffDirTable();
   toast('Đã thêm email '+email,'🎉');
 });
 
 document.getElementById('importUsersBtn').addEventListener('click', ()=>{
+  if(!canEditStaff()){ toast('Chỉ Admin có quyền quản lý danh bạ mới được thao tác','🔒'); return; }
   const fileInput = document.getElementById('importUsersFile');
   if(fileInput.files && fileInput.files[0]){
     importUsersFromExcelFile(fileInput.files[0]);
@@ -3067,7 +3240,16 @@ document.getElementById('addAdminBtn').addEventListener('click', ()=>{
   const btn = document.getElementById('addAdminBtn');
   btn.disabled = true; btn.textContent='⏳ Đang tạo...';
 
-  const adminEntry = { email, dept:'Office Admin General', isSuper:false, password: pass };
+  const adminEntry = { 
+    email, 
+    dept:'Office Admin General', 
+    isSuper:false, 
+    password: pass,
+    canLockWeb: false,
+    canEditProducts: false,
+    canEditDepts: false,
+    canEditStaff: false
+  };
   ADMIN_ACCOUNTS.push(adminEntry);
   cloudSet('admins', ADMIN_ACCOUNTS);
 
@@ -3086,7 +3268,7 @@ document.getElementById('addAdminBtn').addEventListener('click', ()=>{
    QUẢN LÝ PHÒNG BAN (chỉ Admin cấp cao nhất)
    ============================================================ */
 function renderDeptManageTable(){
-  if(!isSuperAdmin()) return;
+  if(!canEditDepts()) return;
   const tbody = document.querySelector('#deptManageTable tbody');
   const q = (document.getElementById('deptSearchInput').value||'').trim().toLowerCase();
   const list = q ? DEPARTMENTS.filter(d=>d.toLowerCase().includes(q)) : DEPARTMENTS;
@@ -3147,6 +3329,7 @@ function renderDeptManageTable(){
   });
 }
 document.getElementById('addDeptBtn').addEventListener('click', ()=>{
+  if(!canEditDepts()){ toast('Chỉ Admin có quyền quản lý phòng ban mới được thao tác','🔒'); return; }
   const input = document.getElementById('newDeptInput');
   const name = input.value.trim();
   if(!name){ toast('Vui lòng nhập tên phòng ban','⚠️'); return; }
@@ -3256,7 +3439,7 @@ function getSelectedProductDepts(){
 }
 
 function openProductModal(mode, product){
-  if(!isSuperAdmin()) return;
+  if(!canEditProducts()) return;
   editingProductMa = mode==='edit' ? product.ma : null;
   pendingProductImg = null;
   document.getElementById('productModalTitle').textContent = mode==='edit' ? '✏️ Sửa sản phẩm' : '🛒 Thêm sản phẩm mới';
@@ -3279,7 +3462,7 @@ document.getElementById('productModalCloseBtn').addEventListener('click', ()=> p
 productModal.addEventListener('click', (e)=>{ if(e.target===productModal) productModal.classList.remove('show'); });
 
 document.getElementById('saveProductBtn').addEventListener('click', ()=>{
-  if(!isSuperAdmin()){ toast('Chỉ Admin cấp cao nhất mới có quyền này','🔒'); return; }
+  if(!canEditProducts()){ toast('Chỉ Admin có quyền quản lý sản phẩm mới được thao tác','🔒'); return; }
   const ma = document.getElementById('prodMaInput').value.trim();
   const ten = document.getElementById('prodTenInput').value.trim();
   const dvt = document.getElementById('prodDvtInput').value.trim();
@@ -3311,7 +3494,7 @@ document.getElementById('saveProductBtn').addEventListener('click', ()=>{
 });
 
 function renderProductManageTable(){
-  if(!isSuperAdmin()) return;
+  if(!canEditProducts()) return;
   const tbody = document.querySelector('#productManageTable tbody');
   const q = productSearchAdmin.trim().toLowerCase();
   let list = PRODUCTS.slice().sort((a,b)=>a.ma.localeCompare(b.ma));
@@ -3553,6 +3736,7 @@ function buildBackupPayload(){
     departments: DEPARTMENTS,
     admins: sanitizeAdminAccounts(ADMIN_ACCOUNTS),
     staffDir: STAFF_DIRECTORY,
+    staffNames: STAFF_NAMES,
     staff: STAFF,
     assign: ASSIGN,
     inspections: INSPECTIONS,
@@ -3645,6 +3829,7 @@ function restoreLatestBackup(){
       DEPARTMENTS = Array.isArray(backupData.departments) ? backupData.departments : DEPARTMENTS;
       ADMIN_ACCOUNTS = sanitizeAdminAccounts(backupData.admins || []);
       STAFF_DIRECTORY = backupData.staffDir || {};
+      STAFF_NAMES = backupData.staffNames || {};
       STAFF = backupData.staff || [];
       ASSIGN = backupData.assign || {};
       INSPECTIONS = backupData.inspections || {};
@@ -3846,8 +4031,8 @@ function renderWeblockUI(){
 }
 
 function toggleWebLock(){
-  if(!isAdmin()){
-    toast('Chỉ Admin mới có thể khoá/mở khoá web!','⚠️'); return;
+  if(!canLockWeb()){
+    toast('Chỉ Admin có quyền khoá web mới có thể thực hiện thao tác này!','⚠️'); return;
   }
   const willLock = !WEB_LOCKED;
   const msg = willLock
