@@ -22,34 +22,30 @@ let expensesEventsBound = false;
 window.initOfficeExpensesFromCloud = function(raw, persistDefaults){
   raw = raw || {};
 
-  // Lọc và xóa bỏ toàn bộ dữ liệu mẫu cũ nếu còn lưu trong DB hoặc local
+  // Danh mục mã/ID dữ liệu mẫu tĩnh cũ cần dọn
+  const MOCK_SUPPLIER_IDS = new Set(['sup-evn', 'sup-sawaco', 'sup-viettel', 'sup-building', 'sup-daikin', 'sup-green', 'sup-lavie']);
+  const MOCK_EXPENSE_CODES = new Set(['EXP-2609-001','EXP-2609-002','EXP-2609-003','EXP-2609-004','EXP-2609-005','EXP-2609-006','EXP-2609-007','EXP-2608-001','EXP-2608-002','EXP-2608-003','EXP-2608-004','EXP-2608-005','EXP-2607-001','EXP-2607-002','EXP-2606-001','EXP-2605-001','EXP-2604-001','EXP-2603-001','EXP-2602-001','EXP-2601-001','EXP-2501','EXP-2502','EXP-2503','EXP-2504','EXP-2505','EXP-2506','EXP-2507','EXP-2508','EXP-2509','EXP-2510','EXP-2511','EXP-2512']);
+
   if(Array.isArray(raw.officeExpenses)){
-    raw.officeExpenses = raw.officeExpenses.filter(e => {
-      const id = String(e.id || '');
-      const code = String(e.code || '');
-      return !id.startsWith('exp-26') && !id.startsWith('exp-25') && !code.startsWith('EXP-26') && !code.startsWith('EXP-25');
-    });
+    OFFICE_EXPENSES = raw.officeExpenses.filter(e => !MOCK_EXPENSE_CODES.has(e.code) && !MOCK_EXPENSE_CODES.has(e.id));
   } else {
-    raw.officeExpenses = [];
+    try {
+      const local = JSON.parse(localStorage.getItem('officeExpenses_v2') || '[]');
+      OFFICE_EXPENSES = Array.isArray(local) ? local : [];
+    } catch(e){
+      OFFICE_EXPENSES = [];
+    }
   }
 
   if(Array.isArray(raw.officeSuppliers)){
-    raw.officeSuppliers = raw.officeSuppliers.filter(s => {
-      const id = String(s.id || '');
-      const code = String(s.code || '');
-      return !id.startsWith('sup-') && !['EVN-HCM', 'SAWACO', 'VIETTEL', 'BQL-GHN', 'DAIVET-ME', 'PHUONGNAM-GREEN', 'LAVIE-VN'].includes(code);
-    });
+    OFFICE_SUPPLIERS = raw.officeSuppliers.filter(s => !MOCK_SUPPLIER_IDS.has(s.id));
   } else {
-    raw.officeSuppliers = [];
-  }
-
-  OFFICE_EXPENSES = raw.officeExpenses;
-  OFFICE_SUPPLIERS = raw.officeSuppliers;
-
-  // Cập nhật lại cloud để database không còn lưu dữ liệu mẫu
-  if(typeof cloudSet === 'function'){
-    cloudSet('officeExpenses', OFFICE_EXPENSES);
-    cloudSet('officeSuppliers', OFFICE_SUPPLIERS);
+    try {
+      const local = JSON.parse(localStorage.getItem('officeSuppliers_v2') || '[]');
+      OFFICE_SUPPLIERS = Array.isArray(local) ? local : [];
+    } catch(e){
+      OFFICE_SUPPLIERS = [];
+    }
   }
 };
 
@@ -60,10 +56,16 @@ function ensureOfficeExpensesData(){
 
 function saveOfficeExpenses(){
   if(typeof cloudSet === 'function') cloudSet('officeExpenses', OFFICE_EXPENSES);
+  try {
+    localStorage.setItem('officeExpenses_v2', JSON.stringify(OFFICE_EXPENSES));
+  } catch(e){}
 }
 
 function saveOfficeSuppliers(){
   if(typeof cloudSet === 'function') cloudSet('officeSuppliers', OFFICE_SUPPLIERS);
+  try {
+    localStorage.setItem('officeSuppliers_v2', JSON.stringify(OFFICE_SUPPLIERS));
+  } catch(e){}
 }
 
 // ─── Helper Functions ───
@@ -89,12 +91,18 @@ function getStepInfo(step){
 
 window.closeModal = function(modalId){
   const el = document.getElementById(modalId);
-  if(el) el.classList.remove('show');
+  if(el){
+    el.classList.remove('show');
+    el.style.display = 'none';
+  }
 };
 
 window.openModal = function(modalId){
   const el = document.getElementById(modalId);
-  if(el) el.classList.add('show');
+  if(el){
+    el.classList.add('show');
+    el.style.display = 'flex';
+  }
 };
 
 // ─── Khởi động trang & Sự kiện ───
@@ -1050,25 +1058,26 @@ window.openEditExpenseModal = function(id){
   window.openModal('expModalExpenseForm');
 };
 
-function handleSaveExpense(){
-  const editId = document.getElementById('expInpEditId').value.trim();
-  const code = document.getElementById('expInpCode').value.trim();
-  const title = document.getElementById('expInpTitle').value.trim();
-  const category = document.getElementById('expInpCategory').value;
-  const amount = parseFloat(document.getElementById('expInpAmount').value) || 0;
-  const month = parseInt(document.getElementById('expInpMonth').value, 10) || 9;
-  const year = parseInt(document.getElementById('expInpYear').value, 10) || 2026;
-  const supplierId = document.getElementById('expInpSupplierSelect').value;
-  const date = document.getElementById('expInpDate').value;
-  const invoiceNo = document.getElementById('expInpInvoiceNo').value.trim();
-  const step = document.getElementById('expInpStep').value;
-  const note = document.getElementById('expInpNote').value.trim();
-  const receiptUrl = document.getElementById('expInpReceiptBase64').value;
+window.handleSaveExpense = function(){
+  const editId = (document.getElementById('expInpEditId')?.value || '').trim();
+  const code = (document.getElementById('expInpCode')?.value || '').trim();
+  const title = (document.getElementById('expInpTitle')?.value || '').trim();
+  const category = document.getElementById('expInpCategory')?.value || 'Văn phòng phẩm & In ấn';
+  const amount = parseFloat(document.getElementById('expInpAmount')?.value) || 0;
+  const month = parseInt(document.getElementById('expInpMonth')?.value, 10) || (new Date().getMonth() + 1);
+  const year = parseInt(document.getElementById('expInpYear')?.value, 10) || new Date().getFullYear();
+  const supplierId = document.getElementById('expInpSupplierSelect')?.value || '';
+  const date = document.getElementById('expInpDate')?.value || new Date().toISOString().split('T')[0];
+  const invoiceNo = (document.getElementById('expInpInvoiceNo')?.value || '').trim();
+  const step = document.getElementById('expInpStep')?.value || '1';
+  const note = (document.getElementById('expInpNote')?.value || '').trim();
+  const receiptUrl = document.getElementById('expInpReceiptBase64')?.value || '';
 
-  if(!code){ if(typeof toast==='function') toast('Vui lòng nhập mã chi phí', '⚠️'); return; }
-  if(!title){ if(typeof toast==='function') toast('Vui lòng nhập nội dung chi phí', '⚠️'); return; }
-  if(amount <= 0){ if(typeof toast==='function') toast('Vui lòng nhập số tiền thanh toán hợp lệ', '⚠️'); return; }
+  if(!code){ if(typeof toast==='function') toast('Vui lòng nhập mã chi phí', '⚠️'); else alert('Vui lòng nhập mã chi phí'); return; }
+  if(!title){ if(typeof toast==='function') toast('Vui lòng nhập nội dung chi phí', '⚠️'); else alert('Vui lòng nhập nội dung chi phí'); return; }
+  if(amount <= 0){ if(typeof toast==='function') toast('Vui lòng nhập số tiền thanh toán hợp lệ', '⚠️'); else alert('Vui lòng nhập số tiền'); return; }
 
+  ensureOfficeExpensesData();
   const sup = OFFICE_SUPPLIERS.find(s => s.id === supplierId);
   const supplierName = sup ? sup.name : '';
 
@@ -1084,7 +1093,7 @@ function handleSaveExpense(){
     }
   } else {
     const newExp = {
-      id: 'exp-' + Date.now(),
+      id: 'chiphi_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
       code,
       title,
       category,
@@ -1132,74 +1141,101 @@ function deleteExpense(id){
   if(typeof toast==='function') toast('Đã xóa khoản chi!', '🗑️');
 }
 
-// ─── THÊM / SỬA NHÀ CUNG CẤP ───
 window.openAddSupplierModal = function(){
-  document.getElementById('expSupplierModalTitle').textContent = '🏢 Thêm Nhà cung cấp mới';
-  document.getElementById('supInpEditId').value = '';
-  document.getElementById('supInpName').value = '';
-  document.getElementById('supInpCode').value = '';
-  document.getElementById('supInpTaxCode').value = '';
-  document.getElementById('supInpPhone').value = '';
-  document.getElementById('supInpEmail').value = '';
-  document.getElementById('supInpBankName').value = '';
-  document.getElementById('supInpBankAcc').value = '';
-  document.getElementById('supInpBankHolder').value = '';
-  document.getElementById('supInpCategory').value = '';
-  document.getElementById('supInpAddress').value = '';
+  const titleEl = document.getElementById('expSupplierModalTitle');
+  if(titleEl) titleEl.textContent = '🏢 Thêm Nhà cung cấp mới';
+  const idEl = document.getElementById('supInpEditId'); if(idEl) idEl.value = '';
+  const nameEl = document.getElementById('supInpName'); if(nameEl) nameEl.value = '';
+  const codeEl = document.getElementById('supInpCode'); if(codeEl) codeEl.value = '';
+  const taxEl = document.getElementById('supInpTaxCode'); if(taxEl) taxEl.value = '';
+  const phoneEl = document.getElementById('supInpPhone'); if(phoneEl) phoneEl.value = '';
+  const emailEl = document.getElementById('supInpEmail'); if(emailEl) emailEl.value = '';
+  const bNameEl = document.getElementById('supInpBankName'); if(bNameEl) bNameEl.value = '';
+  const bAccEl = document.getElementById('supInpBankAcc'); if(bAccEl) bAccEl.value = '';
+  const bHolderEl = document.getElementById('supInpBankHolder'); if(bHolderEl) bHolderEl.value = '';
+  const catEl = document.getElementById('supInpCategory'); if(catEl) catEl.value = '';
+  const addrEl = document.getElementById('supInpAddress'); if(addrEl) addrEl.value = '';
 
   window.openModal('expModalSupplierForm');
 };
 
 window.openEditSupplierModal = function(id){
+  ensureOfficeExpensesData();
   const sup = OFFICE_SUPPLIERS.find(s => s.id === id);
   if(!sup) return;
 
-  document.getElementById('expSupplierModalTitle').textContent = '✏️ Chỉnh sửa thông tin Nhà cung cấp';
-  document.getElementById('supInpEditId').value = sup.id;
-  document.getElementById('supInpName').value = sup.name || '';
-  document.getElementById('supInpCode').value = sup.code || '';
-  document.getElementById('supInpTaxCode').value = sup.taxCode || '';
-  document.getElementById('supInpPhone').value = sup.phone || '';
-  document.getElementById('supInpEmail').value = sup.email || '';
-  document.getElementById('supInpBankName').value = sup.bankName || '';
-  document.getElementById('supInpBankAcc').value = sup.bankAcc || '';
-  document.getElementById('supInpBankHolder').value = sup.bankHolder || '';
-  document.getElementById('supInpCategory').value = sup.category || '';
-  document.getElementById('supInpAddress').value = sup.address || '';
+  const titleEl = document.getElementById('expSupplierModalTitle');
+  if(titleEl) titleEl.textContent = '✏️ Chỉnh sửa thông tin Nhà cung cấp';
+  const idEl = document.getElementById('supInpEditId'); if(idEl) idEl.value = sup.id;
+  const nameEl = document.getElementById('supInpName'); if(nameEl) nameEl.value = sup.name || '';
+  const codeEl = document.getElementById('supInpCode'); if(codeEl) codeEl.value = sup.code || '';
+  const taxEl = document.getElementById('supInpTaxCode'); if(taxEl) taxEl.value = sup.taxCode || '';
+  const phoneEl = document.getElementById('supInpPhone'); if(phoneEl) phoneEl.value = sup.phone || '';
+  const emailEl = document.getElementById('supInpEmail'); if(emailEl) emailEl.value = sup.email || '';
+  const bNameEl = document.getElementById('supInpBankName'); if(bNameEl) bNameEl.value = sup.bankName || '';
+  const bAccEl = document.getElementById('supInpBankAcc'); if(bAccEl) bAccEl.value = sup.bankAcc || '';
+  const bHolderEl = document.getElementById('supInpBankHolder'); if(bHolderEl) bHolderEl.value = sup.bankHolder || '';
+  const catEl = document.getElementById('supInpCategory'); if(catEl) catEl.value = sup.category || '';
+  const addrEl = document.getElementById('supInpAddress'); if(addrEl) addrEl.value = sup.address || '';
 
   window.openModal('expModalSupplierForm');
 };
 
-function handleSaveSupplier(){
-  const editId = document.getElementById('supInpEditId').value.trim();
-  const name = document.getElementById('supInpName').value.trim();
-  const code = document.getElementById('supInpCode').value.trim();
-  const taxCode = document.getElementById('supInpTaxCode').value.trim();
-  const phone = document.getElementById('supInpPhone').value.trim();
-  const email = document.getElementById('supInpEmail').value.trim();
-  const bankName = document.getElementById('supInpBankName').value.trim();
-  const bankAcc = document.getElementById('supInpBankAcc').value.trim();
-  const bankHolder = document.getElementById('supInpBankHolder').value.trim();
-  const category = document.getElementById('supInpCategory').value.trim();
-  const address = document.getElementById('supInpAddress').value.trim();
+window.handleSaveSupplier = function(){
+  const editId = (document.getElementById('supInpEditId')?.value || '').trim();
+  const name = (document.getElementById('supInpName')?.value || '').trim();
+  const code = (document.getElementById('supInpCode')?.value || '').trim();
+  const taxCode = (document.getElementById('supInpTaxCode')?.value || '').trim();
+  const phone = (document.getElementById('supInpPhone')?.value || '').trim();
+  const email = (document.getElementById('supInpEmail')?.value || '').trim();
+  const bankName = (document.getElementById('supInpBankName')?.value || '').trim();
+  const bankAcc = (document.getElementById('supInpBankAcc')?.value || '').trim();
+  const bankHolder = (document.getElementById('supInpBankHolder')?.value || '').trim();
+  const category = (document.getElementById('supInpCategory')?.value || '').trim();
+  const address = (document.getElementById('supInpAddress')?.value || '').trim();
 
-  if(!name){ if(typeof toast==='function') toast('Vui lòng nhập tên công ty / nhà cung cấp', '⚠️'); return; }
+  if(!name){
+    if(typeof toast==='function') toast('Vui lòng nhập tên công ty / nhà cung cấp', '⚠️');
+    else alert('Vui lòng nhập tên công ty / nhà cung cấp');
+    return;
+  }
+
+  ensureOfficeExpensesData();
 
   if(editId){
     const idx = OFFICE_SUPPLIERS.findIndex(s => s.id === editId);
     if(idx !== -1){
       OFFICE_SUPPLIERS[idx] = {
         ...OFFICE_SUPPLIERS[idx],
-        name, code, taxCode, phone, email, bankName, bankAcc, bankHolder, category, address
+        name,
+        code: code || OFFICE_SUPPLIERS[idx].code || ('NCC-' + (idx + 1)),
+        taxCode,
+        phone,
+        email,
+        bankName,
+        bankAcc,
+        bankHolder,
+        category,
+        address
       };
       if(typeof toast==='function') toast('✅ Đã cập nhật thông tin NCC!', '✅');
     }
   } else {
     const newSup = {
-      id: 'sup-' + Date.now(),
-      name, code, taxCode, phone, email, bankName, bankAcc, bankHolder, category, address
+      id: 'ncc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      name,
+      code: code || ('NCC-' + (OFFICE_SUPPLIERS.length + 1)),
+      taxCode,
+      phone,
+      email,
+      bankName,
+      bankAcc,
+      bankHolder,
+      category,
+      address,
+      createdAt: new Date().toISOString()
     };
-    OFFICE_SUPPLIERS.push(newSup);
+    OFFICE_SUPPLIERS.unshift(newSup);
     if(typeof toast==='function') toast('✅ Đã lưu Nhà cung cấp mới!', '✅');
   }
 
@@ -1207,7 +1243,7 @@ function handleSaveSupplier(){
   populateExpenseDropdowns();
   window.closeModal('expModalSupplierForm');
   renderSuppliersList();
-}
+};
 
 window.deleteSupplier = function(id){
   const inUse = OFFICE_EXPENSES.some(e => e.supplierId === id);

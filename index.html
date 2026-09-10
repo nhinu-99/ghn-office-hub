@@ -1313,8 +1313,8 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
           <button class="btn btn-ghost btn-sm" id="expResetFilterBtn" style="padding:8px 12px;">✕ Xóa lọc</button>
         </div>
         <div style="display:flex;gap:10px;align-items:center;">
-          <button class="btn btn-cam btn-sm" id="expAddExpenseBtn" style="padding:9px 18px;border-radius:10px;font-weight:700;">➕ Thêm khoản chi</button>
-          <button class="btn btn-xanh btn-sm" id="expExportExcelBtn" style="padding:9px 16px;border-radius:10px;font-weight:700;">📥 Xuất Excel</button>
+          <button class="btn btn-cam btn-sm" id="expAddExpenseBtn" onclick="window.openAddExpenseModal()" style="padding:9px 18px;border-radius:10px;font-weight:700;">➕ Thêm khoản chi</button>
+          <button class="btn btn-xanh btn-sm" id="expExportExcelBtn" onclick="window.exportExpensesToExcel()" style="padding:9px 16px;border-radius:10px;font-weight:700;">📥 Xuất Excel</button>
         </div>
       </div>
 
@@ -1462,7 +1462,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         </div>
         <div style="display:flex;align-items:center;gap:14px;">
           <span style="font-size:13px;color:var(--muted);" id="expSupplierCountLabel">0 nhà cung cấp</span>
-          <button class="btn btn-cam btn-sm" id="expAddSupplierBtn" style="padding:9px 18px;border-radius:10px;font-weight:700;">🏢 + Thêm Nhà cung cấp</button>
+          <button class="btn btn-cam btn-sm" id="expAddSupplierBtn" onclick="window.openAddSupplierModal()" style="padding:9px 18px;border-radius:10px;font-weight:700;">🏢 + Thêm Nhà cung cấp</button>
         </div>
       </div>
 
@@ -1766,7 +1766,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
 
       <div style="display:flex;gap:10px;margin-top:10px;">
         <button type="button" class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="closeModal('expModalExpenseForm')">Hủy</button>
-        <button type="button" class="btn btn-cam" style="flex:1.5;justify-content:center;" id="expBtnSaveExpense">💾 Lưu khoản chi</button>
+        <button type="button" class="btn btn-cam" style="flex:1.5;justify-content:center;" id="expBtnSaveExpense" onclick="window.handleSaveExpense()">💾 Lưu khoản chi</button>
       </div>
     </div>
   </div>
@@ -1932,7 +1932,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
       </div>
       <div style="display:flex;gap:10px;margin-top:10px;">
         <button type="button" class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="closeModal('expModalSupplierForm')">Hủy</button>
-        <button type="button" class="btn btn-cam" style="flex:1.5;justify-content:center;" id="expBtnSaveSupplier">💾 Lưu thông tin NCC</button>
+        <button type="button" class="btn btn-cam" style="flex:1.5;justify-content:center;" id="expBtnSaveSupplier" onclick="window.handleSaveSupplier()">💾 Lưu thông tin NCC</button>
       </div>
     </div>
   </div>
@@ -5860,5 +5860,5 @@ startPostgresSync();
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="app.js?v=20260827-6"></script>
-<script src="expenses.js?v=20260910-3"></script>
+<script src="expenses.js?v=20260910-4"></script>
 </body></html>
