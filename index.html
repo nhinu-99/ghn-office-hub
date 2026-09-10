@@ -18,7 +18,8 @@
 })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Montserrat:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=20260827-6">
 <style>:root{
   --cam:#FF6B00;
@@ -555,10 +556,306 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
   .nav-tabs button{padding:8px 12px;font-size:13px;}
   .report-summary{grid-template-columns:1fr;}
   .bar-row .lbl{width:110px;font-size:11.5px;}
+/* ============================================================
+   CHỦ ĐỀ LỄ HỘI: TẾT TRUNG THU (MID-AUTUMN FESTIVAL THEME)
+   ============================================================ */
+.theme-fest-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(245, 158, 11, 0.45);
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  color: #b45309;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+  user-select: none;
+}
+.theme-fest-btn:hover {
+  transform: translateY(-1px);
+  border-color: #f59e0b;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+.theme-fest-btn.active {
+  background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%);
+  color: #fff;
+  border-color: #facc15;
+  box-shadow: 0 0 14px rgba(234, 88, 12, 0.5), 0 2px 8px rgba(0, 0, 0, 0.15);
+  animation: tt-btn-glow 2.5s infinite alternate;
+}
+.theme-fest-btn .fest-btn-icon {
+  font-size: 15px;
+  display: inline-block;
+  animation: tt-icon-bounce 2s infinite ease-in-out;
+}
+@keyframes tt-btn-glow {
+  0% { box-shadow: 0 0 10px rgba(234, 88, 12, 0.4); }
+  100% { box-shadow: 0 0 20px rgba(250, 204, 21, 0.7); }
+}
+@keyframes tt-icon-bounce {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+
+/* Khung đèn lồng treo ở mép trên */
+.trungthu-decor-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  pointer-events: none;
+  z-index: 1005;
+  display: none;
+}
+body.theme-trungthu .trungthu-decor-wrap {
+  display: block;
+}
+
+/* Đèn lồng treo phong cách Hội An */
+.tt-lantern-hanging {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  filter: drop-shadow(0 6px 12px rgba(220, 38, 38, 0.35));
+}
+.tt-lantern-left {
+  left: 20px;
+  animation: tt-sway-left 4.2s ease-in-out infinite alternate;
+}
+.tt-lantern-right {
+  right: 20px;
+  animation: tt-sway-right 4.8s ease-in-out infinite alternate;
+}
+.tt-string {
+  width: 2px;
+  height: 28px;
+  background: #b91c1c;
+}
+.tt-lantern-body {
+  position: relative;
+  width: 42px;
+  height: 52px;
+  border-radius: 21px / 26px;
+  background: radial-gradient(circle at 40% 35%, #ff7875 0%, #dc2626 65%, #991b1b 100%);
+  border: 1.5px solid #fde047;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(250, 204, 21, 0.5), inset 0 0 10px rgba(254, 240, 138, 0.4);
+}
+.tt-lantern-gold {
+  background: radial-gradient(circle at 40% 35%, #fef08a 0%, #eab308 65%, #b45309 100%);
+  border-color: #ef4444;
+  box-shadow: 0 0 16px rgba(234, 88, 12, 0.5), inset 0 0 10px rgba(254, 249, 195, 0.5);
+}
+.tt-cap-top, .tt-cap-bottom {
+  position: absolute;
+  width: 20px;
+  height: 6px;
+  background: linear-gradient(90deg, #ca8a04 0%, #fef08a 50%, #ca8a04 100%);
+  border-radius: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.tt-cap-top { top: -4px; }
+.tt-cap-bottom { bottom: -4px; }
+.tt-lantern-char {
+  font-family: 'Charm', cursive, serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fef08a;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+  user-select: none;
+}
+.tt-lantern-gold .tt-lantern-char {
+  color: #7f1d1d;
+  text-shadow: 0 0 4px rgba(254, 240, 138, 0.8);
+}
+.tt-tassel {
+  width: 3px;
+  height: 36px;
+  background: linear-gradient(to bottom, #ca8a04 0%, #dc2626 40%, #b91c1c 100%);
+  margin-top: 3px;
+  border-radius: 0 0 2px 2px;
+  box-shadow: 0 2px 6px rgba(185, 28, 28, 0.4);
+}
+
+@keyframes tt-sway-left {
+  0% { transform: rotate(-5deg); }
+  100% { transform: rotate(7deg); }
+}
+@keyframes tt-sway-right {
+  0% { transform: rotate(6deg); }
+  100% { transform: rotate(-6deg); }
+}
+
+/* ============================================================
+   ÁP DỤNG FONT CHỮ VÀ PHONG CÁCH KHI BẬT THEME TRUNG THU
+   ============================================================ */
+body.theme-trungthu {
+  background:
+    radial-gradient(circle at 10% 8%, rgba(251, 191, 36, 0.15) 0, transparent 38%),
+    radial-gradient(circle at 92% 14%, rgba(234, 88, 12, 0.12) 0, transparent 35%),
+    #fffbf5 !important;
+}
+body.theme-trungthu .topbar {
+  background: linear-gradient(90deg, #fffaf3 0%, #fff7ed 50%, #fffaf3 100%) !important;
+  border-bottom: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 4px 20px rgba(234, 88, 12, 0.08) !important;
+}
+body.theme-trungthu .brand-text h1,
+body.theme-trungthu .home-hero h1,
+body.theme-trungthu .page-head h2,
+body.theme-trungthu .sec-head h3,
+body.theme-trungthu .report-doc-title {
+  font-family: 'Charm', 'Playfair Display', cursive, serif !important;
+  font-weight: 700 !important;
+}
+body.theme-trungthu .brand-text h1 {
+  font-size: 21px !important;
+  color: #c2410c !important;
+  text-shadow: 0 1px 8px rgba(245, 158, 11, 0.25) !important;
+}
+body.theme-trungthu .brand-logo {
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5));
+}
+body.theme-trungthu .home-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 45%, #fef3c7 100%) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.12) !important;
+}
+body.theme-trungthu .home-hero h1 {
+  font-size: 32px !important;
+  color: #9a3412 !important;
+  text-shadow: 0 2px 10px rgba(245, 158, 11, 0.2) !important;
+  letter-spacing: 0.5px;
+}
+body.theme-trungthu .home-card:hover {
+  border-color: #f59e0b !important;
+  box-shadow: 0 12px 32px rgba(245, 158, 11, 0.2) !important;
+  transform: translateY(-3px);
+}
+body.theme-trungthu .pill.cam {
+  background: linear-gradient(135deg, #ea580c 0%, #d97706 100%) !important;
+}
+
+/* Vầng trăng rằm và trang trí trong Hero */
+.tt-decor-hero {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 260px;
+  pointer-events: none;
+  overflow: hidden;
+}
+body.theme-trungthu .tt-decor-hero {
+  display: block;
+}
+.tt-full-moon {
+  position: absolute;
+  top: 14px;
+  right: 28px;
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fffbeb 0%, #fef08a 45%, #f59e0b 100%);
+  box-shadow: 0 0 35px rgba(251, 191, 36, 0.7), 0 0 70px rgba(245, 158, 11, 0.35);
+  animation: tt-moon-pulse 4s ease-in-out infinite alternate;
+}
+.tt-moon-rabbit {
+  position: absolute;
+  bottom: 4px;
+  right: 12px;
+  font-size: 26px;
+  opacity: 0.85;
+  transform: scaleX(-1);
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.8));
+}
+.tt-cloud-wrap {
+  position: absolute;
+  top: 48px;
+  right: 10px;
+  font-size: 26px;
+  opacity: 0.65;
+  animation: tt-cloud-float 6s ease-in-out infinite alternate;
+}
+.tt-sparkle-1 {
+  position: absolute;
+  top: 20px;
+  right: 135px;
+  font-size: 15px;
+  animation: tt-sparkle-twinkle 2.5s ease-in-out infinite;
+}
+.tt-sparkle-2 {
+  position: absolute;
+  bottom: 25px;
+  right: 160px;
+  font-size: 13px;
+  animation: tt-sparkle-twinkle 3.2s ease-in-out infinite 0.7s;
+}
+
+@keyframes tt-moon-pulse {
+  0% { box-shadow: 0 0 25px rgba(251, 191, 36, 0.6), 0 0 50px rgba(245, 158, 11, 0.25); transform: scale(0.98); }
+  100% { box-shadow: 0 0 45px rgba(251, 191, 36, 0.85), 0 0 85px rgba(245, 158, 11, 0.45); transform: scale(1.02); }
+}
+@keyframes tt-cloud-float {
+  0% { transform: translateX(0px); }
+  100% { transform: translateX(-18px); }
+}
+@keyframes tt-sparkle-twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@media(max-width:768px){
+  .tt-lantern-left { left: 8px; }
+  .tt-lantern-right { right: 8px; }
+  .tt-lantern-body { width: 34px; height: 42px; }
+  .tt-string { height: 18px; }
+  .tt-decor-hero { width: 140px; }
+  .tt-full-moon { width: 60px; height: 60px; right: 12px; top: 18px; }
+  .tt-moon-rabbit { font-size: 18px; bottom: 2px; right: 8px; }
+  .theme-fest-btn .fest-btn-txt { display: none; }
 }
 </style>
 <link rel="stylesheet" href="style.css" />
 </head><body>
+<!-- Trang trí Đèn lồng Lễ hội Trung Thu (hiển thị khi bật theme) -->
+<div class="trungthu-decor-wrap" id="trungThuDecorWrap" aria-hidden="true">
+  <div class="tt-lantern-hanging tt-lantern-left">
+    <div class="tt-string"></div>
+    <div class="tt-lantern-body">
+      <div class="tt-cap-top"></div>
+      <span class="tt-lantern-char">福</span>
+      <div class="tt-cap-bottom"></div>
+    </div>
+    <div class="tt-tassel"></div>
+  </div>
+  <div class="tt-lantern-hanging tt-lantern-right">
+    <div class="tt-string"></div>
+    <div class="tt-lantern-body tt-lantern-gold">
+      <div class="tt-cap-top"></div>
+      <span class="tt-lantern-char">秋</span>
+      <div class="tt-cap-bottom"></div>
+    </div>
+    <div class="tt-tassel"></div>
+  </div>
+</div>
+
 <header class="topbar">
   <div class="wrap">
     <div class="brand">
@@ -576,6 +873,10 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
       <button data-page="accounts" id="navAccountsBtn" style="display:none;">🔐 Tài khoản</button>
     </nav>
     <div class="user-area" id="userArea">
+      <button id="themeTrungThuToggleBtn" class="theme-fest-btn" type="button" title="Bật / Tắt giao diện Tết Trung Thu">
+        <span class="fest-btn-icon">🏮</span>
+        <span class="fest-btn-txt">Tết Trung Thu</span>
+      </button>
       <span class="pill cam" id="userDeptPill"></span>
       <span class="user-email" id="userEmailLabel"></span>
       <button id="logoutBtn">Đăng xuất</button>
@@ -588,8 +889,16 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
   <!-- ============ TRANG CHỦ ============ -->
   <section class="page active" id="page-home">
     <div class="home-hero">
-      <h1>Chào buổi sáng! 👋</h1>
-      <p>Quản lý vệ sinh văn phòng và đặt văn phòng phẩm nhanh gọn, vui vẻ mỗi ngày cùng GHN Office Hub.</p>
+      <div class="tt-decor-hero" aria-hidden="true">
+        <div class="tt-sparkle-1">✨</div>
+        <div class="tt-sparkle-2">⭐</div>
+        <div class="tt-full-moon">
+          <div class="tt-moon-rabbit">🐇</div>
+        </div>
+        <div class="tt-cloud-wrap">☁️</div>
+      </div>
+      <h1 id="homeHeroGreeting">Chào buổi sáng! 👋</h1>
+      <p id="homeHeroSubtitle">Quản lý vệ sinh văn phòng và đặt văn phòng phẩm nhanh gọn, vui vẻ mỗi ngày cùng GHN Office Hub.</p>
     </div>
     <div class="home-grid">
       <div class="home-card" data-goto="hygiene">
@@ -5272,6 +5581,59 @@ window.refreshAllViews = function(){
   __origRefreshAllViews();
   _checkAndKickIfLocked();
 };
+
+/* ============================================================
+   CHỦ ĐỀ LỄ HỘI: TẾT TRUNG THU (MID-AUTUMN FESTIVAL THEME)
+   ============================================================ */
+function initTrungThuTheme(){
+  const toggleBtn = document.getElementById('themeTrungThuToggleBtn');
+  const greetingEl = document.getElementById('homeHeroGreeting');
+  const subtitleEl = document.getElementById('homeHeroSubtitle');
+  const decorWrap = document.getElementById('trungThuDecorWrap');
+
+  // Đọc cấu hình đã lưu (mặc định bật trải nghiệm Trung Thu)
+  const savedState = localStorage.getItem('ghn_theme_trungthu');
+  const isEnabled = savedState !== null ? (savedState === 'true') : true;
+
+  function applyTheme(enabled, notify = false){
+    if(enabled){
+      document.body.classList.add('theme-trungthu');
+      if(toggleBtn){
+        toggleBtn.classList.add('active');
+        toggleBtn.innerHTML = `<span class="fest-btn-icon">🏮</span><span class="fest-btn-txt">Tết Trung Thu: BẬT</span>`;
+      }
+      if(greetingEl) greetingEl.innerHTML = `🏮 Rộn Ràng Đêm Trăng Rằm 🥮`;
+      if(subtitleEl) subtitleEl.innerHTML = `Chúc đại gia đình GHN một mùa Tết Trung Thu thật ấm áp, trọn vẹn và ngập tràn niềm vui!`;
+      if(decorWrap) decorWrap.style.display = 'block';
+      if(notify) toast('Đã bật không khí Tết Trung Thu! 🌕🥮','🏮');
+    } else {
+      document.body.classList.remove('theme-trungthu');
+      if(toggleBtn){
+        toggleBtn.classList.remove('active');
+        toggleBtn.innerHTML = `<span class="fest-btn-icon">🏮</span><span class="fest-btn-txt">Tết Trung Thu: TẮT</span>`;
+      }
+      if(greetingEl) greetingEl.innerHTML = `Chào buổi sáng! 👋`;
+      if(subtitleEl) subtitleEl.innerHTML = `Quản lý vệ sinh văn phòng và đặt văn phòng phẩm nhanh gọn, vui vẻ mỗi ngày cùng GHN Office Hub.`;
+      if(decorWrap) decorWrap.style.display = 'none';
+      if(notify) toast('Đã chuyển về giao diện tiêu chuẩn','✨');
+    }
+  }
+
+  // Khởi tạo trạng thái ban đầu
+  applyTheme(isEnabled, false);
+
+  if(toggleBtn && !toggleBtn.dataset.bound){
+    toggleBtn.dataset.bound = '1';
+    toggleBtn.addEventListener('click', ()=>{
+      const currentState = document.body.classList.contains('theme-trungthu');
+      const newState = !currentState;
+      localStorage.setItem('ghn_theme_trungthu', String(newState));
+      applyTheme(newState, true);
+    });
+  }
+}
+
+initTrungThuTheme();
 
 startPostgresSync();
 </script>
