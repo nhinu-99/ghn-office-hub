@@ -489,6 +489,67 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
 .trend-bar:hover span{opacity:1;}
 .trend-label{font-size:10px;color:var(--muted);text-align:center;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
 
+/* Order VPP Analytics & Reports */
+.order-report-toolbar{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;
+  background:#fff;padding:12px 18px;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,0.03);
+}
+.report-select{
+  padding:8px 12px;border-radius:10px;border:1.5px solid #cbd5e1;font-size:13px;font-weight:700;
+  color:var(--text);background:#fff;outline:none;cursor:pointer;transition:border-color .2s;
+}
+.report-select:focus{border-color:var(--xanh);}
+
+.order-report-container{
+  background:#fff;border-radius:16px;padding:24px;border:1px solid #e2e8f0;box-shadow:0 4px 20px rgba(0,0,0,0.05);
+}
+.report-doc-header{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+  padding-bottom:18px;margin-bottom:20px;border-bottom:2px solid #f1f5f9;
+}
+.report-kpi-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:22px;
+}
+.report-kpi-card{
+  background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:16px;display:flex;align-items:center;gap:14px;
+  transition:all .2s ease;
+}
+.report-kpi-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.06);background:#fff;}
+.report-kpi-card .kpi-icon{
+  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+}
+.report-kpi-card .kpi-info{flex:1;min-width:0;}
+.report-kpi-card .kpi-title{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;}
+.report-kpi-card .kpi-value{margin:2px 0 0;font-size:18px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.report-kpi-card .kpi-sub{font-size:11.5px;color:var(--text-sub);margin-top:2px;display:block;}
+
+.report-section-card{
+  background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.02);
+}
+.report-section-header{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px;
+}
+.report-insight-box{
+  margin-top:16px;background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%);
+  border:1px solid #bae6fd;border-left:4px solid var(--xanh);border-radius:12px;padding:14px 16px;
+}
+.report-data-table{
+  width:100%;border-collapse:collapse;font-size:13px;
+}
+.report-data-table th{
+  background:#f8fafc;padding:10px 12px;font-weight:700;color:var(--text-sub);border-bottom:2px solid #e2e8f0;font-size:12px;text-transform:uppercase;letter-spacing:.3px;
+}
+.report-data-table td{
+  padding:11px 12px;border-bottom:1px solid #f1f5f9;color:var(--text);vertical-align:middle;
+}
+.report-data-table tbody tr:hover{background:#f8fafc;}
+.trend-pill{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11.5px;font-weight:700;
+}
+.trend-up{background:#fee2e2;color:#b91c1c;}
+.trend-down{background:#dcfce7;color:#15803d;}
+.trend-same{background:#f1f5f9;color:#64748b;}
+
 @media(max-width:640px){
   .brand-text h1{font-size:16px;}
   .nav-tabs button{padding:8px 12px;font-size:13px;}
@@ -802,6 +863,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
     <div class="sub-tabs" id="orderSubNav">
       <button data-sub="catalog" class="active">🛍️ Danh mục sản phẩm</button>
       <button data-sub="history">🧾 Lịch sử đặt hàng</button>
+      <button data-sub="reports" id="orderReportsTabBtn" style="display:none;">📊 Tổng hợp báo cáo</button>
     </div>
 
     <div class="subpage active" id="or-catalog">
@@ -864,6 +926,156 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         </div>
       </div>
       <div id="orderHistoryList"></div>
+    </div>
+
+    <!-- ============ TỔNG HỢP BÁO CÁO (Chỉ Admin) ============ -->
+    <div class="subpage" id="or-reports">
+      <!-- Toolbar điều khiển -->
+      <div class="order-report-toolbar">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <label for="reportYearSelect" style="font-size:12.5px;font-weight:700;color:var(--text-sub);">Năm:</label>
+            <select id="reportYearSelect" class="report-select"></select>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <label for="reportMonthSelect" style="font-size:12.5px;font-weight:700;color:var(--text-sub);">Tháng phân tích:</label>
+            <select id="reportMonthSelect" class="report-select"></select>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="reportRefreshBtn" title="Làm mới dữ liệu">🔄 Làm mới</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="btn btn-xanh" id="reportExportPdfBtn" style="padding:8px 16px;box-shadow:0 4px 12px rgba(24,144,255,.25);"><span style="font-size:15px;">📄</span> Tải báo cáo PDF</button>
+        </div>
+      </div>
+
+      <!-- Vùng nội dung in/chụp PDF -->
+      <div id="orderReportPrintArea" class="order-report-container">
+        <!-- Tiêu đề văn bản báo cáo -->
+        <div class="report-doc-header">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="font-size:36px;">🏢</div>
+            <div>
+              <div style="font-size:11px;font-weight:800;color:var(--cam);letter-spacing:1px;text-transform:uppercase;">GIAO HÀNG NHANH · VĂN PHÒNG TỔNG</div>
+              <h2 style="margin:2px 0 0;font-size:20px;font-weight:800;color:var(--text);">BÁO CÁO TỔNG HỢP CHI PHÍ VĂN PHÒNG PHẨM</h2>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div id="reportPeriodTag" class="pill xanh" style="font-size:12px;font-weight:700;">Kỳ: Toàn thời gian</div>
+            <div id="reportGenDate" style="font-size:11.5px;color:var(--muted);margin-top:4px;">Ngày lập: --/--/----</div>
+          </div>
+        </div>
+
+        <!-- 1. Thẻ KPI tổng quan -->
+        <div class="report-kpi-grid">
+          <div class="report-kpi-card">
+            <div class="kpi-icon" style="background:#e6f4ff;color:#0958d9;">💰</div>
+            <div class="kpi-info">
+              <span class="kpi-title">Tổng chi phí VPP</span>
+              <h3 class="kpi-value" id="kpiTotalCost">0₫</h3>
+              <span class="kpi-sub" id="kpiTotalOrders">0 đơn hàng</span>
+            </div>
+          </div>
+          <div class="report-kpi-card">
+            <div class="kpi-icon" style="background:#f6ffed;color:#389e0d;">📈</div>
+            <div class="kpi-info">
+              <span class="kpi-title">Chi phí tháng phân tích</span>
+              <h3 class="kpi-value" id="kpiSelectedMonthCost">0₫</h3>
+              <span class="kpi-sub" id="kpiMonthDiffBadge">-- so với tháng trước</span>
+            </div>
+          </div>
+          <div class="report-kpi-card">
+            <div class="kpi-icon" style="background:#fff7e6;color:#d46b08;">🏢</div>
+            <div class="kpi-info">
+              <span class="kpi-title">Phòng ban chi nhiều nhất</span>
+              <h3 class="kpi-value" id="kpiTopDeptName" style="font-size:14.5px;font-weight:800;">—</h3>
+              <span class="kpi-sub" id="kpiTopDeptCost">0₫</span>
+            </div>
+          </div>
+          <div class="report-kpi-card">
+            <div class="kpi-icon" style="background:#f9f0ff;color:#722ed1;">👥</div>
+            <div class="kpi-info">
+              <span class="kpi-title">Số phòng ban phát sinh</span>
+              <h3 class="kpi-value" id="kpiActiveDeptsCount">0</h3>
+              <span class="kpi-sub">phòng ban đã order</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Biểu đồ chi phí theo phòng ban & Nhận xét xu hướng -->
+        <div class="report-section-card">
+          <div class="report-section-header">
+            <div>
+              <h3 style="margin:0;font-size:15px;font-weight:800;color:var(--text);">📊 1. Chi phí mua VPP các phòng ban trong <span id="reportMonthTitleLbl">tháng</span></h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--muted);">So sánh cơ cấu chi phí văn phòng phẩm thực tế phát sinh giữa các phòng ban</p>
+            </div>
+          </div>
+          <div style="position:relative;width:100%;min-height:300px;margin-top:12px;">
+            <canvas id="reportDeptBarChart"></canvas>
+          </div>
+
+          <!-- Hộp nhận xét xu hướng tự động -->
+          <div class="report-insight-box" id="reportInsightBox">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:16px;">💡</span>
+              <strong style="font-size:13px;color:var(--xanh-dark);">Nhận xét &amp; Đánh giá xu hướng chi phí:</strong>
+            </div>
+            <div id="reportInsightText" style="font-size:12.5px;line-height:1.6;color:var(--text);">
+              Đang phân tích dữ liệu...
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Biểu đồ xu hướng qua từng tháng, từng năm -->
+        <div class="report-section-card" style="margin-top:18px;">
+          <div class="report-section-header">
+            <div>
+              <h3 style="margin:0;font-size:15px;font-weight:800;color:var(--text);">📈 2. Xu hướng tăng giảm chi phí qua từng tháng, từng năm</h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--muted);">Diễn biến biến động tổng chi phí toàn công ty và các phòng ban qua các mốc thời gian</p>
+            </div>
+          </div>
+          <div style="position:relative;width:100%;min-height:300px;margin-top:12px;">
+            <canvas id="reportTrendLineChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 4. Ô nhập nội dung giải trình cho Admin -->
+        <div class="report-section-card" style="margin-top:18px;">
+          <div class="report-section-header" style="justify-content:space-between;">
+            <div>
+              <h3 style="margin:0;font-size:15px;font-weight:800;color:var(--text);">📝 3. Nội dung giải trình &amp; Đánh giá của Admin</h3>
+              <p style="margin:2px 0 0;font-size:12px;color:var(--muted);">Nhập lý do biến động chi phí, kế hoạch kiểm soát ngân sách (nội dung này được lưu tự động và đưa vào file PDF khi tải về)</p>
+            </div>
+            <span id="reportExplainSaveStatus" style="font-size:11.5px;color:#10b981;font-weight:700;display:none;">✓ Đã tự động lưu</span>
+          </div>
+          <div style="margin-top:10px;">
+            <textarea id="reportExplainInput" rows="4" placeholder="Nhập nội dung giải trình chi tiết về việc tăng/giảm chi phí mua sắm VPP trong kỳ (ví dụ: 'Chi phí tháng này tăng do tuyển dụng nhân sự mới và trang bị thiết bị đầu quý...', nội dung này sẽ xuất hiện trong bản in PDF)..." style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid #e2e8f0;font-size:13px;line-height:1.6;color:var(--text);background:#fff;resize:vertical;font-family:inherit;"></textarea>
+          </div>
+        </div>
+
+        <!-- 5. Bảng số liệu chi tiết theo phòng ban -->
+        <div class="report-section-card" style="margin-top:18px;">
+          <div class="report-section-header">
+            <div>
+              <h3 style="margin:0;font-size:15px;font-weight:800;color:var(--text);">📋 4. Bảng chi tiết chi phí và đơn hàng theo phòng ban</h3>
+            </div>
+          </div>
+          <div class="report-table-responsive" style="margin-top:12px;overflow-x:auto;">
+            <table class="report-data-table" id="reportDetailTable">
+              <thead>
+                <tr>
+                  <th style="width:45px;text-align:center;">STT</th>
+                  <th>Phòng ban</th>
+                  <th style="text-align:center;">Số đơn</th>
+                  <th style="text-align:right;">Tổng chi phí</th>
+                  <th style="text-align:center;">Tỷ trọng</th>
+                  <th style="text-align:center;">So với tháng trước</th>
+                </tr>
+              </thead>
+              <tbody id="reportDetailTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1824,7 +2036,13 @@ setupSubNav('hygieneSubNav','hy', (sub)=>{
   if(sub==='manage' && typeof renderCategoryManageList==='function') renderCategoryManageList();
 });
 setupSubNav('orderSubNav','or', (sub)=>{
+  if(sub==='reports' && !isAdmin()){
+    toast('Chỉ Admin mới có quyền truy cập tổng hợp báo cáo','🔒');
+    document.querySelector('#orderSubNav button[data-sub="history"]').click();
+    return;
+  }
   if(sub==='history') renderOrderHistory();
+  if(sub==='reports') renderOrderReports();
 });
 
 /* ============================================================
@@ -2945,6 +3163,627 @@ document.getElementById('exportDeptClearAllBtn').addEventListener('click', ()=>{
   renderExportDeptChecklist();
 });
 
+/* ============================================================
+   MODULE TỔNG HỢP BÁO CÁO CHI PHÍ VPP (ADMIN)
+   ============================================================ */
+let reportDeptBarChartInstance = null;
+let reportTrendLineChartInstance = null;
+let reportExplainSaveTimeout = null;
+
+function getReportYearsList(){
+  const years = new Set();
+  const currentYear = new Date().getFullYear();
+  years.add(currentYear);
+  (ORDERS || []).forEach(o=>{
+    const d = new Date(o.date);
+    if(!isNaN(d.getTime())) years.add(d.getFullYear());
+  });
+  return Array.from(years).sort((a,b)=>b-a);
+}
+
+function initOrderReportControls(){
+  const yearSelect = document.getElementById('reportYearSelect');
+  const monthSelect = document.getElementById('reportMonthSelect');
+  if(!yearSelect || !monthSelect) return;
+
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+
+  // Khởi tạo select năm nếu chưa có
+  if(!yearSelect.children.length){
+    const years = getReportYearsList();
+    yearSelect.innerHTML = years.map(y => `<option value="${y}" ${y===currentYear?'selected':''}>Năm ${y}</option>`).join('');
+    yearSelect.addEventListener('change', updateOrderReportView);
+  }
+
+  // Khởi tạo select tháng nếu chưa có
+  if(!monthSelect.children.length){
+    let mHtml = `<option value="all">Toàn bộ cả năm</option>`;
+    for(let m=1; m<=12; m++){
+      mHtml += `<option value="${m}" ${m===currentMonth?'selected':''}>Tháng ${m}</option>`;
+    }
+    monthSelect.innerHTML = mHtml;
+    monthSelect.addEventListener('change', updateOrderReportView);
+  }
+
+  const refreshBtn = document.getElementById('reportRefreshBtn');
+  if(refreshBtn && !refreshBtn.dataset.bound){
+    refreshBtn.dataset.bound = '1';
+    refreshBtn.addEventListener('click', ()=>{
+      updateOrderReportView();
+      toast('Đã làm mới dữ liệu báo cáo','🔄');
+    });
+  }
+
+  const explainInput = document.getElementById('reportExplainInput');
+  if(explainInput && !explainInput.dataset.bound){
+    explainInput.dataset.bound = '1';
+    explainInput.addEventListener('input', ()=>{
+      const y = yearSelect.value;
+      const m = monthSelect.value;
+      const key = `order_report_explain_${y}_${m}`;
+      localStorage.setItem(key, explainInput.value);
+      const statusEl = document.getElementById('reportExplainSaveStatus');
+      if(statusEl){
+        statusEl.style.display = 'inline';
+        clearTimeout(reportExplainSaveTimeout);
+        reportExplainSaveTimeout = setTimeout(()=>{ statusEl.style.display = 'none'; }, 2000);
+      }
+    });
+  }
+
+  const exportPdfBtn = document.getElementById('reportExportPdfBtn');
+  if(exportPdfBtn && !exportPdfBtn.dataset.bound){
+    exportPdfBtn.dataset.bound = '1';
+    exportPdfBtn.addEventListener('click', exportOrderReportToPdf);
+  }
+}
+
+function renderOrderReports(){
+  if(!isAdmin()){
+    toast('Chỉ Admin mới có quyền truy cập tổng hợp báo cáo','🔒');
+    return;
+  }
+  initOrderReportControls();
+  updateOrderReportView();
+}
+
+function updateOrderReportView(){
+  const yearSelect = document.getElementById('reportYearSelect');
+  const monthSelect = document.getElementById('reportMonthSelect');
+  if(!yearSelect || !monthSelect) return;
+
+  const selYear = parseInt(yearSelect.value, 10);
+  const selMonthVal = monthSelect.value; // 'all' hoặc '1'..'12'
+  const isAllMonths = (selMonthVal === 'all');
+  const selMonth = isAllMonths ? null : parseInt(selMonthVal, 10);
+
+  // Tải nội dung giải trình đã lưu của Admin
+  const explainKey = `order_report_explain_${selYear}_${selMonthVal}`;
+  const explainInput = document.getElementById('reportExplainInput');
+  if(explainInput){
+    explainInput.value = localStorage.getItem(explainKey) || '';
+  }
+
+  // Cập nhật thẻ tiêu đề và kỳ báo cáo
+  const periodTag = document.getElementById('reportPeriodTag');
+  const genDate = document.getElementById('reportGenDate');
+  const monthTitleLbl = document.getElementById('reportMonthTitleLbl');
+  const periodText = isAllMonths ? `Năm ${selYear}` : `Tháng ${selMonth}/${selYear}`;
+  if(periodTag) periodTag.textContent = `Kỳ báo cáo: ${periodText}`;
+  if(genDate) genDate.textContent = `Ngày lập: ${new Date().toLocaleDateString('vi-VN')}`;
+  if(monthTitleLbl) monthTitleLbl.textContent = periodText.toLowerCase();
+
+  // Lọc đơn hàng kỳ hiện tại
+  const currentOrders = (ORDERS || []).filter(o => {
+    const d = new Date(o.date);
+    if(isNaN(d.getTime())) return false;
+    if(d.getFullYear() !== selYear) return false;
+    if(!isAllMonths && (d.getMonth() + 1) !== selMonth) return false;
+    return true;
+  });
+
+  // Lọc đơn hàng kỳ trước để so sánh xu hướng
+  const priorOrders = (ORDERS || []).filter(o => {
+    const d = new Date(o.date);
+    if(isNaN(d.getTime())) return false;
+    if(isAllMonths){
+      return d.getFullYear() === (selYear - 1);
+    } else {
+      if(selMonth === 1){
+        return d.getFullYear() === (selYear - 1) && (d.getMonth() + 1) === 12;
+      } else {
+        return d.getFullYear() === selYear && (d.getMonth() + 1) === (selMonth - 1);
+      }
+    }
+  });
+
+  // Tính tổng chi phí
+  const totalCost = currentOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+  const priorTotalCost = priorOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+
+  // Bản đồ chi phí theo phòng ban
+  const currDeptMap = {};
+  currentOrders.forEach(o => {
+    const dept = o.dept || 'Khác';
+    currDeptMap[dept] = (currDeptMap[dept] || 0) + (o.total || 0);
+  });
+
+  const priorDeptMap = {};
+  priorOrders.forEach(o => {
+    const dept = o.dept || 'Khác';
+    priorDeptMap[dept] = (priorDeptMap[dept] || 0) + (o.total || 0);
+  });
+
+  // Sắp xếp phòng ban chi tiêu từ cao xuống thấp
+  const sortedDepts = Object.keys(currDeptMap).sort((a,b) => currDeptMap[b] - currDeptMap[a]);
+
+  // Tổng chi phí toàn bộ từ trước đến nay
+  const allTimeCost = (ORDERS || []).reduce((sum, o) => sum + (o.total || 0), 0);
+
+  // Phòng ban đứng đầu
+  const topDept = sortedDepts[0] || '—';
+  const topDeptCost = currDeptMap[topDept] || 0;
+
+  // Tính phần trăm chênh lệch
+  let diffBadgeHtml = '';
+  let diffPercent = 0;
+  if(priorTotalCost > 0){
+    diffPercent = ((totalCost - priorTotalCost) / priorTotalCost) * 100;
+    const sign = diffPercent >= 0 ? '+' : '';
+    const pillClass = diffPercent > 0 ? 'trend-up' : (diffPercent < 0 ? 'trend-down' : 'trend-same');
+    const arrow = diffPercent > 0 ? '▲' : (diffPercent < 0 ? '▼' : '▬');
+    diffBadgeHtml = `<span class="trend-pill ${pillClass}">${arrow} ${sign}${diffPercent.toFixed(1)}% so với ${isAllMonths ? 'năm trước' : 'tháng trước'}</span>`;
+  } else if(totalCost > 0){
+    diffBadgeHtml = `<span class="trend-pill trend-up">▲ Mới phát sinh</span>`;
+  } else {
+    diffBadgeHtml = `<span class="trend-pill trend-same">▬ 0% biến động</span>`;
+  }
+
+  // Cập nhật các thẻ KPI
+  const kpiTotalCost = document.getElementById('kpiTotalCost');
+  const kpiTotalOrders = document.getElementById('kpiTotalOrders');
+  const kpiSelectedMonthCost = document.getElementById('kpiSelectedMonthCost');
+  const kpiMonthDiffBadge = document.getElementById('kpiMonthDiffBadge');
+  const kpiTopDeptName = document.getElementById('kpiTopDeptName');
+  const kpiTopDeptCost = document.getElementById('kpiTopDeptCost');
+  const kpiActiveDeptsCount = document.getElementById('kpiActiveDeptsCount');
+
+  if(kpiTotalCost) kpiTotalCost.textContent = formatVND(allTimeCost);
+  if(kpiTotalOrders) kpiTotalOrders.textContent = `${(ORDERS||[]).length} đơn toàn thời gian`;
+  if(kpiSelectedMonthCost) kpiSelectedMonthCost.textContent = formatVND(totalCost);
+  if(kpiMonthDiffBadge) kpiMonthDiffBadge.innerHTML = diffBadgeHtml;
+  if(kpiTopDeptName) kpiTopDeptName.textContent = topDept;
+  if(kpiTopDeptCost) kpiTopDeptCost.textContent = `${formatVND(topDeptCost)} (${totalCost > 0 ? ((topDeptCost/totalCost)*100).toFixed(1) : 0}%)`;
+  if(kpiActiveDeptsCount) kpiActiveDeptsCount.textContent = sortedDepts.length;
+
+  // Vẽ biểu đồ cột phòng ban
+  renderReportDeptBarChart(sortedDepts, currDeptMap, totalCost, periodText);
+
+  // Hiển thị hộp nhận xét xu hướng
+  renderReportInsightText({
+    periodText,
+    isAllMonths,
+    totalCost,
+    priorTotalCost,
+    diffPercent,
+    topDept,
+    topDeptCost,
+    sortedDepts,
+    currDeptMap,
+    priorDeptMap,
+    currentOrders
+  });
+
+  // Vẽ biểu đồ đường xu hướng 12 tháng
+  renderReportTrendLineChart(selYear);
+
+  // Render bảng số liệu chi tiết
+  renderReportDetailTable(sortedDepts, currDeptMap, priorDeptMap, currentOrders, totalCost);
+}
+
+function renderReportDeptBarChart(depts, deptMap, totalCost, periodText){
+  const canvas = document.getElementById('reportDeptBarChart');
+  if(!canvas || typeof Chart === 'undefined') return;
+
+  if(reportDeptBarChartInstance){
+    reportDeptBarChartInstance.destroy();
+    reportDeptBarChartInstance = null;
+  }
+
+  if(!depts.length){
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    return;
+  }
+
+  const bgColors = [
+    'rgba(24, 144, 255, 0.85)',
+    'rgba(245, 108, 10, 0.85)',
+    'rgba(16, 185, 129, 0.85)',
+    'rgba(114, 46, 209, 0.85)',
+    'rgba(235, 47, 150, 0.85)',
+    'rgba(19, 194, 194, 0.85)',
+    'rgba(250, 173, 20, 0.85)',
+    'rgba(47, 84, 235, 0.85)'
+  ];
+
+  const labels = depts;
+  const data = depts.map(d => deptMap[d]);
+  const colors = depts.map((_, i) => bgColors[i % bgColors.length]);
+
+  reportDeptBarChartInstance = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: `Chi phí (${periodText})`,
+        data: data,
+        backgroundColor: colors,
+        borderColor: colors.map(c => c.replace('0.85', '1')),
+        borderWidth: 1.5,
+        borderRadius: 6,
+        maxBarThickness: 45
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.9)',
+          padding: 10,
+          titleFont: { size: 13, weight: 'bold' },
+          bodyFont: { size: 12.5 },
+          callbacks: {
+            label: function(context) {
+              const val = context.raw || 0;
+              const pct = totalCost > 0 ? ((val / totalCost) * 100).toFixed(1) : 0;
+              return `Chi phí: ${formatVND(val)} (${pct}%)`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            font: { size: 11.5, weight: '600' },
+            color: '#475569',
+            maxRotation: 45,
+            minRotation: 0
+          }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: '#f1f5f9' },
+          ticks: {
+            font: { size: 11 },
+            color: '#64748b',
+            callback: function(value) {
+              if(value >= 1000000) return (value / 1000000).toFixed(1) + ' tr';
+              if(value >= 1000) return (value / 1000).toFixed(0) + ' k';
+              return value;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderReportInsightText(info){
+  const box = document.getElementById('reportInsightText');
+  if(!box) return;
+
+  const {
+    periodText, isAllMonths, totalCost, priorTotalCost, diffPercent,
+    topDept, topDeptCost, sortedDepts, currDeptMap, priorDeptMap, currentOrders
+  } = info;
+
+  if(!currentOrders.length){
+    box.innerHTML = `<span style="color:var(--muted);">Trong kỳ <b>${periodText}</b> chưa ghi nhận đơn đặt hàng văn phòng phẩm nào phát sinh từ các phòng ban.</span>`;
+    return;
+  }
+
+  const lines = [];
+
+  // Dòng 1: Tổng kết chi phí và chiều hướng
+  if(priorTotalCost > 0){
+    const dirText = diffPercent > 0 ? `<b style="color:#b91c1c;">tăng ${diffPercent.toFixed(1)}%</b>` : (diffPercent < 0 ? `<b style="color:#15803d;">giảm ${Math.abs(diffPercent).toFixed(1)}%</b>` : `<b>ổn định (0%)</b>`);
+    lines.push(`• Tổng ngân sách mua sắm VPP trong <b>${periodText}</b> đạt <b>${formatVND(totalCost)}</b> với <b>${currentOrders.length} đơn hàng</b>, ${dirText} so với kỳ trước (${formatVND(priorTotalCost)}).`);
+  } else {
+    lines.push(`• Tổng ngân sách mua sắm VPP trong <b>${periodText}</b> đạt <b>${formatVND(totalCost)}</b> với <b>${currentOrders.length} đơn hàng</b> phát sinh.`);
+  }
+
+  // Dòng 2: Phân bổ phòng ban chi nhiều nhất
+  if(sortedDepts.length > 0){
+    const topPct = totalCost > 0 ? ((topDeptCost / totalCost) * 100).toFixed(1) : 0;
+    if(sortedDepts.length === 1){
+      lines.push(`• Phòng ban <b>${topDept}</b> là đơn vị duy nhất phát sinh chi phí (${formatVND(topDeptCost)}).`);
+    } else {
+      const top3 = sortedDepts.slice(0, 3).map(d => `<b>${d}</b> (${formatVND(currDeptMap[d])})`).join(', ');
+      lines.push(`• Đơn vị chi tiêu lớn nhất là <b>${topDept}</b> chiếm <b>${topPct}%</b> tổng chi phí toàn công ty. Nhóm 3 phòng ban chiếm tỷ trọng cao nhất gồm: ${top3}.`);
+    }
+  }
+
+  // Dòng 3: Phòng ban có mức tăng chi phí đáng kể (>25%)
+  const surgeDepts = [];
+  sortedDepts.forEach(d => {
+    const pVal = priorDeptMap[d] || 0;
+    const cVal = currDeptMap[d] || 0;
+    if(pVal > 0 && cVal > pVal && ((cVal - pVal) / pVal) >= 0.25){
+      surgeDepts.push({ dept: d, increase: ((cVal - pVal) / pVal * 100).toFixed(0) });
+    }
+  });
+
+  if(surgeDepts.length > 0){
+    const surgeStr = surgeDepts.slice(0, 3).map(s => `<b>${s.dept}</b> (+${s.increase}%)`).join(', ');
+    lines.push(`• ⚠️ <b>Cần lưu ý kiểm soát:</b> Các phòng ban có mức tăng chi phí đáng kể so với kỳ trước gồm: ${surgeStr}. Admin nên kiểm tra danh mục mua sắm để tối ưu ngân sách.`);
+  } else {
+    lines.push(`• ✅ <b>Đánh giá chung:</b> Chi phí giữa các bộ phận phân bổ tương đối đồng đều, không ghi nhận trường hợp đột biến bất thường so với kế hoạch dự trù.`);
+  }
+
+  box.innerHTML = lines.join('<br style="margin-bottom:6px;">');
+}
+
+function renderReportTrendLineChart(selYear){
+  const canvas = document.getElementById('reportTrendLineChart');
+  if(!canvas || typeof Chart === 'undefined') return;
+
+  if(reportTrendLineChartInstance){
+    reportTrendLineChartInstance.destroy();
+    reportTrendLineChartInstance = null;
+  }
+
+  const monthsLabels = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+
+  // Chi phí 12 tháng năm hiện tại
+  const currentYearMonthly = new Array(12).fill(0);
+  (ORDERS || []).forEach(o => {
+    const d = new Date(o.date);
+    if(isNaN(d.getTime())) return;
+    if(d.getFullYear() === selYear){
+      const m = d.getMonth();
+      currentYearMonthly[m] += (o.total || 0);
+    }
+  });
+
+  // Chi phí 12 tháng năm trước để đối chiếu
+  const priorYear = selYear - 1;
+  const priorYearMonthly = new Array(12).fill(0);
+  let hasPriorYearData = false;
+  (ORDERS || []).forEach(o => {
+    const d = new Date(o.date);
+    if(isNaN(d.getTime())) return;
+    if(d.getFullYear() === priorYear){
+      const m = d.getMonth();
+      priorYearMonthly[m] += (o.total || 0);
+      hasPriorYearData = true;
+    }
+  });
+
+  const datasets = [
+    {
+      label: `Năm ${selYear}`,
+      data: currentYearMonthly,
+      borderColor: '#1890ff',
+      backgroundColor: 'rgba(24, 144, 255, 0.12)',
+      borderWidth: 2.5,
+      tension: 0.35,
+      fill: true,
+      pointBackgroundColor: '#1890ff',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      pointRadius: 4.5,
+      pointHoverRadius: 6
+    }
+  ];
+
+  if(hasPriorYearData){
+    datasets.push({
+      label: `Năm ${priorYear} (Đối chiếu)`,
+      data: priorYearMonthly,
+      borderColor: '#94a3b8',
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      borderDash: [5, 5],
+      tension: 0.35,
+      fill: false,
+      pointBackgroundColor: '#94a3b8',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 1.5,
+      pointRadius: 3.5,
+      pointHoverRadius: 5
+    });
+  }
+
+  reportTrendLineChartInstance = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: monthsLabels,
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { font: { size: 12, weight: '600' }, color: '#334155' }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.9)',
+          padding: 10,
+          titleFont: { size: 13, weight: 'bold' },
+          bodyFont: { size: 12.5 },
+          callbacks: {
+            label: function(context) {
+              const val = context.raw || 0;
+              return `${context.dataset.label}: ${formatVND(val)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#f8fafc' },
+          ticks: { font: { size: 11.5, weight: '600' }, color: '#475569' }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: '#f1f5f9' },
+          ticks: {
+            font: { size: 11 },
+            color: '#64748b',
+            callback: function(value) {
+              if(value >= 1000000) return (value / 1000000).toFixed(1) + ' tr';
+              if(value >= 1000) return (value / 1000).toFixed(0) + ' k';
+              return value;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderReportDetailTable(sortedDepts, currDeptMap, priorDeptMap, currentOrders, totalCost){
+  const tbody = document.getElementById('reportDetailTableBody');
+  if(!tbody) return;
+
+  if(!sortedDepts.length){
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Chưa có dữ liệu đặt hàng trong kỳ này.</td></tr>`;
+    return;
+  }
+
+  const orderCountMap = {};
+  currentOrders.forEach(o => {
+    const dept = o.dept || 'Khác';
+    orderCountMap[dept] = (orderCountMap[dept] || 0) + 1;
+  });
+
+  const rowsHtml = sortedDepts.map((d, index) => {
+    const cost = currDeptMap[d] || 0;
+    const pCost = priorDeptMap[d] || 0;
+    const count = orderCountMap[d] || 0;
+    const pct = totalCost > 0 ? ((cost / totalCost) * 100).toFixed(1) : 0;
+
+    let trendHtml = '';
+    if(pCost > 0){
+      const diff = ((cost - pCost) / pCost) * 100;
+      const sign = diff >= 0 ? '+' : '';
+      const cls = diff > 0 ? 'trend-up' : (diff < 0 ? 'trend-down' : 'trend-same');
+      const arrow = diff > 0 ? '▲' : (diff < 0 ? '▼' : '▬');
+      trendHtml = `<span class="trend-pill ${cls}">${arrow} ${sign}${diff.toFixed(1)}%</span>`;
+    } else if(cost > 0){
+      trendHtml = `<span class="trend-pill trend-up">▲ Mới</span>`;
+    } else {
+      trendHtml = `<span class="trend-pill trend-same">▬ 0%</span>`;
+    }
+
+    return `
+      <tr>
+        <td style="text-align:center;font-weight:700;color:var(--muted);">${index + 1}</td>
+        <td style="font-weight:700;color:var(--text);">${escapeHtml(d)}</td>
+        <td style="text-align:center;font-weight:600;">${count} đơn</td>
+        <td style="text-align:right;font-weight:800;color:var(--xanh-dark);">${formatVND(cost)}</td>
+        <td style="text-align:center;font-weight:600;">${pct}%</td>
+        <td style="text-align:center;">${trendHtml}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const totalRowHtml = `
+    <tr style="background:#f8fafc;font-weight:800;">
+      <td colspan="2" style="text-align:center;text-transform:uppercase;color:var(--text-sub);">TỔNG CỘNG</td>
+      <td style="text-align:center;color:var(--text);">${currentOrders.length} đơn</td>
+      <td style="text-align:right;color:var(--cam);font-size:14.5px;">${formatVND(totalCost)}</td>
+      <td style="text-align:center;">100%</td>
+      <td style="text-align:center;">—</td>
+    </tr>
+  `;
+
+  tbody.innerHTML = rowsHtml + totalRowHtml;
+}
+
+async function exportOrderReportToPdf(){
+  if(!isAdmin()){
+    toast('Chỉ Admin mới có quyền tải báo cáo PDF','🔒');
+    return;
+  }
+  const printArea = document.getElementById('orderReportPrintArea');
+  if(!printArea){
+    toast('Không tìm thấy vùng báo cáo để xuất PDF','⚠️');
+    return;
+  }
+
+  if(typeof window.jspdf === 'undefined' || typeof html2canvas === 'undefined'){
+    toast('Đang nạp thư viện tạo PDF, vui lòng thử lại sau 2 giây!','⏳');
+    return;
+  }
+
+  const exportBtn = document.getElementById('reportExportPdfBtn');
+  const origBtnText = exportBtn ? exportBtn.innerHTML : '';
+  if(exportBtn){
+    exportBtn.disabled = true;
+    exportBtn.innerHTML = `⏳ Đang xuất file PDF...`;
+  }
+
+  toast('Hệ thống đang xuất bản file PDF báo cáo, vui lòng đợi trong giây lát...','📄');
+
+  try {
+    const yearSelect = document.getElementById('reportYearSelect');
+    const monthSelect = document.getElementById('reportMonthSelect');
+    const selYear = yearSelect ? yearSelect.value : new Date().getFullYear();
+    const selMonthVal = monthSelect ? monthSelect.value : 'all';
+
+    const canvas = await html2canvas(printArea, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#ffffff',
+      logging: false
+    });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidthMm = 210;
+    const pageHeightMm = 297;
+    const marginMm = 8;
+    const printableWidthMm = pageWidthMm - (marginMm * 2);
+    const imgHeightMm = (canvas.height * printableWidthMm) / canvas.width;
+
+    let heightLeftMm = imgHeightMm;
+    let positionMm = marginMm;
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    pdf.addImage(imgData, 'JPEG', marginMm, positionMm, printableWidthMm, imgHeightMm);
+    heightLeftMm -= (pageHeightMm - marginMm * 2);
+
+    while(heightLeftMm > 0){
+      positionMm -= (pageHeightMm - marginMm * 2);
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', marginMm, positionMm, printableWidthMm, imgHeightMm);
+      heightLeftMm -= (pageHeightMm - marginMm * 2);
+    }
+
+    const fname = `Bao_cao_tong_hop_chi_phi_VPP_${selYear}_${selMonthVal}.pdf`;
+    pdf.save(fname);
+    toast(`✅ Đã tải về thành công file PDF: ${fname}`,'📥');
+  } catch(err){
+    console.error('Lỗi khi tạo PDF:', err);
+    toast('Có lỗi xảy ra khi tạo PDF: ' + err.message, '❌');
+  } finally {
+    if(exportBtn){
+      exportBtn.disabled = false;
+      exportBtn.innerHTML = origBtnText;
+    }
+  }
+}
+
 function renderHomeStats(){
   const week = currentWeekStr();
   const scores = ALL_ZONES.map(z=>zoneScore(week, z.id)).filter(s=>s!==null);
@@ -3206,6 +4045,24 @@ function applyPermissionUI(){
   if(adminSearchWrap) adminSearchWrap.style.display = admin ? 'inline-flex' : 'none';
   const adminExportWrap = document.getElementById('adminExportControlsWrap');
   if(adminExportWrap) adminExportWrap.style.display = admin ? 'inline-flex' : 'none';
+  const reportsTabBtn = document.getElementById('orderReportsTabBtn');
+  if(reportsTabBtn) reportsTabBtn.style.display = admin ? 'inline-flex' : 'none';
+  if(!admin){
+    const reportsPage = document.getElementById('or-reports');
+    if(reportsPage && reportsPage.classList.contains('active')){
+      reportsTabBtn && reportsTabBtn.classList.remove('active');
+      const histBtn = document.querySelector('#orderSubNav button[data-sub="history"]');
+      if(histBtn) histBtn.classList.add('active');
+      reportsPage.classList.remove('active');
+      const histPage = document.getElementById('or-history');
+      if(histPage) histPage.classList.add('active');
+    }
+  } else {
+    const reportsPage = document.getElementById('or-reports');
+    if(reportsPage && reportsPage.classList.contains('active')){
+      if(typeof renderOrderReports === 'function') renderOrderReports();
+    }
+  }
   if(typeof updateExportDeptCountLbl === 'function') updateExportDeptCountLbl();
 }
 
@@ -4418,6 +5275,7 @@ window.refreshAllViews = function(){
 
 startPostgresSync();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
