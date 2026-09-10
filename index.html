@@ -2317,7 +2317,7 @@ const checkoutModal = document.getElementById('checkoutModal');
 const deptSelect = document.getElementById('deptSelect');
 function fillDeptSelectOptions(){
   const cur = deptSelect.value;
-  deptSelect.innerHTML = '<option value="">-- Chọn phòng ban --</option>' + DEPARTMENTS.map(d=>`<option value="${d}">${d}</option>`).join('');
+  deptSelect.innerHTML = '<option value="">-- Chọn phòng ban --</option>' + DEPARTMENTS.map(d=>`<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
   if(DEPARTMENTS.includes(cur)) deptSelect.value = cur;
 }
 fillDeptSelectOptions();
@@ -2327,11 +2327,22 @@ deptSelect.addEventListener('change', ()=>{
 function setupDeptSelectForSession(){
   const otherWrap = document.getElementById('otherDeptWrap');
   if(SESSION && SESSION.role==='staff'){
-    deptSelect.value = SESSION.dept;
+    // Đảm bảo option tồn tại để hiển thị đúng
+    if(SESSION.dept){
+      const optionExists = Array.from(deptSelect.options).some(o => o.value === SESSION.dept);
+      if(!optionExists){
+        const opt = document.createElement('option');
+        opt.value = SESSION.dept;
+        opt.textContent = SESSION.dept;
+        deptSelect.appendChild(opt);
+      }
+    }
+    deptSelect.value = SESSION.dept || '';
     deptSelect.disabled = true;
-    otherWrap.style.display = 'none';
+    otherWrap.style.display = deptSelect.value === 'Khác' ? 'block' : 'none';
   } else {
     deptSelect.disabled = false;
+    deptSelect.dispatchEvent(new Event('change'));
   }
 }
 document.getElementById('checkoutBtn').addEventListener('click', ()=>{
