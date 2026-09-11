@@ -82,6 +82,8 @@ function getStepInfo(step){
       return { num: 4, label: 'B4: BGĐ duyệt chi', cls: 'exp-status-4', desc: 'Đang trình Ban Giám Đốc ký duyệt' };
     case '5':
       return { num: 5, label: 'B5: Đã thanh toán', cls: 'exp-status-5', desc: 'Đã hoàn tất thanh toán ủy nhiệm chi' };
+    case 'pending':
+      return { num: 0, label: '⏸ Pending', cls: 'exp-status-pending', desc: 'Khoản chi đang được tạm hoãn / chờ xử lý' };
     case 'rejected':
       return { num: 0, label: '✕ Đã từ chối', cls: 'exp-status-rej', desc: 'Đề xuất chi phí bị từ chối / hủy bỏ' };
     default:
@@ -976,7 +978,6 @@ window.openAddExpenseModal = function(){
 
   document.getElementById('expInpTitle').value = '';
   document.getElementById('expInpCategory').value = 'Thuê Cây Xanh';
-  document.getElementById('expInpAmount').value = '';
   document.getElementById('expInpMonth').value = String(now.getMonth() + 1);
   document.getElementById('expInpYear').value = String(now.getFullYear());
   document.getElementById('expInpSupplierSelect').value = '';
@@ -984,6 +985,13 @@ window.openAddExpenseModal = function(){
   document.getElementById('expInpInvoiceNo').value = '';
   document.getElementById('expInpStep').value = '1';
   document.getElementById('expInpNote').value = '';
+
+  const amountEl = document.getElementById('expInpAmount');
+  if(amountEl){ amountEl.value = ''; amountEl.dataset.rawValue = ''; }
+  const pendingWrap = document.getElementById('expPendingReasonWrap');
+  if(pendingWrap) pendingWrap.style.display = 'none';
+  const pendingReasonEl = document.getElementById('expInpPendingReason');
+  if(pendingReasonEl) pendingReasonEl.value = '';
 
   document.getElementById('expInpReceiptBase64').value = '';
   const receiptFile = document.getElementById('expInpReceiptFile');
@@ -1008,7 +1016,6 @@ window.openEditExpenseModal = function(id){
   document.getElementById('expInpCode').value = item.code || '';
   document.getElementById('expInpTitle').value = item.title || '';
   document.getElementById('expInpCategory').value = item.category || 'Thuê Cây Xanh';
-  document.getElementById('expInpAmount').value = item.amount || '';
   document.getElementById('expInpMonth').value = String(item.month || 9);
   document.getElementById('expInpYear').value = String(item.year || 2026);
   document.getElementById('expInpSupplierSelect').value = item.supplierId || '';
@@ -1016,6 +1023,17 @@ window.openEditExpenseModal = function(id){
   document.getElementById('expInpInvoiceNo').value = item.invoiceNo || '';
   document.getElementById('expInpStep').value = String(item.step || '1');
   document.getElementById('expInpNote').value = item.note || '';
+
+  const amountEl2 = document.getElementById('expInpAmount');
+  if(amountEl2){
+    const rawVal = String(item.amount || '');
+    amountEl2.dataset.rawValue = rawVal;
+    amountEl2.value = rawVal ? Number(rawVal).toLocaleString('vi-VN') : '';
+  }
+  const pendingWrap2 = document.getElementById('expPendingReasonWrap');
+  if(pendingWrap2) pendingWrap2.style.display = String(item.step) === 'pending' ? 'block' : 'none';
+  const pendingReasonEl2 = document.getElementById('expInpPendingReason');
+  if(pendingReasonEl2) pendingReasonEl2.value = item.pendingReason || '';
 
   document.getElementById('expInpReceiptBase64').value = item.receiptUrl || '';
   const receiptFile = document.getElementById('expInpReceiptFile');
@@ -1041,7 +1059,8 @@ window.handleSaveExpense = function(){
   const code = (document.getElementById('expInpCode')?.value || '').trim();
   const title = (document.getElementById('expInpTitle')?.value || '').trim();
   const category = document.getElementById('expInpCategory')?.value || 'Văn phòng phẩm & In ấn';
-  const amount = parseFloat(document.getElementById('expInpAmount')?.value) || 0;
+  const amountRaw = (document.getElementById('expInpAmount')?.dataset.rawValue || document.getElementById('expInpAmount')?.value || '').replace(/[^0-9]/g, '');
+  const amount = parseFloat(amountRaw) || 0;
   const month = parseInt(document.getElementById('expInpMonth')?.value, 10) || (new Date().getMonth() + 1);
   const year = parseInt(document.getElementById('expInpYear')?.value, 10) || new Date().getFullYear();
   const supplierId = document.getElementById('expInpSupplierSelect')?.value || '';
@@ -1049,11 +1068,13 @@ window.handleSaveExpense = function(){
   const invoiceNo = (document.getElementById('expInpInvoiceNo')?.value || '').trim();
   const step = document.getElementById('expInpStep')?.value || '1';
   const note = (document.getElementById('expInpNote')?.value || '').trim();
+  const pendingReason = step === 'pending' ? (document.getElementById('expInpPendingReason')?.value || '').trim() : '';
   const receiptUrl = document.getElementById('expInpReceiptBase64')?.value || '';
 
   if(!code){ if(typeof toast==='function') toast('Vui lòng nhập mã chi phí', '⚠️'); else alert('Vui lòng nhập mã chi phí'); return; }
   if(!title){ if(typeof toast==='function') toast('Vui lòng nhập nội dung chi phí', '⚠️'); else alert('Vui lòng nhập nội dung chi phí'); return; }
   if(amount <= 0){ if(typeof toast==='function') toast('Vui lòng nhập số tiền thanh toán hợp lệ', '⚠️'); else alert('Vui lòng nhập số tiền'); return; }
+  if(step === 'pending' && !pendingReason){ if(typeof toast==='function') toast('Vui lòng nhập lý do Pending', '⚠️'); else alert('Vui lòng nhập lý do Pending'); return; }
 
   ensureOfficeExpensesData();
   const sup = OFFICE_SUPPLIERS.find(s => s.id === supplierId);
@@ -1064,7 +1085,7 @@ window.handleSaveExpense = function(){
     if(idx !== -1){
       OFFICE_EXPENSES[idx] = {
         ...OFFICE_EXPENSES[idx],
-        code, title, category, amount, month, year, supplierId, supplierName, date, invoiceNo, step, note,
+        code, title, category, amount, month, year, supplierId, supplierName, date, invoiceNo, step, note, pendingReason,
         receiptUrl: receiptUrl || OFFICE_EXPENSES[idx].receiptUrl
       };
       if(typeof toast==='function') toast('✅ Đã cập nhật khoản chi phí!', '✅');
@@ -1083,6 +1104,7 @@ window.handleSaveExpense = function(){
       date: date || new Date().toISOString().split('T')[0],
       invoiceNo,
       step,
+      pendingReason: pendingReason || '',
       receiptUrl: receiptUrl || '',
       createdBy: (window.SESSION && SESSION.email) || 'nhinu@ghn.vn',
       department: (window.SESSION && SESSION.dept) || 'Office Admin General',
