@@ -514,7 +514,7 @@ function renderExpenseAnalytics(){
   if(expSupplierChartInstance){ expSupplierChartInstance.destroy(); expSupplierChartInstance = null; }
 
   // 5. Bảng phân tích biến động 12 tháng
-  renderMonthlyVarianceTable(selectedYear, priorYear, curMonthly, priorMonthly);
+  renderMonthlyVarianceTable(selectedYear);
 }
 
 function renderTrendChart(yearCur, yearPrior, dataCur, dataPrior){
@@ -770,47 +770,215 @@ function renderSupplierMonthlyChart(supName, monthly, year){
   });
 }
 
-function renderMonthlyVarianceTable(yearCur, yearPrior, curArr, priorArr){
+window.expExpandedMonthlyRows = window.expExpandedMonthlyRows || new Set();
+
+window.toggleMonthlyRow = function(m){
+  if(!window.expExpandedMonthlyRows) window.expExpandedMonthlyRows = new Set();
+  if(window.expExpandedMonthlyRows.has(m)){
+    window.expExpandedMonthlyRows.delete(m);
+  } else {
+    window.expExpandedMonthlyRows.add(m);
+  }
+  const yearEl = document.getElementById('expAnalyticsYearSelect');
+  const selectedYear = parseInt(yearEl ? yearEl.value : '2026', 10) || 2026;
+  renderMonthlyVarianceTable(selectedYear);
+};
+
+function renderMonthlyVarianceTable(yearCur){
   const tbody = document.getElementById('expMonthlyTableBody');
   if(!tbody) return;
 
-  let rowsHtml = '';
-  for(let i = 0; i < 12; i++){
-    const m = i + 1;
-    const curVal = curArr[i] || 0;
-    const priorVal = priorArr[i] || 0;
-    const diff = curVal - priorVal;
-    let pctBadge = '<span class="exp-diff-badge">--</span>';
-    let note = 'Chưa phát sinh dữ liệu';
+  const yearPrior = yearCur - 1;
+  const expensesCurYear = OFFICE_EXPENSES.filter(e => Number(e.year) === yearCur && e.step !== 'rejected');
+  const expensesPriorYear = OFFICE_EXPENSES.filter(e => Number(e.year) === yearPrior && e.step !== 'rejected');
 
-    if(priorVal > 0){
-      const pct = ((diff / priorVal) * 100).toFixed(1);
-      if(diff > 0){
-        pctBadge = `<span class="exp-diff-badge pos">+${pct}% ↗</span>`;
-        note = 'Tăng chi phí so với cùng kỳ';
-      } else if(diff < 0){
-        pctBadge = `<span class="exp-diff-badge neg">${pct}% ↘</span>`;
-        note = 'Tiết kiệm chi phí so với cùng kỳ';
-      } else {
-        pctBadge = `<span class="exp-diff-badge">0.0%</span>`;
-        note = 'Chi phí ổn định';
-      }
-    } else if(curVal > 0){
+  // Mảng chi phí 12 tháng năm hiện tại
+  const curMonthly = Array(13).fill(0);
+  expensesCurYear.forEach(e => {
+    const m = Number(e.month) || 0;
+    if(m >= 1 && m <= 12) curMonthly[m] += Number(e.amount) || 0;
+  });
+
+  // Chi phí tháng 12 năm trước (dùng đối soát cho Tháng 1)
+  const priorDecAmt = expensesPriorYear
+    .filter(e => Number(e.month) === 12)
+    .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+  let rowsHtml = '';
+  for(let m = 1; m <= 12; m++){
+    const curVal = curMonthly[m] || 0;
+    const prevVal = m === 1 ? priorDecAmt : (curMonthly[m - 1] || 0);
+    const diff = curVal - prevVal;
+
+    let diffFormatted = '0 ₫';
+    let diffColor = '#64748b';
+    let pctBadge = '<span class="exp-diff-badge">--</span>';
+
+    if(curVal === 0 && prevVal === 0){
+      diffFormatted = '0 ₫';
+      diffColor = '#94a3b8';
+      pctBadge = '<span class="exp-diff-badge">--</span>';
+    } else if(prevVal === 0 && curVal > 0){
+      diffFormatted = `+${curVal.toLocaleString('vi-VN')} ₫`;
+      diffColor = '#ef4444';
       pctBadge = `<span class="exp-diff-badge pos">Mới ↗</span>`;
-      note = 'Kỳ phát sinh mới';
+    } else if(prevVal > 0 && curVal === 0){
+      diffFormatted = `-${prevVal.toLocaleString('vi-VN')} ₫`;
+      diffColor = '#10b981';
+      pctBadge = `<span class="exp-diff-badge neg">-100% ↘</span>`;
+    } else {
+      const pct = ((diff / prevVal) * 100).toFixed(1);
+      if(diff > 0){
+        diffFormatted = `+${diff.toLocaleString('vi-VN')} ₫`;
+        diffColor = '#ef4444';
+        pctBadge = `<span class="exp-diff-badge pos">+${pct}% ↗</span>`;
+      } else if(diff < 0){
+        diffFormatted = `${diff.toLocaleString('vi-VN')} ₫`;
+        diffColor = '#10b981';
+        pctBadge = `<span class="exp-diff-badge neg">${pct}% ↘</span>`;
+      } else {
+        diffFormatted = '0 ₫';
+        diffColor = '#64748b';
+        pctBadge = `<span class="exp-diff-badge">0.0%</span>`;
+      }
     }
 
-    const diffFormatted = (diff >= 0 ? '+' : '') + diff.toLocaleString('vi-VN') + ' ₫';
+    // Lọc danh sách nhà cung cấp của Tháng m
+    const monthExpenses = expensesCurYear.filter(e => Number(e.month) === m);
+    const supMap = {};
+    monthExpenses.forEach(e => {
+      const key = e.supplierId || e.supplierName || 'Khác';
+      if(!supMap[key]){
+        let sName = e.supplierName;
+        if(!sName && e.supplierId){
+          const sObj = OFFICE_SUPPLIERS.find(s => s.id === e.supplierId);
+          if(sObj) sName = sObj.name;
+        }
+        supMap[key] = {
+          id: e.supplierId,
+          name: sName || 'Nhà cung cấp khác',
+          category: e.category || '',
+          curAmt: 0,
+          prevAmt: 0,
+          count: 0
+        };
+      }
+      supMap[key].curAmt += Number(e.amount) || 0;
+      supMap[key].count++;
+    });
 
-    rowsHtml += `<tr>
-      <td><b>Tháng ${m}</b></td>
-      <td style="text-align:right;"><b style="color:#0f172a;">${curVal.toLocaleString('vi-VN')} ₫</b></td>
-      <td style="text-align:right;color:#64748b;">${priorVal.toLocaleString('vi-VN')} ₫</td>
-      <td style="text-align:right;font-weight:700;color:${diff > 0 ? '#ef4444' : (diff < 0 ? '#10b981' : '#64748b')};">${diffFormatted}</td>
-      <td style="text-align:center;">${pctBadge}</td>
-      <td style="font-size:12px;color:#475569;">${note}</td>
-    </tr>`;
+    const prevExpenses = m === 1
+      ? expensesPriorYear.filter(e => Number(e.month) === 12)
+      : expensesCurYear.filter(e => Number(e.month) === m - 1);
+
+    prevExpenses.forEach(e => {
+      const key = e.supplierId || e.supplierName || 'Khác';
+      if(supMap[key]){
+        supMap[key].prevAmt += Number(e.amount) || 0;
+      }
+    });
+
+    const supList = Object.values(supMap).sort((a, b) => b.curAmt - a.curAmt);
+    const supCount = supList.length;
+    const isExpanded = window.expExpandedMonthlyRows && window.expExpandedMonthlyRows.has(m);
+    const toggleIcon = isExpanded ? '▼' : '▶';
+
+    const countBadge = supCount > 0
+      ? `<span class="pill" style="font-size:11px;font-weight:600;padding:2px 8px;margin-left:8px;background:#e2e8f0;color:#334155;">${supCount} NCC</span>`
+      : `<span style="font-size:11px;color:#94a3b8;margin-left:8px;">(0 NCC)</span>`;
+
+    rowsHtml += `
+      <tr class="exp-month-row ${isExpanded ? 'expanded' : ''}" onclick="window.toggleMonthlyRow(${m})" title="Nhấp để xem chi tiết theo từng nhà cung cấp trong Tháng ${m}">
+        <td>
+          <div style="display:flex;align-items:center;">
+            <span style="font-size:11px;color:#0284c7;width:18px;display:inline-block;">${toggleIcon}</span>
+            <b style="color:#0f172a;font-size:13.5px;">Tháng ${m}</b>
+            ${countBadge}
+          </div>
+        </td>
+        <td style="text-align:right;">
+          <b style="color:#0f172a;font-size:13.5px;">${curVal.toLocaleString('vi-VN')} ₫</b>
+        </td>
+        <td style="text-align:right;font-weight:700;color:${diffColor};">
+          ${diffFormatted}
+        </td>
+        <td style="text-align:center;">
+          ${pctBadge}
+        </td>
+      </tr>
+    `;
+
+    if(isExpanded){
+      if(supList.length === 0){
+        rowsHtml += `
+          <tr class="exp-supplier-child-row">
+            <td colspan="4" style="padding:12px 16px 12px 38px;color:#94a3b8;font-style:italic;font-size:12px;">
+              Chưa phát sinh chi phí từ nhà cung cấp nào trong Tháng ${m}.
+            </td>
+          </tr>
+        `;
+      } else {
+        supList.forEach(sup => {
+          const sDiff = sup.curAmt - sup.prevAmt;
+          let sDiffFmt = '0 ₫';
+          let sDiffColor = '#64748b';
+          let sPctBadge = '<span class="exp-diff-badge">--</span>';
+
+          if(sup.curAmt === 0 && sup.prevAmt === 0){
+            sDiffFmt = '0 ₫';
+            sDiffColor = '#94a3b8';
+          } else if(sup.prevAmt === 0 && sup.curAmt > 0){
+            sDiffFmt = `+${sup.curAmt.toLocaleString('vi-VN')} ₫`;
+            sDiffColor = '#ef4444';
+            sPctBadge = `<span class="exp-diff-badge pos">Mới ↗</span>`;
+          } else if(sup.prevAmt > 0 && sup.curAmt === 0){
+            sDiffFmt = `-${sup.prevAmt.toLocaleString('vi-VN')} ₫`;
+            sDiffColor = '#10b981';
+            sPctBadge = `<span class="exp-diff-badge neg">-100% ↘</span>`;
+          } else {
+            const sPct = ((sDiff / sup.prevAmt) * 100).toFixed(1);
+            if(sDiff > 0){
+              sDiffFmt = `+${sDiff.toLocaleString('vi-VN')} ₫`;
+              sDiffColor = '#ef4444';
+              sPctBadge = `<span class="exp-diff-badge pos">+${sPct}% ↗</span>`;
+            } else if(sDiff < 0){
+              sDiffFmt = `${sDiff.toLocaleString('vi-VN')} ₫`;
+              sDiffColor = '#10b981';
+              sPctBadge = `<span class="exp-diff-badge neg">${sPct}% ↘</span>`;
+            } else {
+              sDiffFmt = '0 ₫';
+              sDiffColor = '#64748b';
+              sPctBadge = `<span class="exp-diff-badge">0.0%</span>`;
+            }
+          }
+
+          rowsHtml += `
+            <tr class="exp-supplier-child-row">
+              <td style="padding-left:36px;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="color:#cbd5e1;font-size:12px;">└──</span>
+                  <span style="font-size:13px;">🏢</span>
+                  <b style="color:#334155;font-size:12.5px;">${escapeHtml(sup.name)}</b>
+                  ${sup.category ? `<span class="pill" style="font-size:10px;padding:1px 6px;background:#f1f5f9;color:#64748b;">${escapeHtml(sup.category)}</span>` : ''}
+                  <span style="font-size:11px;color:#94a3b8;">(${sup.count} HĐ)</span>
+                </div>
+              </td>
+              <td style="text-align:right;">
+                <span style="font-weight:600;color:#334155;font-size:12.5px;">${sup.curAmt.toLocaleString('vi-VN')} ₫</span>
+              </td>
+              <td style="text-align:right;font-weight:600;font-size:12px;color:${sDiffColor};">
+                ${sDiffFmt}
+              </td>
+              <td style="text-align:center;">
+                ${sPctBadge}
+              </td>
+            </tr>
+          `;
+        });
+      }
+    }
   }
+
   tbody.innerHTML = rowsHtml;
 }
 
