@@ -632,9 +632,9 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
       </div>
     </div>
     <nav class="nav-tabs" id="mainNav">
-      <button data-page="home" class="active">🏠 Trang chủ</button>
-      <button data-page="hygiene">🧹 Vệ sinh văn phòng</button>
-      <button data-page="order">📦 Order VPP</button>
+      <button data-page="home" id="navHomeBtn" style="display:none;">🏠 Trang chủ</button>
+      <button data-page="hygiene" id="navHygieneBtn" style="display:none;">🧹 Vệ sinh văn phòng</button>
+      <button data-page="order" class="active">📦 Order VPP</button>
       <button data-page="expenses" id="navExpensesBtn" style="display:none;">💰 Chi phí văn phòng</button>
       <button data-page="idcard" id="navIdCardBtn" style="display:none;">🪪 Tạo Thẻ Nhân Viên</button>
       <button data-page="accounts" id="navAccountsBtn" style="display:none;">🔐 Tài khoản</button>
@@ -2345,7 +2345,13 @@ function findAdminAccount(email){
   return ADMIN_ACCOUNTS.find(a=>normalizeEmail(a.email)===target);
 }
 function isLoggedIn(){ return !!SESSION; }
-function isAdmin(){ return !!(SESSION && SESSION.role==='admin'); }
+function isAdmin(){
+  if(!SESSION) return false;
+  if(SESSION.role === 'admin') return true;
+  if(SESSION.email === SUPER_ADMIN_EMAIL) return true;
+  if(typeof findAdminAccount === 'function' && findAdminAccount(SESSION.email)) return true;
+  return false;
+}
 function isSuperAdmin(){ return !!(SESSION && SESSION.email === SUPER_ADMIN_EMAIL); }
 function getBootstrapPassword(email){
   const target = normalizeEmail(email);
@@ -2369,7 +2375,7 @@ function sanitizeAdminAccounts(accounts){
 }
 /* ---------- Admin và Super Admin đều có quyền truy cập đầy đủ hệ thống ---------- */
 function canFullAccess(){
-  return !!(SESSION && (SESSION.email === SUPER_ADMIN_EMAIL || SESSION.role === 'admin' || SESSION.dept === 'Office Admin General'));
+  return isAdmin();
 }
 
 /* ---------- Các hàm kiểm tra quyền Admin chi tiết ---------- */
@@ -2707,14 +2713,18 @@ function confettiBurst(){
    ĐIỀU HƯỚNG
    ============================================================ */
 function gotoPage(pageId){
-  if((pageId==='accounts' || pageId==='idcard') && !isAdmin()){ toast('Chỉ Admin mới có quyền truy cập trang này','🔒'); return; }
-  if(pageId==='expenses' && SESSION && !canFullAccess() && !isAdmin()){ toast('Chỉ Quản trị viên mới có quyền truy cập Chi phí văn phòng','🔒'); return; }
-  if((pageId==='home' || pageId==='hygiene') && SESSION && !canFullAccess()){
-    toast('Tài khoản của bạn chỉ có quyền truy cập Order VPP','🔒');
+  const admin = isAdmin();
+  if(!admin && pageId !== 'order'){
+    pageId = 'order';
+  }
+  if((pageId==='accounts' || pageId==='idcard') && !admin){ toast('Chỉ Admin mới có quyền truy cập trang này','🔒'); return; }
+  if(pageId==='expenses' && !admin){ toast('Chỉ Quản trị viên mới có quyền truy cập Chi phí văn phòng','🔒'); return; }
+  if((pageId==='home' || pageId==='hygiene') && !admin){
     pageId = 'order';
   }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+pageId).classList.add('active');
+  const targetPage = document.getElementById('page-'+pageId);
+  if(targetPage) targetPage.classList.add('active');
   document.querySelectorAll('#mainNav button').forEach(b=>b.classList.toggle('active', b.dataset.page===pageId));
   window.scrollTo({top:0, behavior:'smooth'});
   if(pageId==='accounts') renderAccountsPage();
@@ -4787,20 +4797,29 @@ function applySession(){
     loginOverlay.classList.remove('show');
     userArea.style.display = 'flex';
     document.getElementById('userEmailLabel').textContent = SESSION.email;
-    document.getElementById('userDeptPill').textContent = (SESSION.role==='admin' ? '👑 Admin · ' : '👤 ') + SESSION.dept;
-    document.getElementById('navAccountsBtn').style.display = isAdmin() ? 'flex' : 'none';
+    const admin = isAdmin();
+    document.getElementById('userDeptPill').textContent = (admin ? '👑 Admin · ' : '👤 ') + SESSION.dept;
+
+    // Quản lý tài khoản & Thẻ NV (chỉ Admin)
+    const navAccountsBtn = document.getElementById('navAccountsBtn');
+    if(navAccountsBtn) navAccountsBtn.style.display = admin ? 'flex' : 'none';
     const navIdCardBtn = document.getElementById('navIdCardBtn');
-    if(navIdCardBtn) navIdCardBtn.style.display = isAdmin() ? 'flex' : 'none';
+    if(navIdCardBtn) navIdCardBtn.style.display = admin ? 'flex' : 'none';
+
+    // Chi phí văn phòng (chỉ Admin)
     const navExpensesBtn = document.getElementById('navExpensesBtn');
-    if(navExpensesBtn) navExpensesBtn.style.display = (isAdmin() || full) ? 'flex' : 'none';
+    if(navExpensesBtn) navExpensesBtn.style.display = admin ? 'flex' : 'none';
     const homeCardExpenses = document.getElementById('homeCardExpenses');
-    if(homeCardExpenses) homeCardExpenses.style.display = (isAdmin() || full) ? 'block' : 'none';
-    const full = canFullAccess();
-    const homeBtn = document.querySelector('#mainNav button[data-page="home"]');
-    const hygieneBtn = document.querySelector('#mainNav button[data-page="hygiene"]');
-    if(homeBtn) homeBtn.style.display = full ? 'flex' : 'none';
-    if(hygieneBtn) hygieneBtn.style.display = full ? 'flex' : 'none';
-    if(!full){
+    if(homeCardExpenses) homeCardExpenses.style.display = admin ? 'block' : 'none';
+
+    // Trang chủ & Vệ sinh văn phòng (chỉ Admin, tài khoản thường chỉ thấy Order VPP)
+    const homeBtn = document.getElementById('navHomeBtn') || document.querySelector('#mainNav button[data-page="home"]');
+    const hygieneBtn = document.getElementById('navHygieneBtn') || document.querySelector('#mainNav button[data-page="hygiene"]');
+    if(homeBtn) homeBtn.style.display = admin ? 'flex' : 'none';
+    if(hygieneBtn) hygieneBtn.style.display = admin ? 'flex' : 'none';
+
+    // Nếu là tài khoản thường: đưa trực tiếp vào trang Order VPP
+    if(!admin){
       gotoPage('order');
     }
   } else {
@@ -4952,7 +4971,7 @@ function importUsersFromWorkbookUrl(url, options){
 }
 
 function renderAccountsPage(){
-  if(!isAdmin()){ gotoPage('home'); return; }
+  if(!isAdmin()){ gotoPage('order'); return; }
 
   document.getElementById('productManageCard').style.display = canEditProducts() ? 'block' : 'none';
   if(canEditProducts() && typeof renderProductManageTable === 'function') renderProductManageTable();
