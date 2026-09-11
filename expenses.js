@@ -470,13 +470,16 @@ function renderExpenseAnalytics(){
   });
   renderCategoryChart(catTotals);
 
-  // 4. Top NCC Bar Chart
-  const supTotals = {};
-  expensesForPeriod.forEach(e => {
-    const name = e.supplierName || 'Khác';
-    supTotals[name] = (supTotals[name] || 0) + (Number(e.amount)||0);
-  });
-  renderSupplierChart(supTotals);
+  // 4. Populate dropdown nhà cung cấp theo biểu đồ tháng
+  populateSupplierChartSelector(expensesForPeriod);
+  // Reset chart về trạng thái empty khi đổi bộ lọc
+  const chartWrap = document.getElementById('expSupplierChartWrap');
+  const chartEmpty = document.getElementById('expSupplierChartEmpty');
+  const sel = document.getElementById('expSupplierChartSelector');
+  if(chartWrap) chartWrap.style.display = 'none';
+  if(chartEmpty) chartEmpty.style.display = 'block';
+  if(sel) sel.value = '';
+  if(expSupplierChartInstance){ expSupplierChartInstance.destroy(); expSupplierChartInstance = null; }
 
   // 5. Bảng phân tích biến động 12 tháng
   renderMonthlyVarianceTable(selectedYear, priorYear, curMonthly, priorMonthly);
@@ -626,27 +629,81 @@ function renderCategoryChart(catTotals){
   });
 }
 
-function renderSupplierChart(supTotals){
+function populateSupplierChartSelector(expenses){
+  const sel = document.getElementById('expSupplierChartSelector');
+  if(!sel) return;
+  // Lấy tất cả nhà cung cấp có trong dữ liệu
+  const supplierMap = {};
+  expenses.forEach(e => {
+    if(e.supplierId && e.supplierName) supplierMap[e.supplierId] = e.supplierName;
+  });
+  const current = sel.value;
+  sel.innerHTML = '<option value="">-- Chọn nhà cung cấp --</option>';
+  Object.entries(supplierMap).sort((a,b)=>a[1].localeCompare(b[1],'vi')).forEach(([id, name])=> {
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = name;
+    if(id === current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+window.onSupplierChartSelect = function(supplierId){
+  const chartWrap = document.getElementById('expSupplierChartWrap');
+  const chartEmpty = document.getElementById('expSupplierChartEmpty');
+  if(!supplierId){
+    if(chartWrap) chartWrap.style.display = 'none';
+    if(chartEmpty) chartEmpty.style.display = 'block';
+    if(expSupplierChartInstance){ expSupplierChartInstance.destroy(); expSupplierChartInstance = null; }
+    return;
+  }
+  if(chartWrap) chartWrap.style.display = 'block';
+  if(chartEmpty) chartEmpty.style.display = 'none';
+
+  ensureOfficeExpensesData();
+  // Lấy năm đang chọn trên analytics
+  const yearSel = document.getElementById('expAnalyticsYear');
+  const selectedYear = parseInt(yearSel ? yearSel.value : new Date().getFullYear(), 10);
+
+  // Tổng hợp theo từng tháng
+  const monthly = Array(12).fill(0);
+  OFFICE_EXPENSES
+    .filter(e => e.supplierId === supplierId && Number(e.year) === selectedYear && e.step !== 'rejected')
+    .forEach(e => {
+      const m = (Number(e.month)||1) - 1;
+      if(m >= 0 && m < 12) monthly[m] += Number(e.amount)||0;
+    });
+
+  // Tìm tên nhà cung cấp
+  const sup = OFFICE_SUPPLIERS.find(s => s.id === supplierId);
+  const supName = sup ? sup.name : 'Nhà cung cấp';
+
+  renderSupplierMonthlyChart(supName, monthly, selectedYear);
+};
+
+function renderSupplierMonthlyChart(supName, monthly, year){
   const canvas = document.getElementById('expSupplierChartCanvas');
   if(!canvas || typeof Chart === 'undefined') return;
 
   const ctx = canvas.getContext('2d');
   if(expSupplierChartInstance) expSupplierChartInstance.destroy();
 
-  const sorted = Object.entries(supTotals).sort((a,b)=>b[1]-a[1]).slice(0, 5);
-  const labels = sorted.map(s => s[0].length > 20 ? s[0].substring(0, 20) + '...' : s[0]);
-  const data = sorted.map(s => s[1]);
+  const grad = ctx.createLinearGradient(0, 0, 0, 260);
+  grad.addColorStop(0, 'rgba(2, 132, 199, 0.25)');
+  grad.addColorStop(1, 'rgba(2, 132, 199, 0.0)');
 
   expSupplierChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: labels.length ? labels : ['Chưa có dữ liệu'],
+      labels: ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'],
       datasets: [{
-        label: 'Số tiền chi trả (VNĐ)',
-        data: data.length ? data : [0],
-        backgroundColor: '#0284c7',
+        label: `Chi phí ${supName} năm ${year} (VNĐ)`,
+        data: monthly,
+        backgroundColor: monthly.map(v => v > 0 ? 'rgba(2,132,199,0.75)' : 'rgba(226,232,240,0.5)'),
+        borderColor: monthly.map(v => v > 0 ? '#0284c7' : '#cbd5e1'),
+        borderWidth: 1.5,
         borderRadius: 6,
-        maxBarThickness: 32
+        maxBarThickness: 40
       }]
     },
     options: {
@@ -657,19 +714,21 @@ function renderSupplierChart(supTotals){
         tooltip: {
           callbacks: {
             label: function(ctx){
-              return ` Chi trả: ${(ctx.raw||0).toLocaleString('vi-VN')} ₫`;
+              const val = ctx.raw || 0;
+              return val > 0 ? ` ${val.toLocaleString('vi-VN')} ₫` : ' Chưa phát sinh';
             }
           }
         }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+        x: { grid: { display: false }, ticks: { font: { size: 12, family: 'Mulish' } } },
         y: {
           beginAtZero: true,
           grid: { color: '#f1f5f9' },
           ticks: {
+            font: { size: 11 },
             callback: function(val){
-              if(val >= 1000000) return (val / 1000000).toFixed(0) + ' Tr';
+              if(val >= 1000000) return (val/1000000).toFixed(0) + ' Tr';
               return val;
             }
           }

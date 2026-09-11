@@ -1422,10 +1422,22 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         </div>
       </div>
 
-      <!-- Charts Row 2: Top suppliers bar chart -->
+      <!-- Charts Row 2: Chi phí theo tháng của nhà cung cấp -->
       <div style="background:#fff;border-radius:18px;padding:20px;box-shadow:var(--shadow);margin-bottom:22px;">
-        <h4 style="margin:0 0 14px;font-size:14.5px;color:#1e293b;">🏢 Top Nhà cung cấp có giá trị thanh toán lớn nhất</h4>
-        <div style="height:240px;position:relative;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+          <h4 style="margin:0;font-size:14.5px;color:#1e293b;">📊 Chi phí theo từng tháng của nhà cung cấp</h4>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label style="font-size:12px;color:#64748b;font-weight:600;white-space:nowrap;">Chọn nhà cung cấp:</label>
+            <select id="expSupplierChartSelector" style="font-size:13px;padding:6px 10px;border-radius:8px;border:1.5px solid #e2e8f0;color:#1e293b;background:#f8fafc;min-width:180px;" onchange="window.onSupplierChartSelect(this.value)">
+              <option value="">-- Chọn nhà cung cấp --</option>
+            </select>
+          </div>
+        </div>
+        <div id="expSupplierChartEmpty" style="text-align:center;padding:36px 20px;color:#94a3b8;">
+          <div style="font-size:36px;margin-bottom:8px;">🏢</div>
+          <div style="font-size:13px;font-weight:600;color:#64748b;">Chọn một nhà cung cấp để xem biểu đồ chi phí theo tháng</div>
+        </div>
+        <div id="expSupplierChartWrap" style="display:none;height:260px;position:relative;">
           <canvas id="expSupplierChartCanvas"></canvas>
         </div>
       </div>
