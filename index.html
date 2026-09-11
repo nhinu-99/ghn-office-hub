@@ -1310,8 +1310,9 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
             <option value="1">B1: Tiếp nhận đề xuất</option>
             <option value="2">B2: HC đối soát</option>
             <option value="3">B3: Kế toán kiểm tra</option>
-            <option value="5">B4: Đã thanh toán</option>
-            <option value="rejected">Đã từ chối</option>
+            <option value="4">B4: Đã thanh toán</option>
+            <option value="pending">⏸ Pending</option>
+            <option value="rejected">✕ Đã từ chối</option>
           </select>
           <button class="btn btn-ghost btn-sm" id="expResetFilterBtn" style="padding:8px 12px;">✕ Xóa lọc</button>
         </div>
@@ -1781,7 +1782,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
             <option value="1">Bước 1: Tiếp nhận đề xuất &amp; HĐ</option>
             <option value="2">Bước 2: Hành chính đối soát</option>
             <option value="3">Bước 3: Kế toán kiểm tra</option>
-            <option value="5">Bước 4: Đã thanh toán</option>
+            <option value="4">Bước 4: Đã thanh toán</option>
             <option value="pending">⏸ Pending</option>
             <option value="rejected">Từ chối / Hủy</option>
           </select>
@@ -1848,8 +1849,8 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         </div>
       </div>
       <div class="exp-stepper" id="expDetailStepper">
-        <div class="exp-stepper-line"></div>
-        <div class="exp-stepper-progress" id="expDetailStepperProgress" style="width:0%;"></div>
+        <div class="exp-stepper-line" style="left:12%;width:76%;"></div>
+        <div class="exp-stepper-progress" id="expDetailStepperProgress" style="left:12%;width:0%;"></div>
         <div class="exp-stepper-item" id="expStep1">
           <div class="exp-stepper-circle">1</div>
           <div class="exp-stepper-title">Tiếp nhận</div>
@@ -1867,13 +1868,8 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         </div>
         <div class="exp-stepper-item" id="expStep4">
           <div class="exp-stepper-circle">4</div>
-          <div class="exp-stepper-title">BGĐ Duyệt</div>
-          <div class="exp-stepper-desc">Ký duyệt chi</div>
-        </div>
-        <div class="exp-stepper-item" id="expStep5">
-          <div class="exp-stepper-circle">5</div>
           <div class="exp-stepper-title">Thanh toán</div>
-          <div class="exp-stepper-desc">Hoàn tất chi trả</div>
+          <div class="exp-stepper-desc">Hoàn tất chi trả ✅</div>
         </div>
       </div>
     </div>

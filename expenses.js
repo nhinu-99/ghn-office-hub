@@ -37,6 +37,18 @@ window.initOfficeExpensesFromCloud = function(raw, persistDefaults){
     }
   }
 
+  // Chuẩn hóa dữ liệu cũ: chuyển Cây xanh & Cảnh quan về Thuê Cây Xanh, chuyển step 5 về 4
+  if(Array.isArray(OFFICE_EXPENSES)){
+    OFFICE_EXPENSES.forEach(e => {
+      if(e.category && (e.category.toLowerCase().includes('cảnh quan') || e.category.toLowerCase().includes('canh quan'))){
+        e.category = 'Thuê Cây Xanh';
+      }
+      if(e.step === 5 || e.step === '5'){
+        e.step = 4;
+      }
+    });
+  }
+
   if(Array.isArray(raw.officeSuppliers)){
     OFFICE_SUPPLIERS = raw.officeSuppliers.filter(s => !MOCK_SUPPLIER_IDS.has(s.id));
   } else {
@@ -84,9 +96,8 @@ function getStepInfo(step){
     case '3':
       return { num: 3, label: 'B3: Kế toán kiểm tra', cls: 'exp-status-3', desc: 'Kế toán rà soát thuế & lập đề nghị chi' };
     case '4':
-      return { num: 4, label: 'B4: BGĐ duyệt chi', cls: 'exp-status-4', desc: 'Đang trình Ban Giám Đốc ký duyệt' };
     case '5':
-      return { num: 5, label: 'B4: Đã thanh toán', cls: 'exp-status-5', desc: 'Đã hoàn tất thanh toán ủy nhiệm chi' };
+      return { num: 4, label: 'B4: Đã thanh toán', cls: 'exp-status-5', desc: 'Đã hoàn tất thanh toán ủy nhiệm chi' };
     case 'pending':
       return { num: 0, label: '⏸ Pending', cls: 'exp-status-pending', desc: 'Khoản chi đang được tạm hoãn / chờ xử lý' };
     case 'rejected':
@@ -274,9 +285,12 @@ function populateExpenseDropdowns(){
       'Nước uống'
     ];
     // Lọc bỏ các danh mục không còn dùng / lỗi nhập liệu cũ
-    const excludedCats = ['Cây xanh & Cảnh quan', 'Cây Xanh & Cảnh Quan'];
-    const existingCats = Array.from(new Set(OFFICE_EXPENSES.map(e => e.category).filter(Boolean)))
-      .filter(c => !excludedCats.includes(c));
+    const existingCats = Array.from(new Set(OFFICE_EXPENSES.map(e => {
+      let c = (e.category || '').trim();
+      if(c.toLowerCase().includes('cảnh quan') || c.toLowerCase().includes('canh quan')) return 'Thuê Cây Xanh';
+      return c;
+    }).filter(Boolean)))
+      .filter(c => !c.toLowerCase().includes('cảnh quan') && !c.toLowerCase().includes('canh quan'));
     const allCats = Array.from(new Set([...defaultCats, ...existingCats]));
 
     let html = '<option value="all">Tất cả danh mục</option>';
@@ -307,7 +321,14 @@ function renderExpenseList(){
     if(yearVal !== 'all' && String(item.year) !== yearVal) return false;
     if(monthVal !== 'all' && String(item.month) !== monthVal) return false;
     if(catVal !== 'all' && item.category !== catVal) return false;
-    if(stepVal !== 'all' && String(item.step) !== stepVal) return false;
+    if(stepVal !== 'all'){
+      const itemStep = String(item.step);
+      if(stepVal === '4'){
+        if(itemStep !== '4' && itemStep !== '5') return false;
+      } else if(itemStep !== stepVal){
+        return false;
+      }
+    }
     if(query){
       const haystack = [item.code, item.title, item.supplierName, item.invoiceNo, item.createdBy, item.note].filter(Boolean).join(' ').toLowerCase();
       if(!haystack.includes(query)) return false;
@@ -338,7 +359,7 @@ function renderExpenseList(){
     ` : `<span style="color:#94a3b8;font-size:12px;">--</span>`;
 
     let dotsHtml = '<div class="exp-mini-stepper">';
-    for(let s = 1; s <= 5; s++){
+    for(let s = 1; s <= 4; s++){
       const active = (stepInfo.num >= s);
       dotsHtml += `<div class="exp-mini-dot ${active ? 'active' : ''}" title="Bước ${s}"></div>`;
     }
@@ -396,8 +417,8 @@ function renderExpenseAnalytics(){
   // 1. Cập nhật KPIs
   const totalAnnual = expensesCurYear.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
   const totalPeriod = expensesForPeriod.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
-  const paidList = expensesForPeriod.filter(e => String(e.step) === '5');
-  const pendingList = expensesForPeriod.filter(e => String(e.step) !== '5');
+  const paidList = expensesForPeriod.filter(e => String(e.step) === '4' || String(e.step) === '5');
+  const pendingList = expensesForPeriod.filter(e => String(e.step) !== '4' && String(e.step) !== '5' && e.step !== 'rejected');
 
   const totalPaid = paidList.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
   const totalPending = pendingList.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
@@ -903,11 +924,11 @@ window.openExpenseDetailModal = function(id){
   }
 
   const curNum = stepInfo.num;
-  const pct = curNum === 0 ? 0 : Math.max(0, Math.min(100, (curNum - 1) * 25));
+  const pct = curNum <= 1 ? 0 : Math.max(0, Math.min(100, ((curNum - 1) / 3) * 100));
   const progressLine = document.getElementById('expDetailStepperProgress');
   if(progressLine) progressLine.style.width = pct + '%';
 
-  for(let s = 1; s <= 5; s++){
+  for(let s = 1; s <= 4; s++){
     const el = document.getElementById('expStep' + s);
     if(el){
       el.classList.remove('active', 'completed');
@@ -918,7 +939,7 @@ window.openExpenseDetailModal = function(id){
 
   const advBtn = document.getElementById('expDetailAdvanceBtn');
   if(advBtn){
-    if(curNum >= 5){
+    if(curNum >= 4){
       advBtn.disabled = true;
       advBtn.textContent = '✓ Đã hoàn tất thanh toán';
       advBtn.style.opacity = '0.7';
@@ -986,7 +1007,7 @@ function handleAdvanceDetailStep(){
   if(!item) return;
 
   const curStep = Number(item.step) || 1;
-  if(curStep >= 5){
+  if(curStep >= 4){
     if(typeof toast === 'function') toast('Khoản chi này đã hoàn tất thanh toán!', 'ℹ️');
     return;
   }
@@ -1091,7 +1112,9 @@ window.openEditExpenseModal = function(id){
   document.getElementById('expInpSupplierSelect').value = item.supplierId || '';
   document.getElementById('expInpDate').value = item.date || '';
   document.getElementById('expInpInvoiceNo').value = item.invoiceNo || '';
-  document.getElementById('expInpStep').value = String(item.step || '1');
+  let stepVal = String(item.step || '1');
+  if(stepVal === '5') stepVal = '4';
+  document.getElementById('expInpStep').value = stepVal;
   document.getElementById('expInpNote').value = item.note || '';
 
   const amountEl2 = document.getElementById('expInpAmount');
