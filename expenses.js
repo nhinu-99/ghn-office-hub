@@ -256,16 +256,12 @@ function populateExpenseDropdowns(){
   if(filterCat){
     const curVal = filterCat.value;
     const defaultCats = [
-      'Điện lực & Năng lượng',
-      'Nước sinh hoạt',
-      'Internet & Viễn thông',
-      'Thuê mặt bằng & Tòa nhà',
-      'Bảo trì máy lạnh & CSVC',
-      'Cây xanh & Cảnh quan',
-      'Nước uống đóng bình',
-      'Vệ sinh định kỳ',
-      'Văn phòng phẩm & In ấn',
-      'Khác'
+      'Thuê Cây Xanh',
+      'Giặt thảm',
+      'Mực in',
+      'Văn Phòng Phẩm',
+      'DV Vệ Sinh',
+      'Nước uống'
     ];
     const existingCats = Array.from(new Set(OFFICE_EXPENSES.map(e => e.category).filter(Boolean)));
     const allCats = Array.from(new Set([...defaultCats, ...existingCats]));
@@ -979,7 +975,7 @@ window.openAddExpenseModal = function(){
   document.getElementById('expInpCode').value = autoCode;
 
   document.getElementById('expInpTitle').value = '';
-  document.getElementById('expInpCategory').value = 'Điện lực & Năng lượng';
+  document.getElementById('expInpCategory').value = 'Thuê Cây Xanh';
   document.getElementById('expInpAmount').value = '';
   document.getElementById('expInpMonth').value = String(now.getMonth() + 1);
   document.getElementById('expInpYear').value = String(now.getFullYear());
@@ -1011,7 +1007,7 @@ window.openEditExpenseModal = function(id){
   document.getElementById('expInpEditId').value = item.id;
   document.getElementById('expInpCode').value = item.code || '';
   document.getElementById('expInpTitle').value = item.title || '';
-  document.getElementById('expInpCategory').value = item.category || 'Điện lực & Năng lượng';
+  document.getElementById('expInpCategory').value = item.category || 'Thuê Cây Xanh';
   document.getElementById('expInpAmount').value = item.amount || '';
   document.getElementById('expInpMonth').value = String(item.month || 9);
   document.getElementById('expInpYear').value = String(item.year || 2026);
