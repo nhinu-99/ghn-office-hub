@@ -1636,6 +1636,400 @@ window.exportExpensesToExcel = function(){
   if(typeof toast==='function') toast(`📥 Đã tải xuống file Excel: ${fileName}`, '✅');
 };
 
+// ─── TẢI FILE EXCEL MẪU CHUẨN ĐỂ NHẬP LIỆU ───
+window.downloadExpenseExcelTemplate = function(){
+  if(typeof XLSX === 'undefined'){
+    if(typeof toast === 'function') toast('Thư viện Excel đang tải, vui lòng chờ giây lát!', '⚠️');
+    return;
+  }
+
+  const headers = [
+    'MÃ CHI PHÍ',
+    'DANH MỤC CHI PHÍ',
+    'NỘI DUNG / KHOẢN MỤC CHI',
+    'SỐ TIỀN THANH TOÁN (VNĐ)',
+    'KỲ CHI PHÍ (THÁNG/NĂM)',
+    'NHÀ CUNG CẤP',
+    'NGÀY HÓA ĐƠN',
+    'SỐ HÓA ĐƠN VAT'
+  ];
+
+  const sampleRow1 = [
+    '3399',
+    'Thuê Cây Xanh',
+    'Thanh toán chi phí thuê cây xanh tại VP Thành Thái tháng 07.2026',
+    20887200,
+    7,
+    'Cát Mộc',
+    '13/07/2026',
+    '977'
+  ];
+
+  const sampleRow2 = [
+    '3400',
+    'Văn Phòng Phẩm',
+    'Chi phí giấy in và văn phòng phẩm tháng 07.2026',
+    15500000,
+    7,
+    'Nam Khang',
+    '15/07/2026',
+    '1024'
+  ];
+
+  const sampleRow3 = [
+    '3401',
+    'Nước uống',
+    'Chi phí nước uống Lavie văn phòng tháng 07.2026',
+    66020400,
+    7,
+    'Lavie',
+    '20/07/2026',
+    '8854'
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([headers, sampleRow1, sampleRow2, sampleRow3]);
+
+  ws['!cols'] = [
+    { wch: 14 },
+    { wch: 20 },
+    { wch: 48 },
+    { wch: 24 },
+    { wch: 22 },
+    { wch: 22 },
+    { wch: 16 },
+    { wch: 16 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Mau_Chi_Phi');
+  XLSX.writeFile(wb, 'Mau_Nhap_Chi_Phi_Van_Phong.xlsx');
+  if(typeof toast === 'function') toast('📥 Đã tải xuống file mẫu: Mau_Nhap_Chi_Phi_Van_Phong.xlsx', '✅');
+};
+
+// ─── NHẬP HÀNG LOẠT CHI PHÍ TỪ FILE EXCEL ───
+window._pendingExpenseImports = [];
+
+window.openImportExpensesModal = function(){
+  window._pendingExpenseImports = [];
+  const fileInp = document.getElementById('expImportFileInput');
+  if(fileInp) fileInp.value = '';
+  const label = document.getElementById('expImportFileLabel');
+  if(label) label.textContent = 'Nhấp để chọn file hoặc kéo thả file Excel vào đây';
+  const previewWrap = document.getElementById('expImportPreviewWrap');
+  if(previewWrap) previewWrap.style.display = 'none';
+  const tbody = document.getElementById('expImportPreviewTbody');
+  if(tbody) tbody.innerHTML = '';
+  const confirmBtn = document.getElementById('expImportConfirmBtn');
+  if(confirmBtn){
+    confirmBtn.disabled = true;
+    confirmBtn.style.opacity = '0.6';
+    confirmBtn.textContent = '🚀 Xác nhận tải lên';
+  }
+  window.openModal('expModalImportExcel');
+};
+
+window.closeImportExpensesModal = function(){
+  window._pendingExpenseImports = [];
+  window.closeModal('expModalImportExcel');
+};
+
+window.handleExpenseFileSelect = function(e){
+  const files = e.target.files;
+  if(files && files.length) processExpenseExcelFile(files[0]);
+};
+
+window.handleExpenseDropFiles = function(files){
+  if(files && files.length) processExpenseExcelFile(files[0]);
+};
+
+function processExpenseExcelFile(file){
+  if(!file) return;
+  const label = document.getElementById('expImportFileLabel');
+  if(label) label.textContent = `📄 Đang đọc file: ${file.name}...`;
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try {
+      const data = new Uint8Array(evt.target.result);
+      if(typeof XLSX === 'undefined'){
+        if(typeof toast === 'function') toast('Thư viện Excel chưa sẵn sàng, vui lòng thử lại sau vài giây!', '⚠️');
+        return;
+      }
+      const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+      if(!jsonRows || jsonRows.length < 2){
+        if(typeof toast === 'function') toast('File Excel không có dữ liệu!', '⚠️');
+        if(label) label.textContent = 'File không có dữ liệu, vui lòng chọn file khác.';
+        return;
+      }
+
+      parseExpenseWorkbookRows(jsonRows, file.name);
+    } catch(err){
+      console.error(err);
+      if(typeof toast === 'function') toast('Lỗi đọc file Excel: ' + err.message, '⚠️');
+      if(label) label.textContent = 'Lỗi đọc file Excel, vui lòng kiểm tra lại file.';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseExpenseWorkbookRows(jsonRows, fileName){
+  let headerRowIdx = -1;
+  for(let i = 0; i < Math.min(10, jsonRows.length); i++){
+    const row = jsonRows[i];
+    if(!Array.isArray(row)) continue;
+    const strRow = row.map(c => String(c).trim().toLowerCase()).join(' ');
+    if(strRow.includes('mã chi phí') || strRow.includes('danh mục') || strRow.includes('nội dung') || strRow.includes('khoản mục') || strRow.includes('số tiền')){
+      headerRowIdx = i;
+      break;
+    }
+  }
+
+  let colCode = 0, colCat = 1, colTitle = 2, colAmt = 3, colPeriod = 4, colSup = 5, colDate = 6, colInvoice = 7;
+
+  if(headerRowIdx >= 0){
+    const hRow = jsonRows[headerRowIdx];
+    hRow.forEach((h, idx) => {
+      const s = String(h).trim().toLowerCase();
+      if(s.includes('mã')) colCode = idx;
+      else if(s.includes('danh mục') || s.includes('loại')) colCat = idx;
+      else if(s.includes('nội dung') || s.includes('khoản mục') || s.includes('mục chi') || s.includes('tiêu đề')) colTitle = idx;
+      else if(s.includes('tiền') || s.includes('thanh toán') || s.includes('vnđ')) colAmt = idx;
+      else if(s.includes('kỳ') || s.includes('tháng/năm') || s.includes('tháng')) colPeriod = idx;
+      else if(s.includes('nhà cung cấp') || s.includes('ncc') || s.includes('đơn vị')) colSup = idx;
+      else if(s.includes('ngày')) colDate = idx;
+      else if(s.includes('hóa đơn') || s.includes('số hđ') || s.includes('vat')) colInvoice = idx;
+    });
+  }
+
+  const startIdx = headerRowIdx >= 0 ? headerRowIdx + 1 : 1;
+  const parsedItems = [];
+  const now = new Date();
+
+  for(let i = startIdx; i < jsonRows.length; i++){
+    const r = jsonRows[i];
+    if(!r || !Array.isArray(r) || !r.some(cell => String(cell).trim() !== '')) continue;
+
+    const rawCode = String(r[colCode] || '').trim();
+    let rawCat = String(r[colCat] || '').trim();
+    if(rawCat.toLowerCase().includes('cảnh quan') || rawCat.toLowerCase().includes('canh quan')) rawCat = 'Thuê Cây Xanh';
+    const category = rawCat || 'Thuê Cây Xanh';
+
+    const rawTitle = String(r[colTitle] || '').trim();
+    const title = rawTitle || `Chi phí ${category}`;
+
+    const rawAmt = r[colAmt];
+    let amount = 0;
+    if(typeof rawAmt === 'number') amount = Math.round(rawAmt);
+    else if(rawAmt) amount = Number(String(rawAmt).replace(/[^0-9]/g, '')) || 0;
+
+    if(!rawTitle && amount === 0) continue;
+
+    // Parse kỳ chi phí (tháng/năm)
+    const rawPeriod = String(r[colPeriod] || '').trim();
+    let month = 0, year = 0;
+    if(rawPeriod){
+      const match = rawPeriod.match(/(\d{1,2})[\/\.\-](\d{4})/);
+      if(match){
+        month = parseInt(match[1], 10);
+        year = parseInt(match[2], 10);
+      } else {
+        const num = parseInt(rawPeriod, 10);
+        if(num >= 1 && num <= 12) month = num;
+      }
+    }
+
+    // Parse ngày hóa đơn
+    const rawDate = r[colDate];
+    let dateStr = '';
+    if(rawDate instanceof Date && !isNaN(rawDate.getTime())){
+      const y = rawDate.getFullYear();
+      const m = String(rawDate.getMonth() + 1).padStart(2, '0');
+      const d = String(rawDate.getDate()).padStart(2, '0');
+      dateStr = `${y}-${m}-${d}`;
+      if(!year) year = y;
+      if(!month) month = rawDate.getMonth() + 1;
+    } else if(typeof rawDate === 'number' && rawDate > 20000 && rawDate < 60000){
+      const jsDate = new Date(Math.round((rawDate - 25569) * 86400 * 1000));
+      const y = jsDate.getFullYear();
+      const m = String(jsDate.getMonth() + 1).padStart(2, '0');
+      const d = String(jsDate.getDate()).padStart(2, '0');
+      dateStr = `${y}-${m}-${d}`;
+      if(!year) year = y;
+      if(!month) month = jsDate.getMonth() + 1;
+    } else if(rawDate){
+      const s = String(rawDate).trim();
+      const parts = s.split(/[\/\-\.]/);
+      if(parts.length === 3){
+        if(parts[0].length === 4){
+          dateStr = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+          if(!year) year = parseInt(parts[0], 10);
+          if(!month) month = parseInt(parts[1], 10);
+        } else {
+          dateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          if(!year) year = parseInt(parts[2], 10);
+          if(!month) month = parseInt(parts[1], 10);
+        }
+      }
+    }
+
+    if(!year) year = now.getFullYear();
+    if(!month || month < 1 || month > 12) month = now.getMonth() + 1;
+    if(!dateStr) dateStr = `${year}-${String(month).padStart(2, '0')}-01`;
+
+    const code = rawCode || `EXP-${String(year).slice(-2)}${String(month).padStart(2, '0')}-${String(OFFICE_EXPENSES.length + parsedItems.length + 1).padStart(3, '0')}`;
+
+    const rawSup = String(r[colSup] || '').trim();
+    let supId = '';
+    let supName = rawSup;
+    if(rawSup){
+      const supObj = OFFICE_SUPPLIERS.find(s => s.name.trim().toLowerCase() === rawSup.toLowerCase());
+      if(supObj){
+        supId = supObj.id;
+        supName = supObj.name;
+      }
+    }
+
+    const invoiceNo = String(r[colInvoice] || '').trim();
+
+    parsedItems.push({
+      id: 'exp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '_' + i,
+      code: code,
+      title: title,
+      category: category,
+      amount: amount,
+      month: month,
+      year: year,
+      supplierId: supId,
+      supplierName: supName,
+      date: dateStr,
+      invoiceNo: invoiceNo,
+      step: 1, // AUTO BƯỚC 1 THEO YÊU CẦU!
+      note: 'Nhập từ file Excel: ' + fileName,
+      createdBy: (window.SESSION && SESSION.email) || 'admin@ghn.vn',
+      createdAt: new Date().toISOString(),
+      receiptUrl: '',
+      history: [
+        {
+          step: 1,
+          at: new Date().toLocaleString('vi-VN'),
+          by: (window.SESSION && SESSION.email) || 'admin@ghn.vn',
+          note: 'Tải lên từ file Excel (Bước 1: Tiếp nhận đề xuất & HĐ)'
+        }
+      ]
+    });
+  }
+
+  if(!parsedItems.length){
+    if(typeof toast === 'function') toast('Không tìm thấy dòng dữ liệu chi phí hợp lệ trong file!', '⚠️');
+    return;
+  }
+
+  window._pendingExpenseImports = parsedItems;
+
+  const label = document.getElementById('expImportFileLabel');
+  if(label) label.innerHTML = `✅ <b>${escapeHtml(fileName)}</b> (${parsedItems.length} khoản chi)`;
+
+  const previewWrap = document.getElementById('expImportPreviewWrap');
+  if(previewWrap) previewWrap.style.display = 'block';
+
+  const countEl = document.getElementById('expImportPreviewCount');
+  if(countEl) countEl.textContent = `Đã đọc thành công ${parsedItems.length} khoản chi`;
+
+  const totalAmt = parsedItems.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  const totalAmtEl = document.getElementById('expImportPreviewTotalAmt');
+  if(totalAmtEl) totalAmtEl.textContent = `Tổng tiền: ${totalAmt.toLocaleString('vi-VN')} ₫`;
+
+  const tbody = document.getElementById('expImportPreviewTbody');
+  if(tbody){
+    let rowsHtml = '';
+    parsedItems.slice(0, 15).forEach(item => {
+      rowsHtml += `
+        <tr>
+          <td><b style="color:var(--cam);">${escapeHtml(item.code)}</b></td>
+          <td><span class="pill" style="font-size:11px;background:#f1f5f9;color:#334155;">${escapeHtml(item.category)}</span></td>
+          <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</td>
+          <td style="text-align:right;font-weight:700;color:#0f172a;">${(Number(item.amount) || 0).toLocaleString('vi-VN')} ₫</td>
+          <td style="text-align:center;">T${item.month}/${item.year}</td>
+          <td>${escapeHtml(item.supplierName || '--')}</td>
+          <td>${escapeHtml(item.invoiceNo || '--')}</td>
+          <td style="text-align:center;"><span class="exp-status-pill exp-status-1">B1: Tiếp nhận</span></td>
+        </tr>
+      `;
+    });
+    if(parsedItems.length > 15){
+      rowsHtml += `
+        <tr>
+          <td colspan="8" style="text-align:center;color:#64748b;font-style:italic;background:#f8fafc;padding:8px;">
+            ... và ${parsedItems.length - 15} khoản chi khác nữa
+          </td>
+        </tr>
+      `;
+    }
+    tbody.innerHTML = rowsHtml;
+  }
+
+  const confirmBtn = document.getElementById('expImportConfirmBtn');
+  if(confirmBtn){
+    confirmBtn.disabled = false;
+    confirmBtn.style.opacity = '1';
+    confirmBtn.textContent = `🚀 Xác nhận tải lên (${parsedItems.length} khoản chi)`;
+  }
+}
+
+window.confirmImportExpensesExcel = function(){
+  if(!window._pendingExpenseImports || !window._pendingExpenseImports.length){
+    if(typeof toast === 'function') toast('Không có dữ liệu chi phí nào để tải lên!', '⚠️');
+    return;
+  }
+
+  ensureOfficeExpensesData();
+
+  // Tự động bổ sung các nhà cung cấp mới vào hệ thống nếu chưa có
+  window._pendingExpenseImports.forEach(item => {
+    if(item.supplierName && !item.supplierId){
+      const supName = item.supplierName.trim();
+      let supObj = OFFICE_SUPPLIERS.find(s => s.name.trim().toLowerCase() === supName.toLowerCase());
+      if(!supObj){
+        supObj = {
+          id: 'sup_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          code: 'NCC-' + (OFFICE_SUPPLIERS.length + 1),
+          name: supName,
+          taxCode: '',
+          phone: '',
+          email: '',
+          category: item.category,
+          bankName: '',
+          bankAcc: '',
+          bankHolder: '',
+          note: 'Tự động tạo từ file Excel nhập chi phí'
+        };
+        OFFICE_SUPPLIERS.push(supObj);
+      }
+      item.supplierId = supObj.id;
+    }
+  });
+  saveOfficeSuppliers();
+
+  const count = window._pendingExpenseImports.length;
+  // Đưa các dòng chi phí mới vào đầu danh sách
+  OFFICE_EXPENSES.unshift(...window._pendingExpenseImports);
+  saveOfficeExpenses();
+
+  window.closeImportExpensesModal();
+
+  renderExpenseList();
+  renderExpenseAnalytics();
+  populateExpenseDropdowns();
+
+  if(typeof toast === 'function'){
+    toast(`✅ Đã nhập thành công ${count} khoản chi phí từ Excel (Tiến trình: Bước 1)!`, '✅');
+  }
+};
+
 window.copyToClipboard = function(text, label){
   if(!text || text === '--') return;
   const lbl = label ? label : 'thông tin';

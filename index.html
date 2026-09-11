@@ -1322,8 +1322,9 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
           </select>
           <button class="btn btn-ghost btn-sm" id="expResetFilterBtn" style="padding:8px 12px;">✕ Xóa lọc</button>
         </div>
-        <div style="display:flex;gap:10px;align-items:center;">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <button class="btn btn-cam btn-sm" id="expAddExpenseBtn" onclick="window.openAddExpenseModal()" style="padding:9px 18px;border-radius:10px;font-weight:700;">➕ Thêm khoản chi</button>
+          <button class="btn btn-ghost btn-sm" id="expImportExcelBtn" onclick="window.openImportExpensesModal()" style="padding:9px 16px;border-radius:10px;font-weight:700;border:1.5px solid #0284c7;color:#0284c7;background:#f0f9ff;" title="Tải file Excel mẫu hoặc nhập hàng loạt chi phí">📤 Nhập Excel</button>
           <button class="btn btn-xanh btn-sm" id="expExportExcelBtn" onclick="window.exportExpensesToExcel()" style="padding:9px 16px;border-radius:10px;font-weight:700;">📥 Xuất Excel</button>
         </div>
       </div>
@@ -1823,6 +1824,82 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         <button type="button" class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="closeModal('expModalExpenseForm')">Hủy</button>
         <button type="button" class="btn btn-cam" style="flex:1.5;justify-content:center;" id="expBtnSaveExpense" onclick="window.handleSaveExpense()">💾 Lưu khoản chi</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Tải lên Excel chi phí hàng loạt -->
+<div class="modal-overlay" id="expModalImportExcel" onclick="if(event.target===this) window.closeImportExpensesModal()">
+  <div class="zoom-box" style="max-width:760px;padding:24px;">
+    <button class="zoom-close" onclick="window.closeImportExpensesModal()">✕</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <span style="font-size:24px;">📤</span>
+      <h3 style="margin:0;font-size:17px;color:#0f172a;">Nhập hàng loạt chi phí từ file Excel</h3>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 16px;">
+      Tải lên bảng tính Excel theo mẫu chuẩn. Hệ thống sẽ tự động đối soát thông tin, gán nhà cung cấp và <b>mặc định đưa tất cả vào Bước 1: Tiếp nhận đề xuất &amp; HĐ</b>.
+    </p>
+
+    <!-- Download template banner -->
+    <div style="background:#fffbeb;border:1px solid #fef3c7;border-radius:12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:24px;">📑</span>
+        <div>
+          <div style="font-weight:700;font-size:13px;color:#92400e;">File Excel mẫu chuẩn GHN Office Hub</div>
+          <div style="font-size:11.5px;color:#b45309;">Chứa đúng 8 cột dữ liệu: Mã CP, Danh mục, Nội dung, Số tiền, Kỳ, NCC, Ngày HĐ, Số HĐ VAT.</div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="window.downloadExpenseExcelTemplate()" style="border-color:#f59e0b;color:#b45309;font-weight:700;padding:6px 14px;background:#fff;">
+        📥 Tải file mẫu (.xlsx)
+      </button>
+    </div>
+
+    <!-- Dropzone / File Picker -->
+    <div id="expImportDropzone" style="border:2px dashed #cbd5e1;border-radius:14px;padding:28px 20px;text-align:center;background:#f8fafc;cursor:pointer;transition:all .2s ease;"
+         onclick="document.getElementById('expImportFileInput').click()"
+         ondragover="event.preventDefault();this.style.borderColor='var(--cam)';this.style.background='#fff7ed';"
+         ondragleave="event.preventDefault();this.style.borderColor='#cbd5e1';this.style.background='#f8fafc';"
+         ondrop="event.preventDefault();this.style.borderColor='#cbd5e1';this.style.background='#f8fafc';window.handleExpenseDropFiles(event.dataTransfer.files);">
+      <input type="file" id="expImportFileInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="window.handleExpenseFileSelect(event)">
+      <div style="font-size:36px;margin-bottom:6px;">📊</div>
+      <div style="font-weight:700;font-size:14px;color:#0f172a;margin-bottom:4px;" id="expImportFileLabel">Nhấp để chọn file hoặc kéo thả file Excel vào đây</div>
+      <div style="font-size:12px;color:#64748b;">Hỗ trợ định dạng file: .xlsx, .xls, .csv</div>
+    </div>
+
+    <!-- Preview Area -->
+    <div id="expImportPreviewWrap" style="display:none;margin-top:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+        <div>
+          <span style="font-weight:700;font-size:13.5px;color:#1e293b;" id="expImportPreviewCount">Đã đọc 0 khoản chi</span>
+          <span style="font-size:12px;color:#64748b;margin-left:8px;" id="expImportPreviewTotalAmt">Tổng tiền: 0 ₫</span>
+        </div>
+        <span class="pill xanh" style="font-size:11.5px;font-weight:700;">🔄 Tiến trình: Tự động Bước 1 (Tiếp nhận)</span>
+      </div>
+      <div style="max-height:220px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:10px;">
+        <table class="report-table" style="width:100%;font-size:12px;border-collapse:collapse;" id="expImportPreviewTable">
+          <thead>
+            <tr>
+              <th>Mã CP</th>
+              <th>Danh mục</th>
+              <th>Nội dung khoản chi</th>
+              <th style="text-align:right;">Số tiền</th>
+              <th style="text-align:center;">Kỳ</th>
+              <th>Nhà cung cấp</th>
+              <th>Số HĐ</th>
+              <th style="text-align:center;">Tiến trình</th>
+            </tr>
+          </thead>
+          <tbody id="expImportPreviewTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal Actions -->
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+      <button class="btn btn-ghost btn-sm" onclick="window.closeImportExpensesModal()" style="padding:8px 16px;">Đóng</button>
+      <button class="btn btn-cam btn-sm" id="expImportConfirmBtn" onclick="window.confirmImportExpensesExcel()" disabled style="padding:8px 20px;opacity:0.6;font-weight:700;">
+        🚀 Xác nhận tải lên
+      </button>
     </div>
   </div>
 </div>
