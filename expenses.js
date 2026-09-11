@@ -273,7 +273,10 @@ function populateExpenseDropdowns(){
       'DV Vệ Sinh',
       'Nước uống'
     ];
-    const existingCats = Array.from(new Set(OFFICE_EXPENSES.map(e => e.category).filter(Boolean)));
+    // Lọc bỏ các danh mục không còn dùng / lỗi nhập liệu cũ
+    const excludedCats = ['Cây xanh & Cảnh quan', 'Cây Xanh & Cảnh Quan'];
+    const existingCats = Array.from(new Set(OFFICE_EXPENSES.map(e => e.category).filter(Boolean)))
+      .filter(c => !excludedCats.includes(c));
     const allCats = Array.from(new Set([...defaultCats, ...existingCats]));
 
     let html = '<option value="all">Tất cả danh mục</option>';
