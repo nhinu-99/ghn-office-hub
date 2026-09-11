@@ -906,7 +906,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         </div>
         <div style="overflow-x:auto;">
           <table class="assign-table" id="productManageTable">
-            <thead><tr><th style="width:56px;">Ảnh</th><th>Mã hàng</th><th>Tên hàng</th><th>Nhóm</th><th>ĐVT</th><th>Giá</th><th style="width:120px;"></th></tr></thead>
+            <thead><tr><th style="width:56px;">Ảnh</th><th>Mã hàng</th><th>Tên hàng</th><th>Nhóm</th><th>ĐVT</th><th>Giá</th><th style="width:90px;">Thuế VAT</th><th style="width:120px;"></th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -1497,7 +1497,18 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
   </div>
   <div class="cart-body" id="cartBody"></div>
   <div class="cart-foot">
-    <div class="cart-total-row"><span>Tổng cộng</span><b id="cartTotal">0₫</b></div>
+    <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-sub);margin-bottom:4px;">
+      <span>Tiền hàng (chưa VAT):</span>
+      <b id="cartSubtotal" style="color:var(--text);">0₫</b>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-sub);margin-bottom:8px;">
+      <span>Thuế VAT:</span>
+      <b id="cartVatTotal" style="color:var(--cam);">0₫</b>
+    </div>
+    <div class="cart-total-row" style="border-top:1px dashed #e2e8f0;padding-top:8px;">
+      <span>Tổng thanh toán:</span>
+      <b id="cartTotal">0₫</b>
+    </div>
     <button class="btn btn-cam" id="checkoutBtn">✅ Đặt hàng ngay</button>
   </div>
 </aside>
@@ -1536,7 +1547,21 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         <label>GHI CHÚ</label>
         <textarea id="noteInput" rows="2" placeholder="Ghi chú thêm (nếu có)..."></textarea>
       </div>
-      <button class="btn btn-cam" id="confirmOrderBtn" style="justify-content:center;margin-top:6px;">🚀 Xác nhận đặt hàng</button>
+      <div id="checkoutSummaryBox" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-size:13px;margin:6px 0 10px;">
+        <div style="display:flex;justify-content:space-between;color:var(--text-sub);margin-bottom:4px;">
+          <span>Tiền hàng (chưa VAT):</span>
+          <b id="checkoutSubtotal" style="color:var(--text);">0₫</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;color:var(--text-sub);margin-bottom:6px;">
+          <span>Thuế VAT:</span>
+          <b id="checkoutVatTotal" style="color:var(--cam);">0₫</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;border-top:1px dashed #cbd5e1;padding-top:6px;font-size:14px;">
+          <span style="font-weight:700;">Tổng thanh toán (gồm VAT):</span>
+          <b id="checkoutTotal" style="color:var(--cam-dark);font-size:15px;">0₫</b>
+        </div>
+      </div>
+      <button class="btn btn-cam" id="confirmOrderBtn" style="justify-content:center;">🚀 Xác nhận đặt hàng</button>
     </div>
   </div>
 </div>
@@ -1564,6 +1589,10 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         <div style="flex:1;">
           <label>ĐƠN GIÁ (₫) *</label>
           <input type="number" id="prodGiaInput" placeholder="0" min="0">
+        </div>
+        <div style="flex:1;">
+          <label>THUẾ VAT (%) *</label>
+          <input type="number" id="prodVatInput" placeholder="8" min="0" max="100" step="0.1">
         </div>
       </div>
       <div>
@@ -2374,17 +2403,41 @@ function applyCloudInitial(raw, options){
 
   INSPECTIONS = raw.inspections || {};
   ORDERS = raw.orders || [];
+  if(Array.isArray(ORDERS)){
+    ORDERS.forEach(o => {
+      if(typeof recomputeOrderTotal === 'function') recomputeOrderTotal(o);
+    });
+  }
   WEB_LOCKED = raw.webLocked === true;
+  window.__GHN_LATEST_REMOTE_DATA__ = raw;
 
   if(window.initOfficeExpensesFromCloud){
     window.initOfficeExpensesFromCloud(raw, persistDefaults);
   }
 }
 
+function stripVN(value){
+  return String(value ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'd').trim();
+}
+
+function getProductVat(p){
+  if(!p) return 8;
+  if(p.vat !== undefined && p.vat !== null && p.vat !== '' && !isNaN(p.vat)){
+    return Number(p.vat);
+  }
+  const nameNorm = stripVN(p.ten || '');
+  if(nameNorm.includes('choi co') || p.ma === '000702'){
+    return 5;
+  }
+  return 8;
+}
+
 function normalizeProduct(p){
-  if(p.allowedDepts) return p;
-  if(p.restricted) return {...p, allowedDepts: LEGACY_RESTRICTED_DEPTS.slice()};
-  return {...p, allowedDepts: []};
+  const vat = getProductVat(p);
+  const base = {...p, vat};
+  if(base.allowedDepts) return base;
+  if(base.restricted) return {...base, allowedDepts: LEGACY_RESTRICTED_DEPTS.slice()};
+  return {...base, allowedDepts: []};
 }
 
 /* ---------- CRUD phòng ban (chỉ Admin cấp cao nhất) ---------- */
@@ -2470,11 +2523,15 @@ function saveProductDeleted(){ cloudSet('productDeleted', PRODUCT_DELETED); }
 function saveProductAdded(){ cloudSet('productAdded', PRODUCT_ADDED); }
 
 function addProduct(p){
+  if(p.vat === undefined || p.vat === null || isNaN(p.vat)) p.vat = getProductVat(p);
   PRODUCT_ADDED.push(p);
   saveProductAdded();
   refreshProducts();
 }
 function updateProduct(ma, changes){
+  if(changes.vat !== undefined && (changes.vat === null || isNaN(changes.vat))){
+    delete changes.vat;
+  }
   if(BASE_PRODUCTS.find(p=>p.ma===ma)){
     PRODUCT_EDITS[ma] = {...(PRODUCT_EDITS[ma]||{}), ...changes};
     saveProductEdits();
@@ -3011,7 +3068,10 @@ function renderProductGrid(){
         <img src="${p.img_b64}" alt="${p.ten}" loading="lazy">
       </div>
       <div class="product-name">${p.ten}</div>
-      <div class="product-unit">Đơn vị: ${p.dvt}</div>
+      <div class="product-unit" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Đơn vị: ${p.dvt}</span>
+        <span style="font-size:11px;font-weight:700;color:var(--text-sub);background:#f1f5f9;padding:1px 6px;border-radius:6px;">VAT ${p.vat ?? 8}%</span>
+      </div>
       <div class="product-price">${p.gia>0?formatVND(p.gia):'Liên hệ'}</div>
       <div class="qty-stepper">
         <button data-act="dec" data-ma="${p.ma}">−</button>
@@ -3119,11 +3179,22 @@ function purgeRestrictedCart(){
   if(changed){ saveCart(); renderCart(); }
 }
 function cartCount(){ return Object.values(CART).reduce((a,b)=>a+b,0); }
-function cartTotal(){
+function cartSubtotal(){
   return Object.entries(CART).reduce((sum,[ma,qty])=>{
     const p = PRODUCTS.find(x=>x.ma===ma);
-    return sum + (p? p.gia*qty : 0);
+    return sum + (p ? (p.gia||0)*qty : 0);
   },0);
+}
+function cartVatTotal(){
+  return Object.entries(CART).reduce((sum,[ma,qty])=>{
+    const p = PRODUCTS.find(x=>x.ma===ma);
+    if(!p) return sum;
+    const rate = getProductVat(p);
+    return sum + Math.round(((p.gia||0) * qty * rate) / 100);
+  },0);
+}
+function cartTotal(){
+  return cartSubtotal() + cartVatTotal();
 }
 function renderCart(){
   document.getElementById('cartBadge').textContent = cartCount();
@@ -3135,11 +3206,12 @@ function renderCart(){
     body.innerHTML = entries.map(([ma,qty])=>{
       const p = PRODUCTS.find(x=>x.ma===ma);
       if(!p) return '';
+      const vatRate = getProductVat(p);
       return `<div class="cart-line" data-ma="${ma}">
         <img src="${p.img_b64}" alt="">
         <div class="cart-line-info">
           <div class="n">${p.ten}</div>
-          <div class="p">${p.gia>0?formatVND(p.gia):'Liên hệ'} / ${p.dvt}</div>
+          <div class="p">${p.gia>0?formatVND(p.gia):'Liên hệ'} / ${p.dvt} <span style="font-size:11px;color:var(--text-sub);">(VAT ${vatRate}%)</span></div>
           <div class="qty-stepper">
             <button data-act="dec" data-ma="${ma}">−</button>
             <input type="number" min="1" value="${qty}" data-cartqty="${ma}">
@@ -3150,7 +3222,14 @@ function renderCart(){
       </div>`;
     }).join('');
   }
-  document.getElementById('cartTotal').textContent = formatVND(cartTotal());
+  const sub = cartSubtotal();
+  const vat = cartVatTotal();
+  const total = sub + vat;
+  const subEl = document.getElementById('cartSubtotal');
+  if(subEl) subEl.textContent = formatVND(sub);
+  const vatEl = document.getElementById('cartVatTotal');
+  if(vatEl) vatEl.textContent = formatVND(vat);
+  document.getElementById('cartTotal').textContent = formatVND(total);
 
   body.querySelectorAll('button[data-act]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -3210,6 +3289,16 @@ function setupDeptSelectForSession(){
 document.getElementById('checkoutBtn').addEventListener('click', ()=>{
   if(!cartCount()){ toast('Giỏ hàng đang trống!','⚠️'); return; }
   setupDeptSelectForSession();
+  const sub = cartSubtotal();
+  const vat = cartVatTotal();
+  const total = sub + vat;
+  const subEl = document.getElementById('checkoutSubtotal');
+  if(subEl) subEl.textContent = formatVND(sub);
+  const vatEl = document.getElementById('checkoutVatTotal');
+  if(vatEl) vatEl.textContent = formatVND(vat);
+  const totEl = document.getElementById('checkoutTotal');
+  if(totEl) totEl.textContent = formatVND(total);
+
   const ordererInput = document.getElementById('ordererInput');
   if(SESSION && !ordererInput.value) ordererInput.value = '';
   checkoutModal.classList.add('show');
@@ -3227,8 +3316,16 @@ document.getElementById('confirmOrderBtn').addEventListener('click', ()=>{
 
   const items = Object.entries(CART).filter(([,q])=>q>0).map(([ma,qty])=>{
     const p = PRODUCTS.find(x=>x.ma===ma);
-    return {ma, ten:p.ten, dvt:p.dvt, gia:p.gia, qty};
+    const vat = getProductVat(p);
+    return {ma, ten:p.ten, dvt:p.dvt, gia:p.gia, vat, qty};
   });
+  const subtotal = items.reduce((s,i)=> s + (i.gia||0)*(i.qty||0), 0);
+  const vatTotal = items.reduce((s,i)=> {
+    const rate = (i.vat !== undefined && i.vat !== null && !isNaN(i.vat)) ? Number(i.vat) : 8;
+    return s + Math.round(((i.gia||0)*(i.qty||0)*rate)/100);
+  }, 0);
+  const total = subtotal + vatTotal;
+
   const order = {
     id: 'DH' + Date.now(),
     date: new Date().toISOString(),
@@ -3236,7 +3333,9 @@ document.getElementById('confirmOrderBtn').addEventListener('click', ()=>{
     orderedBy: SESSION ? SESSION.email : '',
     note: document.getElementById('noteInput').value.trim(),
     items,
-    total: items.reduce((s,i)=>s+i.gia*i.qty,0)
+    subtotal,
+    vatTotal,
+    total
   };
   ORDERS.unshift(order);
   cloudSet('orders', ORDERS);
@@ -3379,18 +3478,35 @@ function renderOrderHistory(){
       <div class="order-hist-body ${openOrderIds.has(o.id)?'open':''}" id="body-${escapeHtml(o.id)}">
         ${editMode ? visibleItems.map((i,idx)=>{
           const realIdx = o.items.indexOf(i);
+          const iVat = (i.vat !== undefined && i.vat !== null && !isNaN(i.vat)) ? Number(i.vat) : 8;
           return `<div class="order-hist-row-edit" data-order="${escapeHtml(o.id)}" data-itemidx="${realIdx}">
             <div class="row-top">
-              <span class="item-name ${i.qty===0?'zeroed':''}">${escapeHtml(i.ten)} (${escapeHtml(i.dvt)})</span>
+              <span class="item-name ${i.qty===0?'zeroed':''}">${escapeHtml(i.ten)} (${escapeHtml(i.dvt)}) <small style="color:var(--text-sub);font-size:11px;">[VAT ${iVat}%]</small></span>
               <input type="number" min="0" class="item-qty-input" value="${i.qty}" data-role="qty">
               <span class="item-money" data-role="money">${formatVND(i.gia*i.qty)}</span>
               <button class="item-zero-btn" data-role="zero" title="Cắt về 0">🗑️</button>
             </div>
             <input type="text" class="item-note-input" data-role="note" placeholder="📝 Lý do cắt giảm / ghi chú (chỉ Admin cao nhất thấy)..." value="${escapeHtml(i.cutNote || '')}">
           </div>`;
-        }).join('') : visibleItems.map(i=>`<div class="order-hist-row"><span>${escapeHtml(i.ten)} × ${i.qty} ${escapeHtml(i.dvt)}</span><span>${formatVND(i.gia*i.qty)}</span></div>`).join('')}
+        }).join('') : visibleItems.map(i=>{
+          const iVat = (i.vat !== undefined && i.vat !== null && !isNaN(i.vat)) ? Number(i.vat) : 8;
+          return `<div class="order-hist-row"><span>${escapeHtml(i.ten)} × ${i.qty} ${escapeHtml(i.dvt)} <small style="color:var(--text-sub);font-size:11px;">(VAT ${iVat}%)</small></span><span>${formatVND(i.gia*i.qty)}</span></div>`;
+        }).join('')}
         ${o.note?`<div class="order-hist-row" style="color:var(--muted);font-style:italic;">📝 ${escapeHtml(o.note)}</div>`:''}
-        <div class="order-hist-total"><span>Tổng cộng</span><span>${formatVND(o.total)}</span></div>
+        <div class="order-hist-total" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+          <div style="width:100%;display:flex;justify-content:space-between;font-size:12px;color:var(--text-sub);font-weight:normal;">
+            <span>Tiền hàng (chưa VAT):</span>
+            <span>${formatVND(o.subtotal !== undefined ? o.subtotal : (o.items||[]).reduce((s,x)=>s+(x.gia||0)*(x.qty||0),0))}</span>
+          </div>
+          <div style="width:100%;display:flex;justify-content:space-between;font-size:12px;color:var(--text-sub);font-weight:normal;">
+            <span>Thuế VAT:</span>
+            <span>${formatVND(o.vatTotal !== undefined ? o.vatTotal : (o.total - (o.subtotal !== undefined ? o.subtotal : (o.items||[]).reduce((s,x)=>s+(x.gia||0)*(x.qty||0),0))))}</span>
+          </div>
+          <div style="width:100%;display:flex;justify-content:space-between;border-top:1px dashed #cbd5e1;padding-top:4px;font-size:14px;font-weight:800;">
+            <span>Tổng thanh toán:</span>
+            <span style="color:var(--cam-dark);">${formatVND(o.total)}</span>
+          </div>
+        </div>
       </div>
     </div>`;
   }
@@ -3456,7 +3572,12 @@ function renderOrderHistory(){
 }
 
 function recomputeOrderTotal(order){
-  order.total = order.items.reduce((s,i)=>s+i.gia*i.qty,0);
+  order.subtotal = (order.items||[]).reduce((s,i)=> s + (i.gia||0)*(i.qty||0), 0);
+  order.vatTotal = (order.items||[]).reduce((s,i)=> {
+    const rate = (i.vat !== undefined && i.vat !== null && !isNaN(i.vat)) ? Number(i.vat) : 8;
+    return s + Math.round(((i.gia||0)*(i.qty||0)*rate)/100);
+  }, 0);
+  order.total = order.subtotal + order.vatTotal;
 }
 function updateOrderItemQty(orderId, itemIdx, newQty){
   if(!isSuperAdmin()) return;
@@ -3569,16 +3690,19 @@ function exportSummaryExcel(){
   const showNotes = isSuperAdmin();
 
   // ---------- Sheet 1: Dữ liệu chi tiết dạng "tidy" (mỗi dòng 1 sản phẩm/1 đơn — dùng để tạo PivotTable) ----------
-  // Phòng ban đặt ở cột NGOÀI CÙNG BÊN PHẢI theo yêu cầu, để dễ kéo vào vùng Filter/Rows của PivotTable
   // Cột "Ghi chú" (lý do cắt giảm) chỉ hiển thị khi Admin cấp cao nhất xuất file, đặt ở vị trí ngoài cùng bên phải
-  const headerRow = ['STT','Mã hàng','Tên hàng','ĐVT','Đơn giá','Số lượng','Thành tiền','Ngày đặt hàng','Người đặt hàng','Phòng ban'];
+  const headerRow = ['STT','Mã hàng','Tên hàng','ĐVT','Đơn giá','Số lượng','Tiền hàng (chưa VAT)','VAT (%)','Tiền VAT','Thành tiền (có VAT)','Ngày đặt hàng','Người đặt hàng','Phòng ban'];
   if(showNotes) headerRow.push('Ghi chú');
   const dataRows = [];
   let stt = 1;
   ordersInRange.forEach(o=>{
     const dateStr = new Date(o.date).toLocaleDateString('vi-VN');
     o.items.forEach(it=>{
-      const row = [stt++, it.ma, it.ten, it.dvt, it.gia, it.qty, it.gia*it.qty, dateStr, o.orderer, o.dept];
+      const rate = (it.vat !== undefined && it.vat !== null && !isNaN(it.vat)) ? Number(it.vat) : 8;
+      const sub = (it.gia || 0) * (it.qty || 0);
+      const vatVal = Math.round((sub * rate) / 100);
+      const tot = sub + vatVal;
+      const row = [stt++, it.ma, it.ten, it.dvt, it.gia, it.qty, sub, rate, vatVal, tot, dateStr, o.orderer, o.dept];
       if(showNotes) row.push(it.cutNote || '');
       dataRows.push(row);
     });
@@ -3597,11 +3721,11 @@ function exportSummaryExcel(){
     {s:{r:0,c:0}, e:{r:0,c:headerRow.length-1}},
     {s:{r:1,c:0}, e:{r:1,c:headerRow.length-1}}
   ];
-  ws1['!cols'] = [{wch:5},{wch:11},{wch:32},{wch:9},{wch:11},{wch:9},{wch:13},{wch:13},{wch:20},{wch:26}];
+  ws1['!cols'] = [{wch:5},{wch:11},{wch:32},{wch:9},{wch:11},{wch:9},{wch:16},{wch:8},{wch:12},{wch:16},{wch:13},{wch:20},{wch:26}];
   if(showNotes) ws1['!cols'].push({wch:34});
   ws1['!autofilter'] = { ref: XLSX.utils.encode_range({s:{r:headerRowIdx1,c:0}, e:{r:headerRowIdx1+dataRows.length,c:headerRow.length-1}}) };
   for(let r=headerRowIdx1+1; r<=headerRowIdx1+dataRows.length; r++){
-    [4,6].forEach(c=>{
+    [4,6,8,9].forEach(c=>{
       const addr = XLSX.utils.encode_cell({r,c});
       if(ws1[addr] && typeof ws1[addr].v==='number') ws1[addr].z = '#,##0';
     });
@@ -3611,15 +3735,19 @@ function exportSummaryExcel(){
   XLSX.utils.book_append_sheet(wb, ws1, 'Dữ liệu chi tiết');
 
   // ---------- Sheet 2: Danh sách đơn hàng (tổng hợp theo từng đơn) ----------
-  const logAoa = [['STT','Mã đơn','Ngày đặt','Người đặt','Số sản phẩm','Tổng tiền','Phòng ban']];
+  const logAoa = [['STT','Mã đơn','Ngày đặt','Người đặt','Số sản phẩm','Tiền hàng (chưa VAT)','Thuế VAT','Tổng thanh toán','Phòng ban']];
   ordersInRange.slice().reverse().forEach((o,i)=>{
-    logAoa.push([i+1, o.id, new Date(o.date).toLocaleString('vi-VN'), o.orderer, o.items.length, o.total, o.dept]);
+    const sub = o.subtotal !== undefined ? o.subtotal : (o.items||[]).reduce((s,x)=> s + (x.gia||0)*(x.qty||0), 0);
+    const vat = o.vatTotal !== undefined ? o.vatTotal : ((o.total||0) - sub);
+    logAoa.push([i+1, o.id, new Date(o.date).toLocaleString('vi-VN'), o.orderer, (o.items||[]).length, sub, vat, o.total, o.dept]);
   });
   const ws2 = XLSX.utils.aoa_to_sheet(logAoa);
-  ws2['!cols'] = [{wch:5},{wch:16},{wch:18},{wch:20},{wch:12},{wch:14},{wch:26}];
+  ws2['!cols'] = [{wch:5},{wch:16},{wch:18},{wch:20},{wch:12},{wch:16},{wch:14},{wch:16},{wch:26}];
   for(let r=1;r<logAoa.length;r++){
-    const addr = XLSX.utils.encode_cell({r,c:5});
-    if(ws2[addr]) ws2[addr].z = '#,##0';
+    [5,6,7].forEach(c=>{
+      const addr = XLSX.utils.encode_cell({r,c});
+      if(ws2[addr]) ws2[addr].z = '#,##0';
+    });
   }
   XLSX.utils.book_append_sheet(wb, ws2, 'Danh sách đơn hàng');
 
@@ -5244,6 +5372,10 @@ function openProductModal(mode, product){
   document.getElementById('prodTenInput').value = mode==='edit' ? product.ten : '';
   document.getElementById('prodDvtInput').value = mode==='edit' ? product.dvt : '';
   document.getElementById('prodGiaInput').value = mode==='edit' ? product.gia : '';
+  const vatInput = document.getElementById('prodVatInput');
+  if(vatInput){
+    vatInput.value = (mode==='edit' && product.vat !== undefined) ? product.vat : (mode==='edit' ? getProductVat(product) : 8);
+  }
   fillProductDeptCheckList(mode==='edit' ? product.allowedDepts : []);
   fillProductCatOptions(mode==='edit' ? product.cat : null);
   const preview = document.getElementById('prodImgPreview');
@@ -5262,6 +5394,8 @@ document.getElementById('saveProductBtn').addEventListener('click', ()=>{
   const ten = document.getElementById('prodTenInput').value.trim();
   const dvt = document.getElementById('prodDvtInput').value.trim();
   const gia = parseInt(document.getElementById('prodGiaInput').value) || 0;
+  const vatVal = document.getElementById('prodVatInput') ? parseFloat(document.getElementById('prodVatInput').value) : NaN;
+  const vat = (!isNaN(vatVal) && vatVal >= 0) ? vatVal : 8;
   let cat = document.getElementById('prodCatSelect').value;
   if(cat==='__other__') cat = document.getElementById('prodCatOtherInput').value.trim();
   const allowedDepts = getSelectedProductDepts();
@@ -5276,10 +5410,10 @@ document.getElementById('saveProductBtn').addEventListener('click', ()=>{
   const img_b64 = pendingProductImg || existingImg || '';
 
   if(editingProductMa){
-    updateProduct(editingProductMa, {ten, dvt, gia, cat, allowedDepts, img_b64});
+    updateProduct(editingProductMa, {ten, dvt, gia, vat, cat, allowedDepts, img_b64});
     toast('Đã cập nhật sản phẩm','✅');
   } else {
-    addProduct({ma, ten, dvt, gia, cat, allowedDepts, img_b64});
+    addProduct({ma, ten, dvt, gia, vat, cat, allowedDepts, img_b64});
     toast('Đã thêm sản phẩm mới','🎉');
   }
   productModal.classList.remove('show');
@@ -5302,11 +5436,12 @@ function renderProductManageTable(){
       <td>${p.cat}</td>
       <td>${p.dvt}</td>
       <td>${p.gia>0?formatVND(p.gia):'Liên hệ'}</td>
+      <td><span class="pill" style="padding:2px 6px;font-size:11px;background:#f1f5f9;color:var(--text);font-weight:600;">${p.vat ?? 8}%</span></td>
       <td style="white-space:nowrap;">
         <button class="btn btn-ghost btn-sm" data-editprod="${p.ma}">✏️</button>
         <button class="btn btn-danger btn-sm" data-delprod="${p.ma}">🗑️</button>
       </td>
-    </tr>`).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:16px;">Không tìm thấy sản phẩm nào.</td></tr>`;
+    </tr>`).join('') : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:16px;">Không tìm thấy sản phẩm nào.</td></tr>`;
 
   tbody.querySelectorAll('[data-editprod]').forEach(b=>{
     b.addEventListener('click', ()=>{

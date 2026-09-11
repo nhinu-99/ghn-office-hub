@@ -49,6 +49,11 @@ window.initOfficeExpensesFromCloud = function(raw, persistDefaults){
   }
 };
 
+// Tự động kiểm tra và đồng bộ nếu remoteData đã tải xong từ server
+if(typeof window !== 'undefined' && window.__GHN_LATEST_REMOTE_DATA__){
+  window.initOfficeExpensesFromCloud(window.__GHN_LATEST_REMOTE_DATA__, false);
+}
+
 function ensureOfficeExpensesData(){
   if(!Array.isArray(OFFICE_EXPENSES)) OFFICE_EXPENSES = [];
   if(!Array.isArray(OFFICE_SUPPLIERS)) OFFICE_SUPPLIERS = [];
@@ -109,6 +114,9 @@ window.openModal = function(modalId){
 
 // ─── Khởi động trang & Sự kiện ───
 window.renderExpensesPage = function(){
+  if((!OFFICE_EXPENSES || !OFFICE_EXPENSES.length) && typeof window !== 'undefined' && window.__GHN_LATEST_REMOTE_DATA__){
+    window.initOfficeExpensesFromCloud(window.__GHN_LATEST_REMOTE_DATA__, false);
+  }
   ensureOfficeExpensesData();
   setupExpensesEventsOnce();
   populateExpenseDropdowns();
