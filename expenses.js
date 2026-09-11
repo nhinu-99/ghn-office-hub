@@ -81,7 +81,7 @@ function getStepInfo(step){
     case '4':
       return { num: 4, label: 'B4: BGĐ duyệt chi', cls: 'exp-status-4', desc: 'Đang trình Ban Giám Đốc ký duyệt' };
     case '5':
-      return { num: 5, label: 'B5: Đã thanh toán', cls: 'exp-status-5', desc: 'Đã hoàn tất thanh toán ủy nhiệm chi' };
+      return { num: 5, label: 'B4: Đã thanh toán', cls: 'exp-status-5', desc: 'Đã hoàn tất thanh toán ủy nhiệm chi' };
     case 'pending':
       return { num: 0, label: '⏸ Pending', cls: 'exp-status-pending', desc: 'Khoản chi đang được tạm hoãn / chờ xử lý' };
     case 'rejected':
