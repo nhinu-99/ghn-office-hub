@@ -879,14 +879,14 @@ function renderSuppliersList(){
 
       <div class="supplier-bank-box">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-          <span style="font-weight:700;font-size:11.5px;color:#0284c7;">💳 TÀI KHOẢN NGÂN HÀNG:</span>
-          ${s.bankAcc ? `<button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:11px;" onclick="window.copyToClipboard('${escapeHtml(s.bankAcc)}')">📋 Copy STK</button>` : ''}
+          <span style="font-weight:700;font-size:11.5px;color:#0284c7;cursor:pointer;" class="copyable-bank-info" ondblclick="window.copyToClipboard('${escapeHtml([s.bankName, s.bankAcc, s.bankHolder].filter(Boolean).join(' - '))}', 'Toàn bộ thông tin ngân hàng')" title="Nhấp đúp để sao chép toàn bộ thông tin ngân hàng">💳 TÀI KHOẢN NGÂN HÀNG:</span>
+          ${s.bankAcc ? `<button class="btn btn-ghost btn-sm" style="padding:2px 6px;font-size:11px;" onclick="window.copyToClipboard('${escapeHtml(s.bankAcc)}', 'Số tài khoản')">📋 Copy STK</button>` : ''}
         </div>
-        <div><b>${escapeHtml(s.bankName || '--')}</b></div>
-        <div style="font-family:monospace;font-size:13.5px;color:#0f172a;font-weight:800;letter-spacing:0.5px;margin:2px 0;">
+        <div class="copyable-bank-info" ondblclick="window.copyToClipboard('${escapeHtml(s.bankName || '')}', 'Tên ngân hàng')" title="Nhấp đúp để sao chép Tên ngân hàng"><b>${escapeHtml(s.bankName || '--')}</b></div>
+        <div class="copyable-bank-info" ondblclick="window.copyToClipboard('${escapeHtml(s.bankAcc || '')}', 'Số tài khoản')" title="Nhấp đúp để sao chép Số tài khoản" style="font-family:monospace;font-size:13.5px;color:#0f172a;font-weight:800;letter-spacing:0.5px;margin:2px 0;">
           ${escapeHtml(s.bankAcc || '--')}
         </div>
-        <div style="font-size:11.5px;color:#64748b;">Chủ TK: <b>${escapeHtml(s.bankHolder || '--')}</b></div>
+        <div class="copyable-bank-info" ondblclick="window.copyToClipboard('${escapeHtml(s.bankHolder || '')}', 'Chủ tài khoản')" title="Nhấp đúp để sao chép Tên chủ tài khoản" style="font-size:11.5px;color:#64748b;">Chủ TK: <b>${escapeHtml(s.bankHolder || '--')}</b></div>
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;padding:10px 12px;border-radius:10px;margin-bottom:4px;font-size:12.5px;">
@@ -971,10 +971,10 @@ window.openExpenseDetailModal = function(id){
           <span>Hotline: ${escapeHtml(sup.phone || '--')}</span>
         </div>
         <div style="border-top:1px dashed #cbd5e1;padding-top:6px;margin-top:6px;">
-          <div style="font-size:11.5px;color:#0284c7;font-weight:700;">💳 NGÂN HÀNG THỤ HƯỞNG:</div>
-          <div style="font-weight:700;font-size:13px;color:#0f172a;">${escapeHtml(sup.bankName || '--')}</div>
-          <div style="font-family:monospace;font-weight:800;font-size:14px;color:var(--cam);">${escapeHtml(sup.bankAcc || '--')}</div>
-          <div style="font-size:11.5px;color:#64748b;">Chủ TK: <b>${escapeHtml(sup.bankHolder || '--')}</b></div>
+          <div style="font-size:11.5px;color:#0284c7;font-weight:700;cursor:pointer;margin-bottom:2px;" class="copyable-bank-info" ondblclick="window.copyToClipboard('${escapeHtml([sup.bankName, sup.bankAcc, sup.bankHolder].filter(Boolean).join(' - '))}', 'Toàn bộ thông tin ngân hàng')" title="Nhấp đúp để sao chép toàn bộ thông tin ngân hàng">💳 NGÂN HÀNG THỤ HƯỞNG:</div>
+          <div class="copyable-bank-info" ondblclick="window.copyToClipboard('${escapeHtml(sup.bankName || '')}', 'Tên ngân hàng')" title="Nhấp đúp để sao chép Tên ngân hàng" style="font-weight:700;font-size:13px;color:#0f172a;">${escapeHtml(sup.bankName || '--')}</div>
+          <div class="copyable-bank-info" ondblclick="window.copyToClipboard('${escapeHtml(sup.bankAcc || '')}', 'Số tài khoản')" title="Nhấp đúp để sao chép Số tài khoản" style="font-family:monospace;font-weight:800;font-size:14px;color:var(--cam);margin:2px 0;">${escapeHtml(sup.bankAcc || '--')}</div>
+          <div class="copyable-bank-info" ondblclick="window.copyToClipboard('${escapeHtml(sup.bankHolder || '')}', 'Chủ tài khoản')" title="Nhấp đúp để sao chép Tên chủ tài khoản" style="font-size:11.5px;color:#64748b;">Chủ TK: <b>${escapeHtml(sup.bankHolder || '--')}</b></div>
         </div>
       `;
     } else {
@@ -1468,13 +1468,41 @@ window.exportExpensesToExcel = function(){
   if(typeof toast==='function') toast(`📥 Đã tải xuống file Excel: ${fileName}`, '✅');
 };
 
-window.copyToClipboard = function(text){
-  if(!text) return;
-  navigator.clipboard.writeText(text).then(()=>{
-    if(typeof toast==='function') toast(`📋 Đã sao chép STK: ${text}`, '✅');
-  }).catch(()=>{
-    if(typeof toast==='function') toast(`STK: ${text}`, 'ℹ️');
-  });
+window.copyToClipboard = function(text, label){
+  if(!text || text === '--') return;
+  const lbl = label ? label : 'thông tin';
+  const cleanText = String(text).trim();
+
+  function onCopied(){
+    if(typeof toast === 'function') toast(`📋 Đã sao chép ${lbl}: ${cleanText}`, '✅');
+  }
+
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(cleanText).then(onCopied).catch(()=>{
+      fallbackCopy(cleanText);
+    });
+  } else {
+    fallbackCopy(cleanText);
+  }
+
+  function fallbackCopy(str){
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = str;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '-9999px';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if(ok) onCopied();
+      else if(typeof toast === 'function') toast(`${cleanText}`, 'ℹ️');
+    } catch(err){
+      if(typeof toast === 'function') toast(`${cleanText}`, 'ℹ️');
+    }
+  }
 };
 
 function escapeHtml(str){
