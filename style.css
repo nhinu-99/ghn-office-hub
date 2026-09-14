@@ -492,10 +492,11 @@
   width: 0.72em;
   height: 0.72em;
   border-radius: 50%;
-  border: 0.09em solid var(--ic-blue);
+  border: 0.12em solid var(--ic-blue);
   box-sizing: border-box;
-  margin: 0.06em 0.5px 0;
+  margin: 0 0.5px;
   flex-shrink: 0;
+  vertical-align: middle;
 }
 #page-idcard .scommerce-o-dot {
   display: block;
