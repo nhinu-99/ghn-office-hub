@@ -446,8 +446,9 @@
   text-transform: capitalize;
 }
 #page-idcard .card-position {
-  font-size: 13px; font-weight: 600;
+  font-size: 12px; font-weight: 700;
   color: var(--ic-blue);
+  opacity: 0.82;
   line-height: 1.1;
   margin-bottom: 0;
 }
