@@ -482,27 +482,25 @@
   letter-spacing: .3px;
   color: var(--ic-blue);
   display: flex;
-  align-items: center;
+  align-items: baseline;
   line-height: 1;
 }
 #page-idcard .scommerce-o {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 0.7em;
-  height: 0.7em;
+  width: 0.72em;
+  height: 0.72em;
   border-radius: 50%;
   border: 0.12em solid var(--ic-blue);
   box-sizing: border-box;
   margin: 0 0.5px;
   flex-shrink: 0;
-  align-self: flex-start;
-  margin-top: 0.1em;
 }
 #page-idcard .scommerce-o-dot {
   display: block;
-  width: 0.33em;
-  height: 0.33em;
+  width: 0.34em;
+  height: 0.34em;
   border-radius: 50%;
   background: var(--ic-blue);
   flex-shrink: 0;
