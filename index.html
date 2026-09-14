@@ -561,6 +561,73 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
   .bar-row .lbl{width:110px;font-size:11.5px;}
 }
 
+/* ========== HAMBURGER MENU (Mobile) ========== */
+.hamburger-btn{
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:5px;
+  width:44px;height:44px;
+  background:rgba(255,255,255,.2);
+  border:none;border-radius:12px;
+  cursor:pointer;
+  transition:.25s;
+  flex-shrink:0;
+}
+.hamburger-btn:hover{background:rgba(255,255,255,.32);}
+.hamburger-btn span{
+  display:block;width:22px;height:2.5px;
+  background:#fff;border-radius:3px;
+  transition:transform .3s ease, opacity .3s ease;
+  transform-origin:center;
+}
+.hamburger-btn.open span:nth-child(1){transform:translateY(7.5px) rotate(45deg);}
+.hamburger-btn.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+.hamburger-btn.open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg);}
+
+.mobile-menu-overlay{
+  display:none;
+  position:fixed;inset:0;z-index:199;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(3px);
+  animation:overlayFadeIn .2s ease;
+}
+@keyframes overlayFadeIn{from{opacity:0;}to{opacity:1;}}
+.mobile-menu-overlay.open{display:block;}
+
+.mobile-nav-drawer{
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:198;
+  background:linear-gradient(160deg,var(--cam) 0%,var(--cam-dark) 60%,var(--xanh) 140%);
+  padding:80px 20px 24px;
+  transform:translateY(-110%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 12px 40px rgba(255,107,0,.35);
+  border-radius:0 0 28px 28px;
+}
+.mobile-nav-drawer.open{transform:translateY(0);}
+.mobile-nav-drawer .nav-tabs-mobile{
+  display:flex;flex-direction:column;gap:8px;
+}
+.mobile-nav-drawer .nav-tabs-mobile button{
+  border:none;background:rgba(255,255,255,.18);color:#fff;font-weight:700;
+  padding:14px 20px;border-radius:16px;font-size:15px;
+  display:flex;align-items:center;gap:10px;transition:.2s;
+  text-align:left;
+}
+.mobile-nav-drawer .nav-tabs-mobile button:hover{background:rgba(255,255,255,.28);}
+.mobile-nav-drawer .nav-tabs-mobile button.active{background:#fff;color:var(--cam-dark);box-shadow:0 4px 12px rgba(0,0,0,.15);}
+
+@media(max-width:768px){
+  .nav-tabs{display:none !important;}
+  .hamburger-btn{display:flex;}
+  .topbar .wrap{flex-wrap:nowrap;}
+  .user-area .user-email{display:none;}
+  .user-area .pill{max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10.5px;}
+}
+
 /* ============================================================
    CHI PHÍ VĂN PHÒNG (OFFICE EXPENSES) STYLES
    ============================================================ */
@@ -639,6 +706,10 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
       <button data-page="idcard" id="navIdCardBtn" style="display:none;">🪪 Tạo Thẻ Nhân Viên</button>
       <button data-page="accounts" id="navAccountsBtn" style="display:none;">🔐 Tài khoản</button>
     </nav>
+    <!-- Hamburger button (chỉ hiện trên mobile) -->
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
     <div class="user-area" id="userArea">
       <span class="pill cam" id="userDeptPill"></span>
       <span class="user-email" id="userEmailLabel"></span>
@@ -646,6 +717,14 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
     </div>
   </div>
 </header>
+
+<!-- Mobile Navigation Drawer -->
+<div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+<div class="mobile-nav-drawer" id="mobileNavDrawer">
+  <nav class="nav-tabs-mobile" id="mobileNavTabs">
+    <!-- Các button được inject bởi JS -->
+  </nav>
+</div>
 
 <main class="wrap" style="padding-top:26px;padding-bottom:60px;">
 
@@ -6106,6 +6185,71 @@ window.refreshAllViews = function(){
 };
 
 startPostgresSync();
+
+/* ============================================================
+   HAMBURGER MENU – Mobile Navigation
+   ============================================================ */
+(function initHamburgerMenu(){
+  const hamburgerBtn   = document.getElementById('hamburgerBtn');
+  const mobileOverlay  = document.getElementById('mobileMenuOverlay');
+  const mobileDrawer   = document.getElementById('mobileNavDrawer');
+  const mobileNavTabs  = document.getElementById('mobileNavTabs');
+  const mainNavEl      = document.getElementById('mainNav');
+
+  if(!hamburgerBtn || !mobileOverlay || !mobileDrawer || !mobileNavTabs) return;
+
+  /* Mở / đóng drawer */
+  function openDrawer(){
+    syncMobileNav();
+    hamburgerBtn.classList.add('open');
+    hamburgerBtn.setAttribute('aria-expanded','true');
+    mobileOverlay.classList.add('open');
+    mobileDrawer.classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeDrawer(){
+    hamburgerBtn.classList.remove('open');
+    hamburgerBtn.setAttribute('aria-expanded','false');
+    mobileOverlay.classList.remove('open');
+    mobileDrawer.classList.remove('open');
+    document.body.style.overflow='';
+  }
+  function toggleDrawer(){ mobileDrawer.classList.contains('open') ? closeDrawer() : openDrawer(); }
+
+  /* Đồng bộ danh sách nav buttons từ #mainNav sang mobile drawer */
+  function syncMobileNav(){
+    const desktopBtns = mainNavEl.querySelectorAll('button');
+    mobileNavTabs.innerHTML='';
+    desktopBtns.forEach(btn=>{
+      if(btn.style.display==='none') return; // ẩn những nút không có quyền
+      const clone = document.createElement('button');
+      clone.textContent = btn.textContent;
+      clone.dataset.page = btn.dataset.page;
+      if(btn.classList.contains('active')) clone.classList.add('active');
+      clone.addEventListener('click',()=>{
+        closeDrawer();
+        gotoPage(clone.dataset.page);
+      });
+      mobileNavTabs.appendChild(clone);
+    });
+  }
+
+  /* Cập nhật active state trong mobile drawer sau mỗi lần gotoPage */
+  const _origGotoPage = window.gotoPage || gotoPage;
+  window.gotoPage = function(pageId){
+    _origGotoPage(pageId);
+    // sync active class trong mobile drawer
+    mobileNavTabs.querySelectorAll('button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.page===pageId);
+    });
+  };
+
+  hamburgerBtn.addEventListener('click', toggleDrawer);
+  mobileOverlay.addEventListener('click', closeDrawer);
+
+  /* Đóng khi nhấn Escape */
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDrawer(); });
+})();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
