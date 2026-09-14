@@ -265,6 +265,17 @@ table.report-table tr:hover td{background:#fffaf4;}
 select#sortSelect{padding:12px 14px;border-radius:14px;border:2px solid #f0f0f0;font-weight:700;font-size:13.5px;box-shadow:var(--shadow);}
 
 .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px;margin-top:6px;}
+@media(max-width:768px){.product-grid{grid-template-columns:repeat(3,1fr);gap:10px;}
+  .product-card{padding:10px;border-radius:14px;}
+  .product-img{border-radius:10px;margin-bottom:7px;}
+  .product-name{font-size:11.5px;min-height:28px;margin-bottom:2px;}
+  .product-unit{font-size:10px;margin-bottom:4px;}
+  .product-price{font-size:13px;margin-bottom:7px;}
+  .qty-stepper{gap:4px;margin-bottom:7px;}
+  .qty-stepper button{width:26px;height:26px;font-size:14px;border-radius:7px;}
+  .qty-stepper input{font-size:12px;padding:4px 2px;}
+  .add-cart-btn{font-size:12px;padding:8px 10px;border-radius:10px;}
+}
 .product-card{
   background:#fff;border-radius:20px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;
   transition:.22s;position:relative;
@@ -588,7 +599,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
 
 .mobile-menu-overlay{
   display:none;
-  position:fixed;inset:0;z-index:199;
+  position:fixed;inset:0;z-index:300;
   background:rgba(0,0,0,.35);
   backdrop-filter:blur(3px);
   animation:overlayFadeIn .2s ease;
@@ -599,13 +610,13 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
 .mobile-nav-drawer{
   position:fixed;
   top:0;left:0;right:0;
-  z-index:198;
+  z-index:301;
   background:linear-gradient(160deg,var(--cam) 0%,var(--cam-dark) 60%,var(--xanh) 140%);
-  padding:80px 20px 24px;
+  padding:76px 16px 20px;
   transform:translateY(-110%);
   transition:transform .3s cubic-bezier(.4,0,.2,1);
   box-shadow:0 12px 40px rgba(255,107,0,.35);
-  border-radius:0 0 28px 28px;
+  border-radius:0 0 24px 24px;
 }
 .mobile-nav-drawer.open{transform:translateY(0);}
 .mobile-nav-drawer .nav-tabs-mobile{
@@ -6221,28 +6232,36 @@ startPostgresSync();
     const desktopBtns = mainNavEl.querySelectorAll('button');
     mobileNavTabs.innerHTML='';
     desktopBtns.forEach(btn=>{
-      if(btn.style.display==='none') return; // ẩn những nút không có quyền
+      // ẩn nút không có quyền (display none hoặc '' nhưng chưa visible)
+      const computed = btn.style.display;
+      if(computed==='none') return;
       const clone = document.createElement('button');
       clone.textContent = btn.textContent;
       clone.dataset.page = btn.dataset.page;
       if(btn.classList.contains('active')) clone.classList.add('active');
-      clone.addEventListener('click',()=>{
+      clone.addEventListener('click', function(){
+        const pg = this.dataset.page;
         closeDrawer();
-        gotoPage(clone.dataset.page);
+        // Dùng setTimeout để drawer đóng animation xong mới chuyển trang
+        setTimeout(function(){ window._gotoPageFn(pg); }, 50);
       });
       mobileNavTabs.appendChild(clone);
     });
   }
 
-  /* Cập nhật active state trong mobile drawer sau mỗi lần gotoPage */
-  const _origGotoPage = window.gotoPage || gotoPage;
-  window.gotoPage = function(pageId){
-    _origGotoPage(pageId);
+  /* Lưu reference gốc và patch gotoPage để sync mobile active */
+  var _origFn = typeof gotoPage === 'function' ? gotoPage : null;
+  window._gotoPageFn = function(pageId){
+    if(_origFn) _origFn(pageId);
     // sync active class trong mobile drawer
     mobileNavTabs.querySelectorAll('button').forEach(b=>{
       b.classList.toggle('active', b.dataset.page===pageId);
     });
   };
+  // patch global gotoPage để khi desktop nav dùng cũng sync
+  if(_origFn){
+    window.gotoPage = window._gotoPageFn;
+  }
 
   hamburgerBtn.addEventListener('click', toggleDrawer);
   mobileOverlay.addEventListener('click', closeDrawer);
