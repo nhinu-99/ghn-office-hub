@@ -481,13 +481,13 @@
   font-weight: 700;
   letter-spacing: .3px;
   color: var(--ic-blue);
-  display: flex;
-  align-items: baseline;
+  display: inline-flex;
+  align-items: center;
   line-height: 1;
 }
 #page-idcard .scommerce-o {
   position: relative;
-  display: block;
+  display: inline-block;
   width: 0.72em;
   height: 0.72em;
   border-radius: 50%;
@@ -495,6 +495,7 @@
   box-sizing: border-box;
   margin: 0 0.5px;
   flex-shrink: 0;
+  vertical-align: middle;
 }
 #page-idcard .scommerce-o-dot {
   position: absolute;
