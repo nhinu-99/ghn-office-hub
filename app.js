@@ -468,17 +468,21 @@ btnDownloadTemplate.addEventListener('click', () => {
 async function capturePages() {
   const pages = document.querySelectorAll('.a4-page');
   const canvases = [];
+  // scale: 4 → ~300 DPI trên khổ A4, đủ sắc nét để in
+  const RENDER_SCALE = 4;
   for (const page of pages) {
     const origTransform = page.style.transform;
     page.style.transform = 'scale(1)';
     const canvas = await html2canvas(page, {
-      scale: 2,
+      scale: RENDER_SCALE,
       useCORS: true,
       allowTaint: false,
       backgroundColor: '#ffffff',
       logging: false,
       width: 793,
       height: 1122,
+      windowWidth: 793,
+      windowHeight: 1122,
     });
     page.style.transform = origTransform;
     canvases.push(canvas);
@@ -519,8 +523,9 @@ btnExportPdf.addEventListener('click', async () => {
 
     canvases.forEach((canvas, i) => {
       if (i > 0) pdf.addPage();
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+      // Dùng PNG (lossless) để giữ nguyên chất lượng ảnh khi in
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
     });
 
     pdf.save('the_nhan_vien_GHN.pdf');
