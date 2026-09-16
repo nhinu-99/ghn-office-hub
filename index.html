@@ -3613,11 +3613,16 @@ function renderOrderHistory(){
   const monthInput = document.getElementById('exportMonthFilter');
   const monthFilter = monthInput ? monthInput.value : ''; // 'YYYY-MM' hoặc rỗng
   if(monthFilter){
+    // monthFilter là tháng hiển thị (= tháng nhận hàng = tháng đặt + 1)
+    // Nên cần lọc các order thuộc tháng TRƯỚC monthFilter
+    const [filterY, filterM] = monthFilter.split('-').map(Number);
+    const prevDate = new Date(filterY, filterM - 2, 1); // tháng đặt = tháng hiển thị - 1
+    const prevYM = prevDate.getFullYear() + '-' + String(prevDate.getMonth()+1).padStart(2,'0');
     scopedOrders = scopedOrders.filter(o=>{
       const d = new Date(o.date);
       if(isNaN(d.getTime())) return false;
       const ym = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-      return ym === monthFilter;
+      return ym === prevYM;
     });
   }
 
@@ -3703,8 +3708,16 @@ function renderOrderHistory(){
     const monthGroups = {};
     scopedOrders.forEach(o=>{
       const d = new Date(o.date);
+      // ym là key nhóm theo tháng đặt hàng thực tế (để sort/lọc đúng)
       const ym = isNaN(d.getTime()) ? 'other' : (d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
-      const label = isNaN(d.getTime()) ? 'Thời gian khác' : `Tháng ${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+      // label hiển thị = tháng đặt + 1 (tháng nhận hàng / tháng công nợ)
+      let label;
+      if(isNaN(d.getTime())){
+        label = 'Thời gian khác';
+      } else {
+        const displayDate = new Date(d.getFullYear(), d.getMonth() + 1, 1); // +1 tháng
+        label = `Tháng ${String(displayDate.getMonth()+1).padStart(2,'0')}/${displayDate.getFullYear()}`;
+      }
       if(!monthGroups[ym]){
         monthGroups[ym] = { key: ym, label, orders: [], totalAmount: 0 };
       }
