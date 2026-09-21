@@ -1801,7 +1801,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
     <div class="login-admin-toggle">
       <button id="toggleAdminBtn" onclick="toggleAdminLoginMode()">🔐 Đăng nhập Admin</button>
     </div>
-    <p class="login-hint" id="loginHint">👤 Nhân viên chỉ cần nhập email @ghn.vn là vào được ngay.<br>Nếu cần quyền Admin, hãy bấm nút bên dưới.</p>
+    <p class="login-hint" id="loginHint">👤 Nhân viên nhập email @ghn.vn đã được Admin cấp quyền để đặt hàng.<br>Nếu chưa có tài khoản, liên hệ Admin để được thêm vào hệ thống.</p>
   </div>
 </div>
 
@@ -4766,7 +4766,7 @@ function toggleAdminLoginMode(){
     toggleBtn.classList.remove('admin-active');
     loginBox.classList.remove('admin-mode');
     subtitle.textContent = 'Nhập email công ty để đặt hàng văn phòng phẩm';
-    hint.innerHTML = '👤 Nhân viên chỉ cần nhập email @ghn.vn là vào được ngay.<br>Nếu cần quyền Admin, hãy bấm nút bên dưới.';
+    hint.innerHTML = '👤 Nhân viên nhập email @ghn.vn đã được Admin cấp quyền để đặt hàng.<br>Nếu chưa có tài khoản, liên hệ Admin để được thêm vào hệ thống.';
     loginBtn.textContent = '🔓 Đăng nhập';
     loginEmailInput.focus();
   }
@@ -4845,6 +4845,20 @@ function attemptLogin(){
   // Kiểm tra web có đang bị khoá không
   if(WEB_LOCKED){
     showLoginError('🔒 Web hiện đang bị khoá bởi Admin. Vui lòng thử lại sau.');
+    loginBtn.disabled = false;
+    loginBtn.textContent = '🔓 Đăng nhập';
+    return;
+  }
+  // Kiểm tra domain email phải là @ghn.vn
+  if(!email.endsWith('@ghn.vn')){
+    showLoginError('⛔ Chỉ email công ty có đuôi @ghn.vn mới được phép đăng nhập.');
+    loginBtn.disabled = false;
+    loginBtn.textContent = '🔓 Đăng nhập';
+    return;
+  }
+  // Kiểm tra email có tồn tại trong danh sách nhân viên (do Admin tạo) không
+  if(!STAFF_DIRECTORY || STAFF_DIRECTORY[email] === undefined){
+    showLoginError('⛔ Tài khoản chưa được tạo. Vui lòng liên hệ Admin để được cấp quyền truy cập.');
     loginBtn.disabled = false;
     loginBtn.textContent = '🔓 Đăng nhập';
     return;
