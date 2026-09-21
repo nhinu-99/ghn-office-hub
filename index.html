@@ -4193,25 +4193,43 @@ function updateOrderReportView(){
   if(monthTitleLbl) monthTitleLbl.textContent = periodText.toLowerCase();
 
   // Lọc đơn hàng kỳ hiện tại
+  // Quy ước: đơn đặt tháng N = chi phí tháng N+1
+  // → Chọn "Tháng 10" thì lấy đơn đặt tháng 9 (selMonth - 1)
   const currentOrders = (ORDERS || []).filter(o => {
     const d = new Date(o.date);
     if(isNaN(d.getTime())) return false;
-    if(d.getFullYear() !== selYear) return false;
-    if(!isAllMonths && (d.getMonth() + 1) !== selMonth) return false;
-    return true;
+    if(isAllMonths){
+      // Toàn năm: lấy đơn đặt trong năm selYear (chi phí thuộc năm selYear+1 không tính ở đây)
+      // Để nhất quán: lấy đơn đặt năm selYear-1 tháng 12 đến năm selYear tháng 11
+      // Đơn giản hóa: lấy đơn đặt trong năm selYear (hiển thị đúng nhãn năm)
+      return d.getFullYear() === selYear;
+    } else {
+      // Tháng hiển thị selMonth → lấy đơn đặt tháng (selMonth - 1)
+      const orderMonth = selMonth - 1; // tháng đặt hàng
+      if(orderMonth === 0){
+        // Tháng 1 hiển thị → đơn đặt tháng 12 năm trước
+        return d.getFullYear() === (selYear - 1) && (d.getMonth() + 1) === 12;
+      } else {
+        return d.getFullYear() === selYear && (d.getMonth() + 1) === orderMonth;
+      }
+    }
   });
 
   // Lọc đơn hàng kỳ trước để so sánh xu hướng
+  // Kỳ trước = tháng hiển thị (selMonth - 1) → đơn đặt tháng (selMonth - 2)
   const priorOrders = (ORDERS || []).filter(o => {
     const d = new Date(o.date);
     if(isNaN(d.getTime())) return false;
     if(isAllMonths){
       return d.getFullYear() === (selYear - 1);
     } else {
-      if(selMonth === 1){
+      const orderMonth = selMonth - 2; // tháng đặt hàng của kỳ trước
+      if(orderMonth === 0){
         return d.getFullYear() === (selYear - 1) && (d.getMonth() + 1) === 12;
+      } else if(orderMonth < 0){
+        return d.getFullYear() === (selYear - 1) && (d.getMonth() + 1) === 11;
       } else {
-        return d.getFullYear() === selYear && (d.getMonth() + 1) === (selMonth - 1);
+        return d.getFullYear() === selYear && (d.getMonth() + 1) === orderMonth;
       }
     }
   });
@@ -4458,13 +4476,21 @@ function renderReportTrendLineChart(selYear){
   const monthsLabels = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
 
   // Chi phí 12 tháng năm hiện tại
+  // Quy ước: đơn đặt tháng N → chi phí hiển thị ở Tháng N+1
+  // Đơn đặt tháng 12 năm selYear-1 → hiển thị Tháng 1 năm selYear (index 0)
+  // Đơn đặt tháng 1..11 năm selYear → hiển thị Tháng 2..12 (index 1..11)
   const currentYearMonthly = new Array(12).fill(0);
   (ORDERS || []).forEach(o => {
     const d = new Date(o.date);
     if(isNaN(d.getTime())) return;
-    if(d.getFullYear() === selYear){
-      const m = d.getMonth();
-      currentYearMonthly[m] += (o.total || 0);
+    const orderYear = d.getFullYear();
+    const orderMonth = d.getMonth() + 1; // 1-12
+    // Tháng hiển thị = tháng đặt + 1
+    let displayMonth = orderMonth + 1;
+    let displayYear = orderYear;
+    if(displayMonth > 12){ displayMonth = 1; displayYear++; }
+    if(displayYear === selYear){
+      currentYearMonthly[displayMonth - 1] += (o.total || 0);
     }
   });
 
@@ -4475,9 +4501,13 @@ function renderReportTrendLineChart(selYear){
   (ORDERS || []).forEach(o => {
     const d = new Date(o.date);
     if(isNaN(d.getTime())) return;
-    if(d.getFullYear() === priorYear){
-      const m = d.getMonth();
-      priorYearMonthly[m] += (o.total || 0);
+    const orderYear = d.getFullYear();
+    const orderMonth = d.getMonth() + 1;
+    let displayMonth = orderMonth + 1;
+    let displayYear = orderYear;
+    if(displayMonth > 12){ displayMonth = 1; displayYear++; }
+    if(displayYear === priorYear){
+      priorYearMonthly[displayMonth - 1] += (o.total || 0);
       hasPriorYearData = true;
     }
   });
