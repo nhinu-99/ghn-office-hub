@@ -3872,11 +3872,16 @@ function exportSummaryExcel(){
   const monthFilter = (document.getElementById('exportMonthFilter')||{}).value; // 'YYYY-MM' hoặc rỗng
   let ordersInRange = ORDERS;
   if(monthFilter){
+    // Tháng hiển thị = tháng nhận hàng = tháng đặt + 1
+    // Nên cần lọc các order thuộc tháng TRƯỚC monthFilter (giống logic renderOrderHistory)
+    const [filterY, filterM] = monthFilter.split('-').map(Number);
+    const prevDate = new Date(filterY, filterM - 2, 1); // tháng đặt = tháng hiển thị - 1
+    const prevYM = prevDate.getFullYear() + '-' + String(prevDate.getMonth()+1).padStart(2,'0');
     ordersInRange = ORDERS.filter(o=>{
       const d = new Date(o.date);
       if(isNaN(d.getTime())) return false;
       const ym = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-      return ym === monthFilter;
+      return ym === prevYM;
     });
   }
 
