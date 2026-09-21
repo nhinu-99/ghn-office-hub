@@ -1031,6 +1031,15 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
     </div>
 
     <div class="subpage active" id="or-catalog">
+      <!-- Banner bổ sung đơn hàng (chỉ hiện khi Admin bấm nút bổ sung) -->
+      <div id="supplementOrderBanner" style="display:none;background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #3b82f6;border-radius:14px;padding:12px 16px;margin-bottom:14px;align-items:center;gap:10px;">
+        <span style="font-size:20px;">➕</span>
+        <div style="flex:1;">
+          <b style="color:#1d4ed8;font-size:13.5px;">Chế độ bổ sung đơn hàng</b>
+          <div style="color:#3b82f6;font-size:12.5px;margin-top:2px;">Chọn sản phẩm, thêm vào giỏ và đặt hàng — đơn mới sẽ được ghi nhận vào lịch sử để tổng hợp đầy đủ.</div>
+        </div>
+        <button type="button" id="closeSuppBannerBtn" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;padding:2px 6px;border-radius:6px;" title="Đóng thông báo">✕</button>
+      </div>
       <div class="order-toolbar">
         <div class="search-box">
           <span class="ic">🔍</span>
@@ -1066,6 +1075,9 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
             <input type="text" id="orderSearchAdminInput" placeholder="🔍 Tìm phòng ban, tên NV, email..." style="padding:8px 30px 8px 12px;border-radius:12px;border:2px solid #e2e8f0;font-size:13px;font-weight:600;width:240px;background:#fff;transition:border-color .2s;">
             <button type="button" id="clearOrderAdminSearchBtn" title="Xoá tìm kiếm" style="position:absolute;right:8px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:13px;display:none;padding:2px 4px;">✕</button>
           </div>
+
+          <!-- Nút bổ sung đơn hàng (Chỉ dành cho Admin) -->
+          <button class="btn btn-primary btn-sm" id="adminAddSupplementOrderBtn" title="Thêm hàng hoá bổ sung vào tháng đang xem" style="display:none;padding:8px 14px;gap:6px;align-items:center;">➕ Bổ sung đơn hàng</button>
 
           <!-- Cụm chọn phòng ban & xuất Excel (Chỉ dành cho Admin) -->
           <div id="adminExportControlsWrap" style="display:none;align-items:center;gap:8px;position:relative;">
@@ -2869,7 +2881,39 @@ setupSubNav('orderSubNav','or', (sub)=>{
   }
   if(sub==='history') renderOrderHistory();
   if(sub==='reports') renderOrderReports();
+  // Ẩn banner bổ sung khi rời tab catalog
+  if(sub !== 'catalog'){
+    const banner = document.getElementById('supplementOrderBanner');
+    if(banner) banner.style.display = 'none';
+  }
 });
+
+/* ---------- Nút bổ sung đơn hàng (Admin only) ---------- */
+(function(){
+  const btn = document.getElementById('adminAddSupplementOrderBtn');
+  if(!btn) return;
+  btn.addEventListener('click', ()=>{
+    if(!isAdmin()){ toast('Chỉ Admin mới có quyền bổ sung đơn hàng','🔒'); return; }
+    // Chuyển sang tab Danh mục sản phẩm
+    const catalogBtn = document.querySelector('#orderSubNav button[data-sub="catalog"]');
+    if(catalogBtn) catalogBtn.click();
+    // Hiển thị banner bổ sung
+    const banner = document.getElementById('supplementOrderBanner');
+    if(banner) banner.style.display = 'flex';
+    // Scroll lên đầu trang
+    window.scrollTo({top:0, behavior:'smooth'});
+    toast('Chọn sản phẩm muốn bổ sung, thêm vào giỏ rồi đặt hàng bình thường','➕');
+  });
+
+  // Nút đóng banner
+  const closeBtn = document.getElementById('closeSuppBannerBtn');
+  if(closeBtn){
+    closeBtn.addEventListener('click', ()=>{
+      const banner = document.getElementById('supplementOrderBanner');
+      if(banner) banner.style.display = 'none';
+    });
+  }
+})();
 setupSubNav('expensesSubNav','exp', (sub)=>{
   if(typeof renderExpensesPage === 'function') renderExpensesPage();
 });
@@ -5020,6 +5064,8 @@ function applyPermissionUI(){
   if(adminSearchWrap) adminSearchWrap.style.display = admin ? 'inline-flex' : 'none';
   const adminExportWrap = document.getElementById('adminExportControlsWrap');
   if(adminExportWrap) adminExportWrap.style.display = admin ? 'inline-flex' : 'none';
+  const adminAddSupplementBtn = document.getElementById('adminAddSupplementOrderBtn');
+  if(adminAddSupplementBtn) adminAddSupplementBtn.style.display = admin ? 'inline-flex' : 'none';
   const reportsTabBtn = document.getElementById('orderReportsTabBtn');
   if(reportsTabBtn) reportsTabBtn.style.display = admin ? 'inline-flex' : 'none';
   if(!admin){
