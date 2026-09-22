@@ -5206,34 +5206,46 @@ function parseImportedUsers(rows){
     const norm = normalizeImportHeader(h);
     return norm.includes('phong ban') || norm.includes('department') || norm.includes('dept') || norm.includes('bo phan');
   });
+  const nameHeader = headers.find(h=>{
+    const norm = normalizeImportHeader(h);
+    return norm.includes('ten nhan vien') || norm.includes('ho ten') || norm.includes('full name') || norm.includes('display name') || norm.includes('name') || norm.includes('ten');
+  });
 
   const result = [];
   rows.forEach(row=>{
     const rawEmail = row[emailHeader] || '';
     const rawDept = row[deptHeader] || '';
+    const rawName = nameHeader ? (row[nameHeader] || '') : '';
     const email = normalizeEmail(rawEmail);
     const dept = String(rawDept||'').trim();
-    if(email && email.includes('@') && dept){ result.push({email, dept}); }
+    const name = String(rawName||'').trim();
+    if(email && email.includes('@') && dept){ result.push({email, dept, name}); }
   });
   return result;
 }
 function applyImportedUsers(parsed, options){
   options = options || {};
   let importedCount = 0;
-  parsed.forEach(({email, dept})=>{
+  let namesUpdated = false;
+  parsed.forEach(({email, dept, name})=>{
     if(findAdminAccount(email)) return;
     if(!departmentExists(dept)) addDepartment(dept);
     if(STAFF_DIRECTORY[email] !== dept){
       STAFF_DIRECTORY[email] = dept;
       importedCount++;
     }
+    if(name && STAFF_NAMES[email] !== name){
+      STAFF_NAMES[email] = name;
+      namesUpdated = true;
+    }
   });
 
-  if(importedCount){
+  if(importedCount || namesUpdated){
     cloudSet('staffDir', STAFF_DIRECTORY);
+    if(namesUpdated) cloudSet('staffNames', STAFF_NAMES);
     cloudSet('departments', DEPARTMENTS);
     if(typeof renderAccountsPage === 'function') renderAccountsPage();
-    if(!options.silent) toast('Đã nhập ' + importedCount + ' tài khoản từ file Excel','📥');
+    if(!options.silent) toast('Đã nhập ' + (importedCount || parsed.length) + ' tài khoản từ file Excel','📥');
   } else if(!options.silent){
     toast('Không có tài khoản mới nào được thêm','⚠️');
   }
@@ -5453,7 +5465,7 @@ function renderStaffDirTable(){
   }
   tbody.innerHTML = emails.map(e=>`
     <tr>
-      <td>${escapeHtml(STAFF_NAMES[e]||'—')}</td>
+      <td>${escapeHtml(STAFF_NAMES[e] || e.split('@')[0])}</td>
       <td>${escapeHtml(e)}</td>
       <td>${escapeHtml(STAFF_DIRECTORY[e])}</td>
       <td style="white-space:nowrap;">
