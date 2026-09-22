@@ -268,7 +268,7 @@ function renderPreview() {
     while (slots.length < CARDS_PER_PAGE) slots.push(null);
 
     const cardsHtml = slots.map(emp =>
-      emp ? buildCardHTML(emp) : '<div class="id-card-wrap"><div style="width:204px;height:320px;"></div></div>'
+      emp ? buildCardHTML(emp) : '<div class="id-card-wrap"><div style="width:196px;height:317px;"></div></div>'
     ).join('');
 
     return `<div class="a4-page" id="a4-page-${pi}" style="transform:scale(${state.zoom/100})">${cardsHtml}</div>`;
