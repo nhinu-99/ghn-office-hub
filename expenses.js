@@ -17,6 +17,7 @@ let expSupplierChartInstance = null;
 
 let expCurrentDetailId = null;
 let expensesEventsBound = false;
+let expCurrentSupplierTypeFilter = 'all'; // 'all' | 'fixed' | 'non_fixed'
 
 // ─── Khởi tạo từ Cloud / LocalStorage & Dọn sạch dữ liệu mẫu cũ ───
 window.initOfficeExpensesFromCloud = function(raw, persistDefaults){
@@ -983,15 +984,57 @@ function renderMonthlyVarianceTable(yearCur){
 }
 
 // ─── TAB 3: QUẢN LÝ NHÀ CUNG CẤP (SUPPLIERS) ───
+window.setSupplierTypeFilter = function(type){
+  expCurrentSupplierTypeFilter = type || 'all';
+  // Update active tab UI
+  document.querySelectorAll('.exp-sup-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === expCurrentSupplierTypeFilter);
+  });
+  renderSuppliersList();
+};
+
+window.onSupplierTypeRadioChange = function(value){
+  const fixedLbl = document.getElementById('supTypeFixedLbl');
+  const nonFixedLbl = document.getElementById('supTypeNonFixedLbl');
+  const hint = document.getElementById('supTypeHint');
+  if(value === 'fixed'){
+    if(fixedLbl){ fixedLbl.style.borderColor='#059669'; fixedLbl.style.background='#f0fdf4'; fixedLbl.style.color='#047857'; fixedLbl.style.fontWeight='700'; }
+    if(nonFixedLbl){ nonFixedLbl.style.borderColor='#cbd5e1'; nonFixedLbl.style.background='#fff'; nonFixedLbl.style.color='#475569'; nonFixedLbl.style.fontWeight='600'; }
+    if(hint) hint.innerHTML = '• <b>Cố định hàng tháng:</b> Dịch vụ thuê định kỳ, chi phí cố định (Cây xanh, nước uống, giặt thảm, vệ sinh, bảo trì máy in...).';
+  } else {
+    if(fixedLbl){ fixedLbl.style.borderColor='#cbd5e1'; fixedLbl.style.background='#fff'; fixedLbl.style.color='#475569'; fixedLbl.style.fontWeight='600'; }
+    if(nonFixedLbl){ nonFixedLbl.style.borderColor='#f59e0b'; nonFixedLbl.style.background='#fffbeb'; nonFixedLbl.style.color='#b45309'; nonFixedLbl.style.fontWeight='700'; }
+    if(hint) hint.innerHTML = '• <b>Không cố định:</b> Mua sắm theo nhu cầu, chi phí phát sinh, mua lẻ văn phòng phẩm, sửa chữa...';
+  }
+};
+
 function renderSuppliersList(){
   ensureOfficeExpensesData();
   const searchEl = document.getElementById('expSupplierSearchInput');
   const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
 
-  const filtered = OFFICE_SUPPLIERS.filter(s => {
+  // Filter by search query first
+  const matchSearch = OFFICE_SUPPLIERS.filter(s => {
     if(!q) return true;
     const haystack = [s.name, s.code, s.taxCode, s.phone, s.email, s.bankName, s.bankAcc, s.category].filter(Boolean).join(' ').toLowerCase();
     return haystack.includes(q);
+  });
+
+  // Count per type (for tab badges)
+  const cntFixed = matchSearch.filter(s => s.supplierType === 'fixed').length;
+  const cntNonFixed = matchSearch.filter(s => s.supplierType !== 'fixed').length;
+  const elAll = document.getElementById('expSupCountAll');
+  const elFixed = document.getElementById('expSupCountFixed');
+  const elNonFixed = document.getElementById('expSupCountNonFixed');
+  if(elAll) elAll.textContent = matchSearch.length;
+  if(elFixed) elFixed.textContent = cntFixed;
+  if(elNonFixed) elNonFixed.textContent = cntNonFixed;
+
+  // Filter by type tab
+  const filtered = matchSearch.filter(s => {
+    if(expCurrentSupplierTypeFilter === 'fixed') return s.supplierType === 'fixed';
+    if(expCurrentSupplierTypeFilter === 'non_fixed') return s.supplierType !== 'fixed';
+    return true;
   });
 
   const countLabel = document.getElementById('expSupplierCountLabel');
@@ -1001,9 +1044,14 @@ function renderSuppliersList(){
   if(!grid) return;
 
   if(!filtered.length){
+    const emptyMsg = expCurrentSupplierTypeFilter === 'fixed'
+      ? 'Chưa có nhà cung cấp cố định hàng tháng nào.'
+      : expCurrentSupplierTypeFilter === 'non_fixed'
+        ? 'Chưa có nhà cung cấp không cố định nào.'
+        : 'Chưa có nhà cung cấp nào.';
     grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px 20px;color:#94a3b8;background:#fff;border-radius:18px;box-shadow:var(--shadow);">
       <span style="font-size:40px;display:block;margin-bottom:8px;">🏢</span>
-      <div style="font-weight:700;font-size:15px;color:#1e293b;margin-bottom:4px;">Chưa có nhà cung cấp nào</div>
+      <div style="font-weight:700;font-size:15px;color:#1e293b;margin-bottom:4px;">${emptyMsg}</div>
       <p style="margin:0 0 16px;font-size:13px;color:#64748b;">Bắt đầu lưu thông tin nhà cung cấp dịch vụ để đối soát và thanh toán nhanh chóng.</p>
       <button class="btn btn-cam btn-sm" onclick="window.openAddSupplierModal()">🏢 + Thêm Nhà cung cấp</button>
     </div>`;
@@ -1017,12 +1065,20 @@ function renderSuppliersList(){
       .reduce((sum, e) => sum + (Number(e.amount)||0), 0);
     const invoiceCount = OFFICE_EXPENSES.filter(e => e.supplierId === s.id).length;
 
+    const isFixed = s.supplierType === 'fixed';
+    const typeBadge = isFixed
+      ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10.5px;font-weight:700;background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;">📌 Cố định</span>`
+      : `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10.5px;font-weight:700;background:#fef3c7;color:#b45309;border:1px solid #fde68a;">⚡ Không cố định</span>`;
+
     html += `<div class="supplier-card">
       <div class="supplier-card-header">
-        <div class="supplier-avatar">🏢</div>
+        <div class="supplier-avatar">${isFixed ? '📌' : '⚡'}</div>
         <div style="flex:1;">
           <h4 style="margin:0;font-size:14.5px;color:#0f172a;line-height:1.3;">${escapeHtml(s.name)}</h4>
-          ${s.code ? `<span class="pill cam" style="font-size:11px;padding:2px 8px;margin-top:4px;display:inline-block;">${escapeHtml(s.code)}</span>` : ''}
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+            ${s.code ? `<span class="pill cam" style="font-size:11px;padding:2px 8px;">${escapeHtml(s.code)}</span>` : ''}
+            ${typeBadge}
+          </div>
         </div>
       </div>
 
@@ -1416,6 +1472,9 @@ window.openAddSupplierModal = function(){
   const bHolderEl = document.getElementById('supInpBankHolder'); if(bHolderEl) bHolderEl.value = '';
   const catEl = document.getElementById('supInpCategory'); if(catEl) catEl.value = '';
   const addrEl = document.getElementById('supInpAddress'); if(addrEl) addrEl.value = '';
+  // Default type: fixed
+  const fixedRadio = document.getElementById('supTypeFixedRadio');
+  if(fixedRadio){ fixedRadio.checked = true; window.onSupplierTypeRadioChange('fixed'); }
 
   window.openModal('expModalSupplierForm');
 };
@@ -1438,6 +1497,13 @@ window.openEditSupplierModal = function(id){
   const bHolderEl = document.getElementById('supInpBankHolder'); if(bHolderEl) bHolderEl.value = sup.bankHolder || '';
   const catEl = document.getElementById('supInpCategory'); if(catEl) catEl.value = sup.category || '';
   const addrEl = document.getElementById('supInpAddress'); if(addrEl) addrEl.value = sup.address || '';
+  // Supplier type radio
+  const sType = sup.supplierType || 'fixed';
+  const fixedR = document.getElementById('supTypeFixedRadio');
+  const nonFixedR = document.getElementById('supTypeNonFixedRadio');
+  if(fixedR) fixedR.checked = sType === 'fixed';
+  if(nonFixedR) nonFixedR.checked = sType === 'non_fixed';
+  window.onSupplierTypeRadioChange(sType);
 
   window.openModal('expModalSupplierForm');
 };
@@ -1454,6 +1520,8 @@ window.handleSaveSupplier = function(){
   const bankHolder = (document.getElementById('supInpBankHolder')?.value || '').trim();
   const category = (document.getElementById('supInpCategory')?.value || '').trim();
   const address = (document.getElementById('supInpAddress')?.value || '').trim();
+  const supplierTypeEl = document.querySelector('input[name="supInpTypeRadio"]:checked');
+  const supplierType = supplierTypeEl ? supplierTypeEl.value : 'fixed';
 
   if(!name){
     if(typeof toast==='function') toast('Vui lòng nhập tên công ty / nhà cung cấp', '⚠️');
@@ -1477,7 +1545,8 @@ window.handleSaveSupplier = function(){
         bankAcc,
         bankHolder,
         category,
-        address
+        address,
+        supplierType
       };
       if(typeof toast==='function') toast('✅ Đã cập nhật thông tin NCC!', '✅');
     }
@@ -1494,6 +1563,7 @@ window.handleSaveSupplier = function(){
       bankHolder,
       category,
       address,
+      supplierType,
       createdAt: new Date().toISOString()
     };
     OFFICE_SUPPLIERS.unshift(newSup);

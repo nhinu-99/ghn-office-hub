@@ -702,6 +702,17 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
 .exp-month-row.expanded{background-color:#f8fafc !important;}
 .exp-supplier-child-row{background-color:#fbfcfd;transition:background-color .15s ease;}
 .exp-supplier-child-row:hover{background-color:#f1f5f9;}
+
+/* Supplier Type Filter Tabs */
+.exp-sup-tabs{display:inline-flex;gap:4px;background:#f1f5f9;padding:4px;border-radius:12px;border:1px solid #e2e8f0;flex-wrap:wrap;}
+.exp-sup-tab-btn{
+  border:none;background:transparent;padding:6px 12px;border-radius:8px;font-size:12.5px;
+  font-weight:600;color:#64748b;cursor:pointer;transition:all .2s ease;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.exp-sup-tab-btn:hover{color:#1e293b;background:rgba(255,255,255,0.6);}
+.exp-sup-tab-btn.active{background:#fff;color:var(--cam-dark, #ea580c);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+.exp-sup-tab-btn .tab-count{display:inline-block;padding:1px 6px;border-radius:10px;font-size:11px;background:#e2e8f0;color:#475569;font-weight:700;}
+.exp-sup-tab-btn.active .tab-count{background:#ffedd5;color:#c2410c;}
 </style>
 <link rel="stylesheet" href="style.css" />
 </head><body>
@@ -1580,11 +1591,24 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
 
     <!-- 3. QUẢN LÝ NHÀ CUNG CẤP -->
     <div class="subpage" id="exp-suppliers">
-      <!-- Search & actions -->
-      <div style="background:#fff;border-radius:16px;padding:14px 18px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
-        <div class="search-box" style="min-width:260px;flex:1;max-width:400px;">
-          <span class="ic">🔍</span>
-          <input type="text" id="expSupplierSearchInput" placeholder="Tìm kiếm nhà cung cấp theo tên, MST, SĐT...">
+      <!-- Search, filter tabs & actions -->
+      <div style="background:#fff;border-radius:16px;padding:14px 18px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1;min-width:300px;">
+          <div class="search-box" style="min-width:220px;flex:1;max-width:320px;">
+            <span class="ic">🔍</span>
+            <input type="text" id="expSupplierSearchInput" placeholder="Tìm kiếm nhà cung cấp theo tên, MST, SĐT...">
+          </div>
+          <div class="exp-sup-tabs" id="expSupFilterTabs">
+            <button type="button" class="exp-sup-tab-btn active" data-type="all" onclick="window.setSupplierTypeFilter('all')">
+              Tất cả <span class="tab-count" id="expSupCountAll">0</span>
+            </button>
+            <button type="button" class="exp-sup-tab-btn" data-type="fixed" onclick="window.setSupplierTypeFilter('fixed')">
+              📌 Cố định hàng tháng <span class="tab-count" id="expSupCountFixed">0</span>
+            </button>
+            <button type="button" class="exp-sup-tab-btn" data-type="non_fixed" onclick="window.setSupplierTypeFilter('non_fixed')">
+              ⚡ Không cố định <span class="tab-count" id="expSupCountNonFixed">0</span>
+            </button>
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:14px;">
           <span style="font-size:13px;color:var(--muted);" id="expSupplierCountLabel">0 nhà cung cấp</span>
@@ -2117,6 +2141,22 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
       <div>
         <label>TÊN CÔNG TY / NHÀ CUNG CẤP *</label>
         <input type="text" id="supInpName" placeholder="VD: Công ty Điện Lực TP.HCM (EVN HCM)">
+      </div>
+      <div>
+        <label>PHÂN LOẠI NHÀ CUNG CẤP *</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+          <label id="supTypeFixedLbl" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid #059669;background:#f0fdf4;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;color:#047857;transition:all .15s ease;">
+            <input type="radio" name="supInpTypeRadio" id="supTypeFixedRadio" value="fixed" checked onchange="window.onSupplierTypeRadioChange(this.value)" style="accent-color:#059669;transform:scale(1.15);">
+            <span>📌 Cố định hàng tháng</span>
+          </label>
+          <label id="supTypeNonFixedLbl" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid #cbd5e1;background:#fff;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:#475569;transition:all .15s ease;">
+            <input type="radio" name="supInpTypeRadio" id="supTypeNonFixedRadio" value="non_fixed" onchange="window.onSupplierTypeRadioChange(this.value)" style="accent-color:#059669;transform:scale(1.15);">
+            <span>⚡ Không cố định</span>
+          </label>
+        </div>
+        <div style="font-size:11.5px;color:#64748b;margin-top:5px;line-height:1.4;" id="supTypeHint">
+          • <b>Cố định hàng tháng:</b> Dịch vụ thuê định kỳ, chi phí cố định (Cây xanh, nước uống, giặt thảm, vệ sinh, bảo trì máy in...).
+        </div>
       </div>
       <div style="display:flex;gap:12px;">
         <div style="flex:1;">
