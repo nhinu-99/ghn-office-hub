@@ -3769,7 +3769,10 @@ function renderOrderHistory(){
   let scopedOrders = canViewAllOrders() ? ORDERS : ORDERS.filter(o=>o.orderedBy===(SESSION&&SESSION.email));
 
   if(!scopedOrders.length){
-    wrap.innerHTML = `<div class="no-result"><span class="em">🧾</span>Chưa có đơn hàng nào được tạo.</div>`;
+    wrap.innerHTML = `<div class="no-result">
+      <span class="em">🧾</span>Chưa có đơn hàng nào được tạo.<br>
+      <button class="btn btn-primary btn-sm" style="margin-top:14px;background:#2563eb;color:#fff;border-radius:8px;padding:8px 16px;cursor:pointer;font-weight:700;border:none;box-shadow:0 2px 8px rgba(37,99,235,0.25);" onclick="autoRecoverLocalOrders(true)">🔄 Quét & Khôi phục đơn hàng từ trình duyệt</button>
+    </div>`;
     return;
   }
 
@@ -6320,6 +6323,76 @@ function refreshAllViews(){
   try{ renderCart(); }catch(e){}
 }
 
+/* ---------- Tự động khôi phục đơn hàng từ bộ nhớ trình duyệt (localStorage) ---------- */
+window.autoRecoverLocalOrders = function(isManual){
+  try {
+    let allFound = [];
+    // 1. Quét ghn_backup_fallback
+    try {
+      const raw = localStorage.getItem('ghn_backup_fallback');
+      if(raw){
+        const history = JSON.parse(raw);
+        if(Array.isArray(history)){
+          history.forEach(h => {
+            const ords = (h && h.payload && h.payload.orders) || (h && h.orders) || [];
+            if(Array.isArray(ords) && ords.length) allFound.push(ords);
+          });
+        }
+      }
+    }catch(e){}
+
+    // 2. Quét ghn_live_state
+    try {
+      const raw = localStorage.getItem('ghn_live_state');
+      if(raw){
+        const live = JSON.parse(raw);
+        if(live && Array.isArray(live.orders) && live.orders.length) allFound.push(live.orders);
+      }
+    }catch(e){}
+
+    // 3. Quét mọi key khác trong localStorage
+    for(let i=0; i<localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(k === 'ghn_backup_fallback' || k === 'ghn_live_state') continue;
+      try {
+        const v = JSON.parse(localStorage.getItem(k));
+        if(v && Array.isArray(v.orders) && v.orders.length) allFound.push(v.orders);
+        if(v && v.payload && Array.isArray(v.payload.orders) && v.payload.orders.length) allFound.push(v.payload.orders);
+      }catch(e){}
+    }
+
+    // Merge theo ID để gom đầy đủ đơn các tháng
+    const orderMap = new Map();
+    allFound.forEach(arr => {
+      arr.forEach(o => {
+        if(o && o.id) orderMap.set(o.id, o);
+      });
+    });
+
+    const mergedOrders = Array.from(orderMap.values());
+    if(mergedOrders.length > 0 && (!window.ORDERS || window.ORDERS.length < mergedOrders.length)){
+      console.log('✅ Khôi phục thành công ' + mergedOrders.length + ' đơn hàng từ bộ nhớ trình duyệt!');
+      window.ORDERS = mergedOrders;
+      if(typeof cloudSet === 'function') cloudSet('orders', mergedOrders);
+      fetch((window.__GHN_API_BASE__ || '') + '/api/data/orders', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ value: mergedOrders })
+      }).catch(()=>{});
+
+      if(typeof renderOrderHistory === 'function') renderOrderHistory();
+      if(typeof renderHomeStats === 'function') renderHomeStats();
+      if(isManual) toast('Đã khôi phục thành công ' + mergedOrders.length + ' đơn hàng! 🎉', '🚀');
+      return mergedOrders.length;
+    } else if(isManual){
+      toast('Không tìm thấy dữ liệu đơn hàng trong bộ nhớ trình duyệt này.', '⚠️');
+    }
+  } catch(e) {
+    console.error('Lỗi tự động khôi phục đơn hàng:', e);
+  }
+  return 0;
+};
+
 /* ---------- Khởi động đồng bộ PostgreSQL qua Backend API ---------- */
 function startPostgresSync(){
   const apiBase = window.__GHN_API_BASE__ || '';
@@ -6372,6 +6445,11 @@ function startPostgresSync(){
       }
       
       applyCloudInitial(dataToApply, { persistDefaults: false });
+
+      // Nếu ORDERS rỗng (ví dụ DB mới chưa có đơn), tự động khôi phục từ backup trình duyệt
+      if(!window.ORDERS || window.ORDERS.length === 0){
+        autoRecoverLocalOrders(false);
+      }
 
       // Nếu database lần đầu sử dụng (chưa có data), tự động khởi tạo state mặc định lên PostgreSQL
       if(isDbEmpty){
