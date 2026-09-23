@@ -6323,31 +6323,43 @@ function refreshAllViews(){
   try{ renderCart(); }catch(e){}
 }
 
-/* ---------- Tự động khôi phục đơn hàng từ bộ nhớ trình duyệt (localStorage) ---------- */
-window.autoRecoverLocalOrders = function(isManual){
+/* ---------- Tự động khôi phục toàn bộ dữ liệu (đơn hàng, giá sản phẩm, sản phẩm mới tạo) từ localStorage ---------- */
+window.autoRecoverLocalData = function(isManual){
   try {
-    let allFound = [];
+    let allOrders = [];
+    let mergedProductEdits = {};
+    let mergedProductAdded = new Map();
+    let mergedProductDeleted = new Set();
+
+    function inspectPayload(p){
+      if(!p || typeof p !== 'object') return;
+      if(Array.isArray(p.orders) && p.orders.length) allOrders.push(p.orders);
+      if(p.productEdits && typeof p.productEdits === 'object'){
+        Object.assign(mergedProductEdits, p.productEdits);
+      }
+      if(Array.isArray(p.productAdded)){
+        p.productAdded.forEach(prod => { if(prod && prod.ma) mergedProductAdded.set(prod.ma, prod); });
+      }
+      if(Array.isArray(p.productDeleted)){
+        p.productDeleted.forEach(code => mergedProductDeleted.add(code));
+      }
+    }
+
     // 1. Quét ghn_backup_fallback
     try {
       const raw = localStorage.getItem('ghn_backup_fallback');
       if(raw){
         const history = JSON.parse(raw);
         if(Array.isArray(history)){
-          history.forEach(h => {
-            const ords = (h && h.payload && h.payload.orders) || (h && h.orders) || [];
-            if(Array.isArray(ords) && ords.length) allFound.push(ords);
-          });
+          history.forEach(h => inspectPayload(h.payload || h));
         }
       }
     }catch(e){}
 
     // 2. Quét ghn_live_state
     try {
-      const raw = localStorage.getItem('ghn_live_state');
-      if(raw){
-        const live = JSON.parse(raw);
-        if(live && Array.isArray(live.orders) && live.orders.length) allFound.push(live.orders);
-      }
+      const live = JSON.parse(localStorage.getItem('ghn_live_state') || '{}');
+      inspectPayload(live);
     }catch(e){}
 
     // 3. Quét mọi key khác trong localStorage
@@ -6356,22 +6368,18 @@ window.autoRecoverLocalOrders = function(isManual){
       if(k === 'ghn_backup_fallback' || k === 'ghn_live_state') continue;
       try {
         const v = JSON.parse(localStorage.getItem(k));
-        if(v && Array.isArray(v.orders) && v.orders.length) allFound.push(v.orders);
-        if(v && v.payload && Array.isArray(v.payload.orders) && v.payload.orders.length) allFound.push(v.payload.orders);
+        inspectPayload(v);
+        if(v && v.payload) inspectPayload(v.payload);
       }catch(e){}
     }
 
-    // Merge theo ID để gom đầy đủ đơn các tháng
+    // A. Khôi phục Đơn hàng
     const orderMap = new Map();
-    allFound.forEach(arr => {
-      arr.forEach(o => {
-        if(o && o.id) orderMap.set(o.id, o);
-      });
+    allOrders.forEach(arr => {
+      arr.forEach(o => { if(o && o.id) orderMap.set(o.id, o); });
     });
-
     const mergedOrders = Array.from(orderMap.values());
     if(mergedOrders.length > 0 && (!window.ORDERS || window.ORDERS.length < mergedOrders.length)){
-      console.log('✅ Khôi phục thành công ' + mergedOrders.length + ' đơn hàng từ bộ nhớ trình duyệt!');
       window.ORDERS = mergedOrders;
       if(typeof cloudSet === 'function') cloudSet('orders', mergedOrders);
       fetch((window.__GHN_API_BASE__ || '') + '/api/data/orders', {
@@ -6379,19 +6387,49 @@ window.autoRecoverLocalOrders = function(isManual){
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ value: mergedOrders })
       }).catch(()=>{});
+    }
 
-      if(typeof renderOrderHistory === 'function') renderOrderHistory();
-      if(typeof renderHomeStats === 'function') renderHomeStats();
-      if(isManual) toast('Đã khôi phục thành công ' + mergedOrders.length + ' đơn hàng! 🎉', '🚀');
-      return mergedOrders.length;
-    } else if(isManual){
-      toast('Không tìm thấy dữ liệu đơn hàng trong bộ nhớ trình duyệt này.', '⚠️');
+    // B. Khôi phục Giá sản phẩm (PRODUCT_EDITS)
+    let prodChanged = false;
+    if(Object.keys(mergedProductEdits).length > 0){
+      PRODUCT_EDITS = Object.assign({}, mergedProductEdits, PRODUCT_EDITS || {});
+      cloudSet('productEdits', PRODUCT_EDITS);
+      fetch((window.__GHN_API_BASE__ || '') + '/api/data/productEdits', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ value: PRODUCT_EDITS })
+      }).catch(()=>{});
+      prodChanged = true;
+    }
+
+    // C. Khôi phục Sản phẩm mới tạo (PRODUCT_ADDED)
+    if(mergedProductAdded.size > 0){
+      const addedList = Array.from(mergedProductAdded.values());
+      PRODUCT_ADDED = addedList;
+      cloudSet('productAdded', PRODUCT_ADDED);
+      fetch((window.__GHN_API_BASE__ || '') + '/api/data/productAdded', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ value: PRODUCT_ADDED })
+      }).catch(()=>{});
+      prodChanged = true;
+    }
+
+    if(prodChanged && typeof refreshProducts === 'function'){
+      refreshProducts();
+    }
+    if(typeof renderOrderHistory === 'function') renderOrderHistory();
+    if(typeof renderHomeStats === 'function') renderHomeStats();
+    if(typeof renderProductsManageTable === 'function') renderProductsManageTable();
+
+    if(isManual){
+      toast('Đã quét và khôi phục dữ liệu từ bộ nhớ trình duyệt! 🎉', '🚀');
     }
   } catch(e) {
-    console.error('Lỗi tự động khôi phục đơn hàng:', e);
+    console.error('Lỗi tự động khôi phục dữ liệu:', e);
   }
-  return 0;
 };
+window.autoRecoverLocalOrders = window.autoRecoverLocalData;
 
 /* ---------- Khởi động đồng bộ PostgreSQL qua Backend API ---------- */
 function startPostgresSync(){

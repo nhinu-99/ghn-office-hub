@@ -10,40 +10,71 @@ async function mergeDatabases() {
   const newPool = new Pool({ connectionString: NEW_DB_URL, ssl: { rejectUnauthorized: false } });
 
   try {
-    // 1. Đọc orders từ Database Cũ
-    console.log('📦 Đang đọc đơn hàng từ Database CŨ...');
-    const oldRes = await oldPool.query("SELECT value FROM ghn_app_state WHERE key = 'orders'");
-    const oldOrders = (oldRes.rows[0] && Array.isArray(oldRes.rows[0].value)) ? oldRes.rows[0].value : [];
-    console.log(`✅ Tìm thấy ${oldOrders.length} đơn hàng trong Database CŨ.`);
+    // Lấy toàn bộ dữ liệu từ 2 DB
+    console.log('📦 Đang đọc dữ liệu từ Database CŨ...');
+    const oldRows = (await oldPool.query("SELECT key, value FROM ghn_app_state")).rows;
+    const oldData = {};
+    oldRows.forEach(r => oldData[r.key] = r.value);
 
-    // 2. Đọc orders từ Database Mới
-    console.log('📦 Đang đọc đơn hàng từ Database MỚI...');
-    const newRes = await newPool.query("SELECT value FROM ghn_app_state WHERE key = 'orders'");
-    const newOrders = (newRes.rows[0] && Array.isArray(newRes.rows[0].value)) ? newRes.rows[0].value : [];
-    console.log(`✅ Tìm thấy ${newOrders.length} đơn hàng trong Database MỚI.`);
+    console.log('📦 Đang đọc dữ liệu từ Database MỚI...');
+    const newRows = (await newPool.query("SELECT key, value FROM ghn_app_state")).rows;
+    const newData = {};
+    newRows.forEach(r => newData[r.key] = r.value);
 
-    // 3. Gộp các đơn hàng theo ID (không trùng lặp, giữ lại toàn bộ đơn)
+    // 1. Gộp đơn hàng (ORDERS)
+    const oldOrders = Array.isArray(oldData.orders) ? oldData.orders : [];
+    const newOrders = Array.isArray(newData.orders) ? newData.orders : [];
     const orderMap = new Map();
-    // Nạp đơn từ DB cũ trước
     oldOrders.forEach(o => { if (o && o.id) orderMap.set(o.id, o); });
-    // Nạp đơn từ DB mới (nếu trùng ID thì ưu tiên bản mới nhất)
     newOrders.forEach(o => { if (o && o.id) orderMap.set(o.id, o); });
+    const mergedOrders = Array.from(orderMap.values()).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
-    const mergedOrders = Array.from(orderMap.values());
-    // Sắp xếp theo ngày giảm dần (đơn mới nhất lên đầu)
-    mergedOrders.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+    // 2. Gộp chỉnh sửa sản phẩm (PRODUCT_EDITS: giá mới, tên mới)
+    const mergedProductEdits = Object.assign({}, oldData.productEdits || {}, newData.productEdits || {});
 
-    console.log(`🎉 Tổng số đơn hàng sau khi gộp: ${mergedOrders.length} đơn hàng.`);
+    // 3. Gộp sản phẩm thêm mới (PRODUCT_ADDED)
+    const oldProdAdded = Array.isArray(oldData.productAdded) ? oldData.productAdded : [];
+    const newProdAdded = Array.isArray(newData.productAdded) ? newData.productAdded : [];
+    const prodAddedMap = new Map();
+    oldProdAdded.forEach(p => { if (p && p.ma) prodAddedMap.set(p.ma, p); });
+    newProdAdded.forEach(p => { if (p && p.ma) prodAddedMap.set(p.ma, p); });
+    const mergedProductAdded = Array.from(prodAddedMap.values());
 
-    // 4. Lưu danh sách đã gộp vào Database Mới
-    await newPool.query(`
-      INSERT INTO ghn_app_state (key, value, updated_at)
-      VALUES ($1, $2, CURRENT_TIMESTAMP)
-      ON CONFLICT (key)
-      DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP
-    `, ['orders', JSON.stringify(mergedOrders)]);
+    // 4. Gộp sản phẩm đã xoá (PRODUCT_DELETED)
+    const mergedProductDeleted = Array.from(new Set([
+      ...(Array.isArray(oldData.productDeleted) ? oldData.productDeleted : []),
+      ...(Array.isArray(newData.productDeleted) ? newData.productDeleted : [])
+    ]));
 
-    console.log('🚀 ĐÃ LƯU THÀNH CÔNG VÀO DATABASE MỚI!');
+    // 5. Gộp danh mục (CATEGORY_EDITS, CATEGORY_ADDED)
+    const mergedCatEdits = Object.assign({}, oldData.catEdits || {}, newData.catEdits || {});
+    const mergedZoneEdits = Object.assign({}, oldData.zoneEdits || {}, newData.zoneEdits || {});
+
+    console.log(`✅ Kết quả gộp:`);
+    console.log(`- Đơn hàng: ${mergedOrders.length}`);
+    console.log(`- Sản phẩm đổi giá (productEdits): ${Object.keys(mergedProductEdits).length}`);
+    console.log(`- Sản phẩm mới tạo (productAdded): ${mergedProductAdded.length}`);
+
+    // Ghi vào Database Mới
+    const updates = {
+      orders: mergedOrders,
+      productEdits: mergedProductEdits,
+      productAdded: mergedProductAdded,
+      productDeleted: mergedProductDeleted,
+      catEdits: mergedCatEdits,
+      zoneEdits: mergedZoneEdits
+    };
+
+    for (const [key, val] of Object.entries(updates)) {
+      await newPool.query(`
+        INSERT INTO ghn_app_state (key, value, updated_at)
+        VALUES ($1, $2, CURRENT_TIMESTAMP)
+        ON CONFLICT (key)
+        DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP
+      `, [key, JSON.stringify(val)]);
+    }
+
+    console.log('🚀 ĐÃ HOÀN TẤT GỘP TOÀN BỘ DỮ LIỆU VÀO DATABASE MỚI!');
   } catch (err) {
     console.error('❌ Lỗi trong quá trình gộp:', err.message);
   } finally {
