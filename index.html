@@ -6419,9 +6419,9 @@ function startPostgresSync(){
       __isFirstLoadDone = true;
     });
 
-  // Polling đồng bộ tự động mỗi 12 giây cho môi trường nhiều máy cùng truy cập
-  setInterval(() => {
-    // Nếu vừa có thao tác ghi ở local trong vòng 3 giây thì tạm hoãn poll 1 chu kỳ để tránh ghi đè
+  // Polling đồng bộ tự động (chỉ poll khi tab đang mở để tiết kiệm Neon compute quota)
+  function pollSync(){
+    if(document.hidden) return;
     if(Date.now() - __lastLocalWriteTime < 3000) return;
     
     fetch(dataUrl)
@@ -6453,7 +6453,10 @@ function startPostgresSync(){
       .catch(() => {
         // Im lặng khi mất mạng tạm thời
       });
-  }, 12000);
+  }
+
+  setInterval(pollSync, 45000);
+  window.addEventListener('focus', pollSync);
 
   window.addEventListener('online', () => setSyncBadge('online'));
   window.addEventListener('offline', () => setSyncBadge('offline'));
