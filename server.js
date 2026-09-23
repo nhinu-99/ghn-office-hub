@@ -13,8 +13,14 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Cấu hình kết nối PostgreSQL (Neon DB)
+const DEFAULT_DATABASE_URL = 'postgresql://neondb_owner:npg_0p1zKbZolHhu@ep-bitter-salad-b39q0ymr-pooler.c-4.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+let dbConnectionString = process.env.DATABASE_URL;
+if (!dbConnectionString || dbConnectionString.includes('ep-billowing-block')) {
+  dbConnectionString = DEFAULT_DATABASE_URL;
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: dbConnectionString,
   ssl: {
     rejectUnauthorized: false
   },
