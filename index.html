@@ -2455,6 +2455,23 @@ function lsGet(key, fallback){
 function lsSet(key, val){
   try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
 }
+/* ---------- Live State: localStorage write-through cache (dùng khi DB offline) ---------- */
+const LS_LIVE_STATE_KEY = 'ghn_live_state';
+function liveStateSet(key, value){
+  try{
+    const raw = localStorage.getItem(LS_LIVE_STATE_KEY);
+    const state = raw ? JSON.parse(raw) : {};
+    state[key] = value;
+    state.__updatedAt = Date.now();
+    localStorage.setItem(LS_LIVE_STATE_KEY, JSON.stringify(state));
+  }catch(e){}
+}
+function liveStateGet(){
+  try{
+    const raw = localStorage.getItem(LS_LIVE_STATE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
 /* ---------- Firestore helper: lưu dữ liệu DÙNG CHUNG giữa mọi phòng ban ---------- */
 function canWriteCloudKey(key){
   if(!SESSION) return false;
@@ -2469,6 +2486,8 @@ function cloudSet(key, value){
     return;
   }
   const payload = key === 'admins' ? sanitizeAdminAccounts(value) : value;
+  // Lưu ngay vào localStorage để data không bị mất khi DB offline
+  liveStateSet(key, payload);
   if(window.__ghnCloudSet) window.__ghnCloudSet(key, payload);
 }
 
@@ -2481,6 +2500,33 @@ const LOCAL_ADMIN_BOOTSTRAP_PASSWORDS = {
 let ADMIN_ACCOUNTS = [];
 let STAFF_DIRECTORY = {};
 let STAFF_NAMES = {}; // {email: displayName}
+/* Tên nhân viên mặc định từ file DS phòng ban.xlsx — dùng làm fallback khi DB chưa có dữ liệu */
+const STAFF_NAMES_BUILTIN = {
+  'anhpdp@ghn.vn':'Phan Đoàn Phương Anh',
+  'binhnlc@ghn.vn':'Nguyễn Lục Cẩm Bình',
+  'chau@ghn.vn':'Chị Châu',
+  'hanhltn@ghn.vn':'Lê Thị Ngọc Hạnh',
+  'hongnlb@ghn.vn':'Nguyễn Lê Bích Hồng',
+  'huycg8@ghn.vn':'Cổ Gia Huy',
+  'nganhtt@ghn.vn':'Huỳnh Thị Tuyết Ngân',
+  'ngoclt23@ghn.vn':'Lưu Thị Ngọc',
+  'nhunth@ghn.vn':'Nguyễn Thị Huỳnh Như',
+  'nhuntt4@ghn.vn':'Nguyễn Trần Thanh Như',
+  'suongdtt@ghn.vn':'Dương Thị Thu Sương',
+  'thanhtha@ghn.vn':'Trịnh Huỳnh Ái Thanh',
+  'tuanba@ghn.vn':'Bạch Anh Tuấn',
+  'vybt@ghn.vn':'Bùi Thuý Vy',
+  'trangctt@ghn.vn':'Chu Thị Thu Trang',
+  'thu@ghn.vn':'Cô Thu',
+  'xuan@ghn.vn':'Cô Xuân',
+  'thaodp@ghn.vn':'Đào Phương Thảo',
+  'thoadb@ghn.vn':'Đỗ Bảo Thoa',
+  'trangdtt@ghn.vn':'Đoàn Thị Thu Trang',
+  'tultc@ghn.vn':'Lê Thị Cẩm Tú',
+  'trannt1@ghn.vn':'Nguyễn Ngọc Thanh Trà',
+  'trucnth1@ghn.vn':'Nguyễn Thị Hoàng Trúc',
+  'trangttk@ghn.vn':'Tạ Thị Kim Trang',
+};
 let SESSION = lsGet(LS_KEY.session, null); // phiên đăng nhập: riêng từng máy
 
 function findAdminAccount(email){
@@ -2622,6 +2668,15 @@ function applyCloudInitial(raw, options){
   if(typeof ensureAdminFirebaseUsers === 'function') ensureAdminFirebaseUsers();
   STAFF_DIRECTORY = raw.staffDir || {};
   STAFF_NAMES = raw.staffNames || {};
+  // Nếu DB chưa có staffNames, lấy từ liveState localStorage
+  if(!Object.keys(STAFF_NAMES).length){
+    const live = liveStateGet ? liveStateGet() : null;
+    if(live && live.staffNames && Object.keys(live.staffNames).length) STAFF_NAMES = live.staffNames;
+  }
+  // Bổ sung tên builtin cho email chưa có tên (fallback từ DS phòng ban.xlsx)
+  if(typeof STAFF_NAMES_BUILTIN !== 'undefined'){
+    Object.entries(STAFF_NAMES_BUILTIN).forEach(([email, name])=>{ if(!STAFF_NAMES[email]) STAFF_NAMES[email] = name; });
+  }
 
   STAFF = (raw.staff && raw.staff.length) ? raw.staff : null;
   ASSIGN = raw.assign || null;
@@ -5465,7 +5520,7 @@ function renderStaffDirTable(){
   }
   tbody.innerHTML = emails.map(e=>`
     <tr>
-      <td>${escapeHtml(STAFF_NAMES[e] || e.split('@')[0])}</td>
+      <td>${escapeHtml(STAFF_NAMES[e] || '—')}</td>
       <td>${escapeHtml(e)}</td>
       <td>${escapeHtml(STAFF_DIRECTORY[e])}</td>
       <td style="white-space:nowrap;">
@@ -6298,7 +6353,25 @@ function startPostgresSync(){
     .then(remoteData => {
       const isDbEmpty = !remoteData || Object.keys(remoteData).length === 0 || !remoteData.departments;
       
-      applyCloudInitial(remoteData, { persistDefaults: false });
+      // Nếu liveState localStorage có thay đổi mới hơn DB (xảy ra khi DB offline một lúc rồi online trở lại),
+      // merge liveState vào remoteData trước khi apply, rồi push lại lên DB
+      const liveState = liveStateGet();
+      let dataToApply = remoteData;
+      if(liveState && liveState.__updatedAt && liveState.__updatedAt > (remoteData.__updatedAt || 0)){
+        dataToApply = Object.assign({}, remoteData);
+        Object.keys(liveState).forEach(k => { if(!k.startsWith('__')) dataToApply[k] = liveState[k]; });
+        // Đẩy các thay đổi từ liveState lên DB (vì DB vừa online trở lại)
+        Object.keys(liveState).forEach(k => {
+          if(k.startsWith('__')) return;
+          fetch(apiBase + '/api/data/' + encodeURIComponent(k), {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ value: liveState[k] })
+          }).catch(()=>{});
+        });
+      }
+      
+      applyCloudInitial(dataToApply, { persistDefaults: false });
 
       // Nếu database lần đầu sử dụng (chưa có data), tự động khởi tạo state mặc định lên PostgreSQL
       if(isDbEmpty){
@@ -6323,10 +6396,18 @@ function startPostgresSync(){
     })
     .catch(err => {
       console.error('Lỗi tải dữ liệu từ PostgreSQL:', err);
-      // Fallback về dữ liệu local nếu có
+      // Fallback: ưu tiên liveState (thay đổi gần nhất) merge với local backup
+      const liveState = liveStateGet();
       const localBackup = loadLatestBackupFromLocal();
-      if(localBackup){
-        applyCloudInitial(localBackup, { persistDefaults: false });
+      let fallback = null;
+      if(localBackup && liveState){
+        fallback = Object.assign({}, localBackup);
+        Object.keys(liveState).forEach(k => { if(!k.startsWith('__')) fallback[k] = liveState[k]; });
+      } else {
+        fallback = liveState || localBackup;
+      }
+      if(fallback){
+        applyCloudInitial(fallback, { persistDefaults: false });
         toast('Đang dùng dữ liệu tạm do chưa kết nối được server','ℹ️');
       } else {
         applyCloudInitial({}, { persistDefaults: false });
@@ -6349,7 +6430,23 @@ function startPostgresSync(){
         setSyncBadge('online');
         if(latestData && latestData.__updatedAt && latestData.__updatedAt > __lastRemoteUpdatedAt){
           __lastRemoteUpdatedAt = latestData.__updatedAt;
-          applyCloudInitial(latestData, { persistDefaults: false });
+          // Merge liveState nếu có thay đổi chưa được đồng bộ lên DB
+          const liveState = liveStateGet();
+          let dataToApply = latestData;
+          if(liveState && liveState.__updatedAt && liveState.__updatedAt > latestData.__updatedAt){
+            dataToApply = Object.assign({}, latestData);
+            Object.keys(liveState).forEach(k => { if(!k.startsWith('__')) dataToApply[k] = liveState[k]; });
+            // Push liveState lên DB vì DB vừa có dữ liệu mới (DB có thể đã online lại)
+            Object.keys(liveState).forEach(k => {
+              if(k.startsWith('__')) return;
+              fetch(apiBase + '/api/data/' + encodeURIComponent(k), {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ value: liveState[k] })
+              }).catch(()=>{});
+            });
+          }
+          applyCloudInitial(dataToApply, { persistDefaults: false });
           refreshAllViews();
         }
       })
