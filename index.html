@@ -3676,6 +3676,7 @@ document.getElementById('confirmOrderBtn').addEventListener('click', ()=>{
     subtotal,
     vatTotal,
     total
+  };
   ORDERS.unshift(order);
   liveStateSet('orders', ORDERS);
   fetch((window.__GHN_API_BASE__ || '') + '/api/orders', {
