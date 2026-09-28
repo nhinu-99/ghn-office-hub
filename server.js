@@ -118,12 +118,25 @@ app.get('/api/data', async (req, res) => {
 app.put('/api/data/:key', async (req, res) => {
   const { key } = req.params;
   const { value } = req.body;
+  const forceReplace = req.query.replace === 'true';
 
   if (value === undefined) {
     return res.status(400).json({ error: 'Thiếu trường value trong body' });
   }
 
   try {
+    let finalValue = value;
+
+    // Chống Race Condition: Tự động MERGE đơn hàng theo ID (trừ khi cố ý forceReplace từ restore backup)
+    if (key === 'orders' && Array.isArray(value) && !forceReplace) {
+      const existingRes = await pool.query("SELECT value FROM ghn_app_state WHERE key = 'orders'");
+      const existingOrders = (existingRes.rows[0] && Array.isArray(existingRes.rows[0].value)) ? existingRes.rows[0].value : [];
+      const orderMap = new Map();
+      existingOrders.forEach(o => { if (o && o.id) orderMap.set(o.id, o); });
+      value.forEach(o => { if (o && o.id) orderMap.set(o.id, o); });
+      finalValue = Array.from(orderMap.values()).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+    }
+
     const query = `
       INSERT INTO ghn_app_state (key, value, updated_at)
       VALUES ($1, $2, CURRENT_TIMESTAMP)
@@ -131,11 +144,77 @@ app.put('/api/data/:key', async (req, res) => {
       DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP
       RETURNING key, updated_at;
     `;
-    const result = await pool.query(query, [key, JSON.stringify(value)]);
+    const result = await pool.query(query, [key, JSON.stringify(finalValue)]);
     res.json({ success: true, key, updated_at: result.rows[0].updated_at });
   } catch (err) {
     console.error(`Lỗi cập nhật key "${key}":`, err);
     res.status(500).json({ error: `Không thể lưu key "${key}"`, details: err.message });
+  }
+});
+
+// 3.1. API Đặt hàng an toàn nguyên tử (Atomic order creation - chống ghi đè tuyệt đối)
+app.post('/api/orders', async (req, res) => {
+  const newOrder = req.body;
+  if (!newOrder || !newOrder.id) {
+    return res.status(400).json({ error: 'Dữ liệu đơn hàng không hợp lệ' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const existingRes = await client.query("SELECT value FROM ghn_app_state WHERE key = 'orders' FOR UPDATE");
+    const existingOrders = (existingRes.rows[0] && Array.isArray(existingRes.rows[0].value)) ? existingRes.rows[0].value : [];
+    
+    const orderMap = new Map();
+    existingOrders.forEach(o => { if (o && o.id) orderMap.set(o.id, o); });
+    orderMap.set(newOrder.id, newOrder);
+
+    const mergedOrders = Array.from(orderMap.values()).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+    await client.query(`
+      INSERT INTO ghn_app_state (key, value, updated_at)
+      VALUES ('orders', $1, CURRENT_TIMESTAMP)
+      ON CONFLICT (key)
+      DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP
+    `, [JSON.stringify(mergedOrders)]);
+
+    await client.query('COMMIT');
+    res.json({ success: true, order: newOrder, totalOrders: mergedOrders.length });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Lỗi khi tạo đơn hàng atomic:', err);
+    res.status(500).json({ error: 'Không thể lưu đơn hàng', details: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// 3.2. API Xoá đơn hàng an toàn (Atomic order deletion)
+app.delete('/api/orders/:id', async (req, res) => {
+  const { id } = req.params;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const existingRes = await client.query("SELECT value FROM ghn_app_state WHERE key = 'orders' FOR UPDATE");
+    const existingOrders = (existingRes.rows[0] && Array.isArray(existingRes.rows[0].value)) ? existingRes.rows[0].value : [];
+
+    const filtered = existingOrders.filter(o => o.id !== id);
+
+    await client.query(`
+      INSERT INTO ghn_app_state (key, value, updated_at)
+      VALUES ('orders', $1, CURRENT_TIMESTAMP)
+      ON CONFLICT (key)
+      DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP
+    `, [JSON.stringify(filtered)]);
+
+    await client.query('COMMIT');
+    res.json({ success: true, deletedId: id, totalOrders: filtered.length });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(`Lỗi khi xoá đơn hàng ${id}:`, err);
+    res.status(500).json({ error: 'Không thể xoá đơn hàng', details: err.message });
+  } finally {
+    client.release();
   }
 });
 

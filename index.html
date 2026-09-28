@@ -1077,7 +1077,7 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <!-- Lọc theo tháng (áp dụng cho tất cả tài khoản) -->
           <div style="display:flex;align-items:center;gap:6px;">
-            <input type="month" id="exportMonthFilter" title="Lọc theo tháng (để trống = tất cả)" style="padding:8px 12px;border-radius:12px;border:2px solid #e2e8f0;font-weight:700;font-size:13px;color:var(--xanh-dark);background:#fff;">
+            <input type="month" id="exportMonthFilter" autocomplete="off" title="Lọc theo tháng (để trống = tất cả)" style="padding:8px 12px;border-radius:12px;border:2px solid #e2e8f0;font-weight:700;font-size:13px;color:var(--xanh-dark);background:#fff;">
             <button class="btn btn-ghost btn-sm" id="clearExportMonthBtn" title="Xem tất cả các tháng" style="padding:8px 12px;">✕ Tất cả</button>
           </div>
 
@@ -3676,9 +3676,15 @@ document.getElementById('confirmOrderBtn').addEventListener('click', ()=>{
     subtotal,
     vatTotal,
     total
-  };
   ORDERS.unshift(order);
-  cloudSet('orders', ORDERS);
+  liveStateSet('orders', ORDERS);
+  fetch((window.__GHN_API_BASE__ || '') + '/api/orders', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(order)
+  }).catch(()=>{
+    cloudSet('orders', ORDERS);
+  });
   CART = {}; saveCart(); renderCart();
   checkoutModal.classList.remove('show'); closeCart();
   if(!(SESSION && SESSION.role==='staff')) document.getElementById('deptSelect').value='';
@@ -3766,7 +3772,14 @@ function renderOrderHistory(){
 
   const admin = isAdmin();
   const editMode = isSuperAdmin();
-  let scopedOrders = canViewAllOrders() ? ORDERS : ORDERS.filter(o=>o.orderedBy===(SESSION&&SESSION.email));
+  let scopedOrders = canViewAllOrders() ? ORDERS : ORDERS.filter(o=>{
+    if(!SESSION) return false;
+    if(o.orderedBy && normalizeEmail(o.orderedBy) === normalizeEmail(SESSION.email)) return true;
+    if(SESSION.dept && o.dept === SESSION.dept) return true;
+    // Cho phép xem chung giữa Tech và HRBP Tech (cùng khối công nghệ)
+    if(SESSION.dept && (SESSION.dept === 'Tech' || SESSION.dept === 'HRBP Tech') && (o.dept === 'Tech' || o.dept === 'HRBP Tech')) return true;
+    return false;
+  });
 
   if(!scopedOrders.length){
     wrap.innerHTML = `<div class="no-result">
@@ -4058,7 +4071,12 @@ function deleteOrder(id){
   if(!isAdmin()){ toast('Chỉ Admin mới có quyền xoá đơn hàng','🔒'); return; }
   if(!confirm('Bạn có chắc muốn xoá đơn hàng này? Hành động không thể hoàn tác.')) return;
   ORDERS = ORDERS.filter(o=>o.id!==id);
-  cloudSet('orders', ORDERS);
+  liveStateSet('orders', ORDERS);
+  fetch((window.__GHN_API_BASE__ || '') + '/api/orders/' + encodeURIComponent(id), {
+    method: 'DELETE'
+  }).catch(()=>{
+    cloudSet('orders', ORDERS);
+  });
   renderOrderHistory();
   renderHomeStats();
   toast('Đã xoá đơn hàng','🗑️');
@@ -4172,6 +4190,8 @@ document.getElementById('exportExcelBtn').addEventListener('click', exportSummar
 // Sự kiện lọc theo tháng
 const exportMonthFilterEl = document.getElementById('exportMonthFilter');
 if(exportMonthFilterEl){
+  exportMonthFilterEl.value = ''; // Luôn để trống khi khởi động để hiển thị toàn bộ đơn hàng
+  exportMonthFilterEl.setAttribute('autocomplete', 'off');
   exportMonthFilterEl.addEventListener('change', renderOrderHistory);
 }
 document.getElementById('clearExportMonthBtn').addEventListener('click', ()=>{
@@ -6470,7 +6490,18 @@ function startPostgresSync(){
       let dataToApply = remoteData;
       if(liveState && liveState.__updatedAt && liveState.__updatedAt > (remoteData.__updatedAt || 0)){
         dataToApply = Object.assign({}, remoteData);
-        Object.keys(liveState).forEach(k => { if(!k.startsWith('__')) dataToApply[k] = liveState[k]; });
+        Object.keys(liveState).forEach(k => {
+          if(k.startsWith('__')) return;
+          // Chống mất đơn hàng: MERGE orders theo ID thay vì thay thế
+          if(k === 'orders' && Array.isArray(liveState[k]) && Array.isArray(dataToApply[k])){
+            const orderMap = new Map();
+            dataToApply[k].forEach(o => { if(o && o.id) orderMap.set(o.id, o); });
+            liveState[k].forEach(o => { if(o && o.id) orderMap.set(o.id, o); });
+            dataToApply[k] = Array.from(orderMap.values());
+          } else {
+            dataToApply[k] = liveState[k];
+          }
+        });
         // Đẩy các thay đổi từ liveState lên DB (vì DB vừa online trở lại)
         Object.keys(liveState).forEach(k => {
           if(k.startsWith('__')) return;
@@ -6551,7 +6582,18 @@ function startPostgresSync(){
           let dataToApply = latestData;
           if(liveState && liveState.__updatedAt && liveState.__updatedAt > latestData.__updatedAt){
             dataToApply = Object.assign({}, latestData);
-            Object.keys(liveState).forEach(k => { if(!k.startsWith('__')) dataToApply[k] = liveState[k]; });
+            Object.keys(liveState).forEach(k => {
+              if(k.startsWith('__')) return;
+              // Chống mất đơn hàng: MERGE orders theo ID thay vì thay thế
+              if(k === 'orders' && Array.isArray(liveState[k]) && Array.isArray(dataToApply[k])){
+                const orderMap = new Map();
+                dataToApply[k].forEach(o => { if(o && o.id) orderMap.set(o.id, o); });
+                liveState[k].forEach(o => { if(o && o.id) orderMap.set(o.id, o); });
+                dataToApply[k] = Array.from(orderMap.values());
+              } else {
+                dataToApply[k] = liveState[k];
+              }
+            });
             // Push liveState lên DB vì DB vừa có dữ liệu mới (DB có thể đã online lại)
             Object.keys(liveState).forEach(k => {
               if(k.startsWith('__')) return;
