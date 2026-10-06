@@ -1013,7 +1013,8 @@ input:disabled, select:disabled, textarea:disabled{background:#f7f7f7 !important
         <span class="collapsible-chevron">▾</span>
       </button>
       <div class="collapsible-body" id="cc-products">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+        <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+          <button class="btn btn-ghost btn-sm" id="exportProductsExcelBtn" title="Tải danh sách sản phẩm (theo bộ lọc tìm kiếm hiện tại) dưới dạng file Excel">📥 Tải Excel</button>
           <button class="btn btn-cam btn-sm" id="addProductBtn">+ Thêm sản phẩm mới</button>
         </div>
         <div style="margin-bottom:14px;">
@@ -5963,6 +5964,45 @@ document.getElementById('productSearchAdmin').addEventListener('input', (e)=>{
   productSearchAdmin = e.target.value;
   renderProductManageTable();
 });
+
+function exportProductsToExcel(){
+  if(!canEditProducts()){ toast('Bạn không có quyền thực hiện thao tác này','🔒'); return; }
+  if(typeof XLSX === 'undefined'){ toast('Không tải được thư viện Excel, vui lòng thử lại','⚠️'); return; }
+  const q = productSearchAdmin.trim().toLowerCase();
+  let list = PRODUCTS.slice().sort((a,b)=>a.ma.localeCompare(b.ma));
+  if(q) list = list.filter(p=>p.ten.toLowerCase().includes(q) || p.ma.toLowerCase().includes(q));
+  if(!list.length){ toast('Không có sản phẩm nào để xuất','⚠️'); return; }
+
+  const headers = ['STT','Mã hàng','Tên hàng','Nhóm','ĐVT','Giá (VNĐ)','Thuế VAT (%)','Phòng ban được xem/đặt'];
+  const rows = list.map((p,i)=>[
+    i+1,
+    p.ma,
+    p.ten,
+    p.cat || '',
+    p.dvt || '',
+    p.gia > 0 ? Number(p.gia) : 'Liên hệ',
+    Number(p.vat ?? 8),
+    (p.allowedDepts && p.allowedDepts.length) ? p.allowedDepts.join(', ') : 'Tất cả'
+  ]);
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  ws['!cols'] = [{wch:6},{wch:14},{wch:45},{wch:22},{wch:10},{wch:14},{wch:12},{wch:40}];
+  // định dạng cột giá có dấu phân cách hàng nghìn
+  for(let r=1; r<=rows.length; r++){
+    const cell = ws[XLSX.utils.encode_cell({r, c:5})];
+    if(cell && cell.t === 'n') cell.z = '#,##0';
+  }
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:rows.length,c:headers.length-1}}) };
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'San_Pham_VPP');
+  const d = new Date();
+  const stamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  const fileName = `GHN_Danh_Sach_San_Pham_VPP_${stamp}.xlsx`;
+  XLSX.writeFile(wb, fileName);
+  toast(`Đã tải xuống ${list.length} sản phẩm: ${fileName}`,'📥');
+}
+document.getElementById('exportProductsExcelBtn').addEventListener('click', exportProductsToExcel);
 
 /* ============================================================
    QUẢN TRỊ NỘI DUNG "CHẤM ĐIỂM TUẦN" (chỉ Admin cấp cao nhất)
