@@ -283,7 +283,8 @@ function populateExpenseDropdowns(){
       'Mực in',
       'Văn Phòng Phẩm',
       'DV Vệ Sinh',
-      'Nước uống'
+      'Nước uống',
+      'Phí gửi xe'
     ];
     // Lọc bỏ các danh mục không còn dùng / lỗi nhập liệu cũ
     const existingCats = Array.from(new Set(OFFICE_EXPENSES.map(e => {
